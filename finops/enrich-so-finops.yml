@@ -1,0 +1,128 @@
+specification: FinOps Framework
+specificationVersion: '1.0'
+schema: https://www.finops.org/framework/
+provider: Enrich
+providerId: enrich-so
+created: '2026-07-11'
+modified: '2026-07-11'
+reconciled: false
+tags:
+- Data Enrichment
+- Contact Discovery
+- Web Intelligence
+- B2B Data
+- FinOps
+- Cost Management
+- FOCUS
+description: >-
+  FinOps view of Enrich spend. Enrich bills a prepaid, credit-metered model: you buy credits
+  (via a monthly plan or top-up) and each API call debits credits by endpoint. Confirmed
+  per-call costs are 1 credit for email validation, 10 for email finding, 10 for reverse
+  email lookup (person enrichment), 100 for IP-to-company, 500 for phone finding, 50/525/575
+  for lead reveal (email/phone/both), and 1 credit per returned result for lead search beyond
+  the free page allowance. Unsuccessful ("not found") lookups and cached results are not
+  charged, so effective cost tracks successful matches rather than raw call volume.
+notes: >-
+  Per-endpoint credit costs are confirmed from the live Enrich endpoint documentation. The
+  dollar value of a credit depends on the monthly plan (larger plans lower the effective
+  per-credit rate); confirm current plan pricing on www.enrich.so/pricing during
+  reconciliation.
+sources:
+- https://doc.enrich.so/credits-pricing-1951027m0
+- https://doc.enrich.so/introduction-1951028m0
+- https://www.enrich.so/pricing
+- https://focus.finops.org/focus-specification/v1-3/
+alignedWith:
+  framework: FinOps Foundation Framework
+  frameworkUrl: https://www.finops.org/framework/
+  dataSpec: FOCUS
+  dataSpecVersion: '1.3'
+  dataSpecUrl: https://focus.finops.org/focus-specification/v1-3/
+publisherName: Enrich
+serviceCategory: Data Enrichment and Intelligence
+billingModel:
+  pricingCategory: Credit-Based
+  billingFrequency: Monthly
+  billingCurrency: USD
+  chargeCategories:
+  - Purchase
+  - Usage
+  - Adjustment
+focusColumns:
+  ServiceName: Enrich API
+  ServiceCategory: Data Enrichment and Intelligence
+  ProviderName: Enrich
+  PublisherName: Enrich
+  InvoiceIssuerName: Enrich
+  BillingCurrency: USD
+  ChargeCategory: Usage
+  PricingCategory: Credit-Based
+meters:
+- name: email_validation_credits
+  description: 1 credit per email validation request; not charged when the result is risky.
+  unit: credits
+  aggregation: sum
+  dimensions:
+  - account
+  - endpoint
+- name: email_finder_credits
+  description: 10 credits per successful email find; not charged when found is false.
+  unit: credits
+  aggregation: sum
+  dimensions:
+  - account
+  - endpoint
+- name: person_lookup_credits
+  description: 10 credits per successful reverse email lookup (person enrichment); refunded when not found.
+  unit: credits
+  aggregation: sum
+  dimensions:
+  - account
+  - endpoint
+- name: ip_to_company_credits
+  description: 100 credits per IP-to-company resolution; refunded when no domain is found; cached 7 days.
+  unit: credits
+  aggregation: sum
+  dimensions:
+  - account
+  - endpoint
+- name: phone_finder_credits
+  description: 500 credits per successful phone lookup; refunded when no numbers are found.
+  unit: credits
+  aggregation: sum
+  dimensions:
+  - account
+  - endpoint
+- name: lead_search_credits
+  description: 1 credit per returned result beyond the free page allowance (first 3 pages / 75 results free).
+  unit: credits
+  aggregation: sum
+  dimensions:
+  - account
+  - endpoint
+- name: lead_reveal_credits
+  description: 50 credits email-only, 525 phone-only, 575 both per revealed lead; cached reveals free.
+  unit: credits
+  aggregation: sum
+  dimensions:
+  - account
+  - endpoint
+- name: company_follower_credits
+  description: Credits reserved upfront from max_limit and settled per profile found; excess refunded.
+  unit: credits
+  aggregation: sum
+  dimensions:
+  - account
+  - endpoint
+principles:
+- name: Visibility
+  description: Track credit debits per endpoint via the wallet balance and transaction history; map spend to matches, not raw calls.
+- name: Allocation
+  description: Issue separate API keys per workload/team so credit consumption maps to internal cost centers.
+- name: Optimization
+  description: Validate and de-duplicate inputs before enriching; rely on not-found refunds and 7-day IP caching; prefer email reveal (50) over phone (525) when a phone is not required; keep lead searches within the free page allowance.
+- name: Accountability
+  description: Assign owners per key; review monthly credit burn against the plan allotment and top-up thresholds.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

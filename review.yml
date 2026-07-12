@@ -1,0 +1,137 @@
+aid: enrich-so
+name: Enrich
+review:
+  question: Does Enrich expose a documented public WebSocket API?
+  answer: false
+  date: '2026-07-11'
+  reviewer: API Evangelist
+  asyncapiSpecCreated: false
+  asyncapiScopeNote: |
+    No AsyncAPI document was authored. Enrich's public API is request/response
+    REST over HTTPS under https://dev.enrich.so/api/v3. Its long-running work
+    (batch email validation/finding, bulk phone/profile lookup, company-follower
+    scraping, lead reveal/enrich, CSV export) uses an asynchronous submit -> poll
+    -> get-results pattern, plus optional outbound webhook callbacks that Enrich
+    POSTs to a customer-supplied URL. Both are ordinary HTTP; neither is a
+    server-push transport (WebSocket or SSE) on Enrich's own API, so there is no
+    AsyncAPI surface to model.
+findings:
+  summary: |
+    Enrich (enrich.so) does not publish a documented public WebSocket API.
+    Enrich is a person and company data enrichment provider. Its public API is a
+    single REST (HTTPS) interface with base URL https://dev.enrich.so/api/v3,
+    authenticated with an API key (sk_ prefixed) sent in the x-api-key header or
+    as an Authorization Bearer token. Every documented endpoint is
+    request/response REST. Batch and bulk jobs (email validation, email finder,
+    phone finder, professional-profile lookup, company-follower scrape, lead
+    reveal/enrich, CSV export, count estimation) follow an asynchronous
+    submit/check-progress/get-results HTTP pattern and can additionally deliver
+    optional webhook callbacks (Enrich POSTs per-result and completion events to a
+    customer webhookUrl). No realtime, bidirectional, or streaming WebSocket
+    (ws:// or wss://) endpoint is documented anywhere in Enrich's API reference as
+    of the review date.
+  accessModel: |
+    Commercial, closed-source SaaS. There is no self-hostable component. Access
+    requires an Enrich account and API key from the dashboard
+    (https://dash.enrich.so/dashboard/api-keys). New accounts receive a one-time
+    grant of free credits; ongoing use is metered against a prepaid credit balance
+    with per-endpoint credit costs, and "not found" results are refunded. Official
+    SDKs exist for Node.js/TypeScript (@enrich.so/sdk) and Go
+    (github.com/maximiseai/enrich-go-sdk). The interactive reference is hosted on
+    Apidog at doc.enrich.so.
+  transports:
+    - protocol: REST
+      scheme: https
+      baseURL: https://dev.enrich.so/api/v3
+      documented: true
+      note: All documented endpoints are request/response REST over HTTPS.
+    - protocol: Webhook
+      scheme: https
+      documented: true
+      note: >-
+        Optional outbound callbacks. For batch/scrape jobs Enrich POSTs per-result
+        and completion events to a customer-supplied webhookUrl. Server-to-endpoint
+        HTTP, not WebSocket.
+    - protocol: HTTP Polling
+      scheme: https
+      documented: true
+      note: >-
+        Asynchronous jobs are consumed by submitting a job, polling a progress
+        endpoint, and fetching results. Client-initiated polling, not server push.
+    - protocol: WebSocket
+      scheme: wss
+      documented: false
+      note: No WebSocket endpoint is documented anywhere in Enrich's API reference as of the review date.
+  endpointsConfirmedRest:
+    - POST https://dev.enrich.so/api/v3/reverse-lookup/lookup
+    - POST https://dev.enrich.so/api/v3/email-finder
+    - POST https://dev.enrich.so/api/v3/email-validation
+    - GET  https://dev.enrich.so/api/v3/reverse-lookup/phones
+    - POST https://dev.enrich.so/api/v3/ip-to-company
+    - POST https://dev.enrich.so/api/v3/company-follower
+    - POST https://dev.enrich.so/api/v3/lead-finder/search
+    - POST https://dev.enrich.so/api/v3/lead-finder/reveal
+  endpointsModeled:
+    - POST https://dev.enrich.so/api/v3/reverse-lookup/batch
+    - GET  https://dev.enrich.so/api/v3/reverse-lookup/batch/{batchId}
+    - POST https://dev.enrich.so/api/v3/email-finder/batch
+    - POST https://dev.enrich.so/api/v3/email-validation/batch
+    - POST https://dev.enrich.so/api/v3/reverse-lookup/phones/batch
+    - GET  https://dev.enrich.so/api/v3/company-follower/{batchId}
+    - POST https://dev.enrich.so/api/v3/lead-finder/count
+    - GET  https://dev.enrich.so/api/v3/wallet/balance
+    - GET  https://dev.enrich.so/api/v3/wallet/transactions
+  endpointsModeledNote: |
+    The single-call endpoints, their HTTP methods, and their credit costs are
+    confirmed from the live Enrich documentation. Enrich clearly documents batch,
+    progress, results, count, export, saved-search, team, and wallet endpoints in
+    its navigation, but the exact URL path segments for those async sub-resources
+    were not each individually opened; the paths above are modeled on Enrich's
+    documented submit/poll/results pattern and should be reconciled against the
+    current docs before code generation.
+sources:
+  - url: https://doc.enrich.so/introduction-1951028m0
+    type: Documentation
+    note: Introduction, base URL https://dev.enrich.so/api/v3, credit metering, not-found refunds.
+  - url: https://doc.enrich.so/authentication-1951026m0
+    type: Documentation
+    note: x-api-key header (recommended) or Authorization Bearer; sk_ prefixed keys; 401 on bad key.
+  - url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+    type: APIReference
+    note: POST /reverse-lookup/lookup, person enrichment, 10 credits.
+  - url: https://doc.enrich.so/find-a-professional-email-27483195e0
+    type: APIReference
+    note: POST /email-finder, 10 credits, not charged when found=false.
+  - url: https://doc.enrich.so/validate-a-single-email-27483191e0
+    type: APIReference
+    note: POST /email-validation, 1 credit, not charged when risky.
+  - url: https://doc.enrich.so/find-phone-numbers-27483199e0
+    type: APIReference
+    note: GET /reverse-lookup/phones, 500 credits, keyed on email or LinkedIn URL.
+  - url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+    type: APIReference
+    note: POST /ip-to-company, 100 credits, cached 7 days.
+  - url: https://doc.enrich.so/start-company-follower-scrape-27728071e0
+    type: APIReference
+    note: POST /company-follower, async LinkedIn follower scrape with filters and webhooks.
+  - url: https://doc.enrich.so/search-leads-28165853e0
+    type: APIReference
+    note: POST /lead-finder/search, ~135 filters, first 3 pages / 75 results free then 1 credit per result.
+  - url: https://doc.enrich.so/reveal-contact-info-28165856e0
+    type: APIReference
+    note: POST /lead-finder/reveal, async, 50 credits email / 525 phone / 575 both.
+  - url: https://doc.enrich.so/credits-pricing-1951027m0
+    type: Documentation
+    note: Per-endpoint credit costs and monthly plan tiers.
+  - url: https://doc.enrich.so/rate-limits-1951030m0
+    type: Documentation
+    note: Per-plan burst/sustained limits, X-RateLimit headers, 429 with Retry-After.
+actions:
+  asyncapiPath: null
+  apisYmlUpdated: true
+  reason: |
+    No WebSocket protocol surface exists on Enrich's own API. The public API is
+    request/response REST; asynchronous work uses HTTP submit/poll/results plus
+    optional outbound webhook callbacks. No AsyncAPI document was created because
+    there is no server-push transport (WebSocket or SSE) on Enrich's own API to
+    model.

@@ -1,0 +1,108 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
+provider: Enrich
+providerId: enrich-so
+created: '2026-07-11'
+modified: '2026-07-11'
+reconciled: false
+tags:
+- Data Enrichment
+- Contact Discovery
+- Web Intelligence
+- Rate Limiting
+- Quotas
+- Throttling
+description: >-
+  Enrich enforces global per-account rate limits that scale with your plan, expressed as a
+  burst limit (requests per second) and a sustained limit (requests per minute averaged
+  over a 60 second window). Enrichment and bulk endpoints carry tighter per-endpoint
+  overrides than the global limit. Every response returns X-RateLimit-Limit,
+  X-RateLimit-Remaining, and X-RateLimit-Reset headers; exceeding a limit returns HTTP 429
+  with a Retry-After header. The tier values below are captured from the Enrich rate-limits
+  documentation and should be reconciled against the live docs, which control.
+notes: >-
+  Values taken from the Enrich rate-limits documentation page. Enrichment and bulk
+  endpoints have stricter overrides (for example, Free-plan enrichment is limited well
+  below the global sustained limit, and Free-plan bulk submissions to roughly 1 request per
+  second). Confirm current numbers in the docs on reconciliation.
+sources:
+- https://doc.enrich.so/rate-limits-1951030m0
+responseCodes:
+  throttled: 429
+headers:
+- X-RateLimit-Limit
+- X-RateLimit-Remaining
+- X-RateLimit-Reset
+- Retry-After
+limits:
+- name: Free - Burst
+  scope: account
+  metric: requests_per_second
+  limit: 5
+  notes: Short-spike burst limit on the Free plan.
+- name: Free - Sustained
+  scope: account
+  metric: requests_per_minute
+  limit: 60
+  notes: Sustained throughput on the Free plan; enrichment endpoints capped lower (~10 rpm).
+- name: Growth - Burst
+  scope: account
+  metric: requests_per_second
+  limit: 25
+  notes: Burst limit on the Growth plan.
+- name: Growth - Sustained
+  scope: account
+  metric: requests_per_minute
+  limit: 300
+  notes: Sustained throughput on the Growth plan.
+- name: Scale - Burst
+  scope: account
+  metric: requests_per_second
+  limit: 50
+  notes: Burst limit on the Scale plan.
+- name: Scale - Sustained
+  scope: account
+  metric: requests_per_minute
+  limit: 1000
+  notes: Sustained throughput on the Scale plan.
+- name: Pro - Burst
+  scope: account
+  metric: requests_per_second
+  limit: 100
+  notes: Burst limit on the Pro plan.
+- name: Pro - Sustained
+  scope: account
+  metric: requests_per_minute
+  limit: 5000
+  notes: Sustained throughput on the Pro plan.
+- name: Enterprise - Burst
+  scope: account
+  metric: requests_per_second
+  limit: 200
+  notes: Burst limit on the Enterprise plan.
+- name: Enterprise - Sustained
+  scope: account
+  metric: requests_per_minute
+  limit: 10000
+  notes: Sustained throughput on the Enterprise plan.
+- name: Enrichment Endpoint Override
+  scope: endpoint
+  metric: requests_per_minute
+  limit: stricter than global
+  notes: Enrichment endpoints (person/company/phone) have tighter per-endpoint caps than the global sustained limit.
+- name: Bulk Submission Override
+  scope: endpoint
+  metric: requests_per_second
+  limit: stricter than global
+  notes: Bulk/batch submission endpoints are throttled below the global burst limit (Free plan ~1 rps).
+policies:
+- name: Tiered Limits
+  description: Burst and sustained limits increase from Free through Growth, Scale, Pro, and Enterprise plans.
+- name: Backoff Strategy
+  description: On 429, honor the Retry-After header and implement exponential backoff with jitter.
+- name: Rate Limit Headers
+  description: Read X-RateLimit-Remaining and X-RateLimit-Reset to pace client throughput proactively.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

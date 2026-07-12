@@ -1,0 +1,154 @@
+specification: API Commons Plans
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
+provider: Enrich
+providerId: enrich-so
+created: '2026-07-11'
+modified: '2026-07-11'
+reconciled: false
+tags:
+- Data Enrichment
+- Contact Discovery
+- Web Intelligence
+- B2B Data
+- Lead Enrichment
+- Plans
+description: >-
+  Enrich meters every endpoint against a single prepaid credit balance rather than
+  per-endpoint subscriptions. New accounts receive a one-time grant of free credits to
+  start, and monthly plans buy larger credit allotments at a lower effective rate.
+  Credits are deducted per call by endpoint (see the FinOps and per-endpoint costs below),
+  and unsuccessful ("not found") lookups are refunded. The plan tiers and prices below are
+  captured from the Enrich credits and pricing documentation and should be reconciled
+  against the live pricing page, which controls.
+notes: >-
+  Per-endpoint credit costs are confirmed from the live Enrich endpoint documentation:
+  email validation 1 credit, email finder 10, reverse email lookup (person) 10, IP to
+  company 100, phone finder 500, lead reveal 50 (email) / 525 (phone) / 575 (both), and
+  lead search first 3 pages or 75 results free then 1 credit per result. Monthly plan
+  names, prices, and credit allotments are taken from the docs credits-pricing page and
+  are marked reconciled:false pending confirmation on www.enrich.so/pricing.
+sources:
+- https://doc.enrich.so/credits-pricing-1951027m0
+- https://www.enrich.so/pricing
+- https://doc.enrich.so/introduction-1951028m0
+plans:
+- id: enrich-free
+  name: Free Credits (Signup)
+  type: free
+  description: >-
+    New accounts receive a one-time grant of free credits to evaluate every endpoint. No
+    recurring free allotment; credits do not renew monthly.
+  entries:
+  - label: Signup Credits
+    name: signup_credits
+    type: limited
+    metric: credits
+    limit: 100
+    timeFrame: lifetime
+    geo: global
+    unit: 1
+    price: free (one-time)
+    userMultiplied: false
+  elements:
+  - name: All Enrichment Endpoints
+  - name: Lead Finder Free Searches
+- id: enrich-growth
+  name: Growth
+  type: subscription
+  description: Monthly plan bundling credits at the entry paid tier.
+  entries:
+  - label: Monthly Credits
+    name: growth_credits
+    type: limited
+    metric: credits
+    limit: 100000
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: $49 per month
+    userMultiplied: false
+  elements:
+  - name: All Enrichment Endpoints
+  - name: Higher Rate Limits
+- id: enrich-scale
+  name: Scale
+  type: subscription
+  description: Monthly plan for higher-volume enrichment workloads.
+  entries:
+  - label: Monthly Credits
+    name: scale_credits
+    type: limited
+    metric: credits
+    limit: 500000
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: $149 per month
+    userMultiplied: false
+  elements:
+  - name: All Enrichment Endpoints
+  - name: Higher Rate Limits
+- id: enrich-pro
+  name: Pro
+  type: subscription
+  description: Monthly plan for large-scale enrichment and prospecting.
+  entries:
+  - label: Monthly Credits
+    name: pro_credits
+    type: limited
+    metric: credits
+    limit: 2500000
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: $499 per month
+    userMultiplied: false
+  elements:
+  - name: All Enrichment Endpoints
+  - name: Highest Standard Rate Limits
+- id: enrich-enterprise
+  name: Enterprise
+  type: enterprise
+  description: >-
+    Custom credit volume, elevated rate limits, and negotiated terms for high-volume
+    accounts. Contact Enrich.
+  entries:
+  - label: Enterprise Agreement
+    name: enterprise
+    type: flat
+    metric: contract
+    limit: -1
+    timeFrame: year
+    geo: global
+    unit: 1
+    price: contact sales
+    userMultiplied: false
+  elements:
+  - name: Custom Volume Pricing
+  - name: Elevated Rate Limits
+perEndpointCredits:
+- endpoint: POST /email-validation
+  credits: 1
+  note: Not charged when the result is risky.
+- endpoint: POST /email-finder
+  credits: 10
+  note: Not charged when found is false.
+- endpoint: POST /reverse-lookup/lookup
+  credits: 10
+  note: Person enrichment; not charged when no profile is found.
+- endpoint: POST /ip-to-company
+  credits: 100
+  note: Not charged when no domain is found; results cached 7 days.
+- endpoint: GET /reverse-lookup/phones
+  credits: 500
+  note: Not charged when no numbers are found.
+- endpoint: POST /lead-finder/search
+  credits: 0
+  note: First 3 pages or 75 results free per search, then 1 credit per result; 50 free unique searches monthly.
+- endpoint: POST /lead-finder/reveal
+  credits: 575
+  note: 50 credits email-only, 525 phone-only, 575 both (default); cached reveals are free.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

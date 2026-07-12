@@ -1,0 +1,146 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Enrich API",
+    "version": "3.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "apikey": {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "in": "header"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": { "name": "Person Enrichment", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "Look up a professional profile by email", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://dev.enrich.so/api/v3/reverse-lookup/lookup",
+            "body": { "type": "json", "data": "{\n  \"email\": \"jane@figma.com\"\n}" }
+          },
+          "docs": "Returns a person's professional profile from an email address. 10 credits per successful lookup; not charged when no profile is found."
+        },
+        {
+          "info": { "name": "Look up professional profiles in batch", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://dev.enrich.so/api/v3/reverse-lookup/batch",
+            "body": { "type": "json", "data": "{\n  \"emails\": [\"jane@figma.com\"]\n}" }
+          },
+          "docs": "Modeled. Submits multiple emails for asynchronous reverse-email-lookup enrichment."
+        }
+      ]
+    },
+    {
+      "info": { "name": "Email Finder", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "Find a professional email", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://dev.enrich.so/api/v3/email-finder",
+            "body": { "type": "json", "data": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"domain\": \"figma.com\"\n}" }
+          },
+          "docs": "Finds a professional email from first name, last name, and company domain. 10 credits per successful find; not charged when found is false."
+        }
+      ]
+    },
+    {
+      "info": { "name": "Email Verification", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "Validate a single email", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://dev.enrich.so/api/v3/email-validation",
+            "body": { "type": "json", "data": "{\n  \"email\": \"jane@figma.com\"\n}" }
+          },
+          "docs": "Validates an email for deliverability, returning valid, invalid, or risky. 1 credit per request; not charged when risky."
+        }
+      ]
+    },
+    {
+      "info": { "name": "Phone Finder", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "Find phone numbers", "type": "http" },
+          "http": {
+            "method": "GET",
+            "url": "https://dev.enrich.so/api/v3/reverse-lookup/phones",
+            "params": [
+              { "name": "email", "value": "jane@figma.com", "type": "query", "description": "The person's email address." },
+              { "name": "linkedin", "value": "", "type": "query", "description": "The person's LinkedIn profile URL." }
+            ]
+          },
+          "docs": "Returns phone numbers for a person from an email or LinkedIn URL. 500 credits per successful lookup; not charged when none found."
+        }
+      ]
+    },
+    {
+      "info": { "name": "Company Intelligence", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "Resolve company from IP", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://dev.enrich.so/api/v3/ip-to-company",
+            "body": { "type": "json", "data": "{\n  \"ip\": \"8.8.8.8\"\n}" }
+          },
+          "docs": "Resolves company, organization, and geolocation from an IP address. Cached 7 days. 100 credits per request; not charged when no domain found."
+        },
+        {
+          "info": { "name": "Start company follower scrape", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://dev.enrich.so/api/v3/company-follower",
+            "body": { "type": "json", "data": "{\n  \"companyUrl\": \"https://www.linkedin.com/company/figma\",\n  \"max_limit\": 1000\n}" }
+          },
+          "docs": "Starts an asynchronous scrape of a LinkedIn company's followers. Credits reserved from max_limit and settled when results are fetched."
+        }
+      ]
+    },
+    {
+      "info": { "name": "Lead Finder", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "Search leads", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://dev.enrich.so/api/v3/lead-finder/search",
+            "body": { "type": "json", "data": "{\n  \"filters\": {\n    \"jobTitle\": [\"Head of Engineering\"],\n    \"industry\": [\"Software\"]\n  },\n  \"page\": 1,\n  \"pageSize\": 25\n}" }
+          },
+          "docs": "Searches people + organizations + insights across ~135 filters. First 3 pages / 75 results free; then 1 credit per result."
+        },
+        {
+          "info": { "name": "Reveal contact info", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://dev.enrich.so/api/v3/lead-finder/reveal",
+            "body": { "type": "json", "data": "{\n  \"leads\": [{ \"id\": \"lead_123\" }],\n  \"fields\": [\"email\", \"phone\"]\n}" }
+          },
+          "docs": "Asynchronously reveals email and/or phone for up to 25 leads. 50 credits email, 525 phone, 575 both."
+        }
+      ]
+    },
+    {
+      "info": { "name": "Account", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "Get your credit balance", "type": "http" },
+          "http": {
+            "method": "GET",
+            "url": "https://dev.enrich.so/api/v3/wallet/balance"
+          },
+          "docs": "Modeled. Returns the current prepaid credit balance for your account."
+        }
+      ]
+    }
+  ]
+}

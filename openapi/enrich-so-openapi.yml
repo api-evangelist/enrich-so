@@ -1,0 +1,942 @@
+openapi: 3.0.3
+info:
+  title: Enrich API
+  description: >-
+    Enrich (enrich.so) is a person and company data enrichment API. From one REST
+    interface it resolves professional profiles from an email address (reverse email
+    lookup), finds and verifies professional email addresses, finds phone/mobile numbers,
+    resolves a company and geolocation from an IP address, scrapes LinkedIn company
+    followers, and searches a lead-finder database of people and organizations. All
+    requests use the base URL https://dev.enrich.so/api/v3 and authenticate with an API
+    key passed either in the `x-api-key` header or as `Authorization: Bearer`. Usage is
+    metered against a prepaid credit balance; "not found" results are refunded.
+
+    Grounding note: the single-lookup endpoints in this document
+    (POST /reverse-lookup/lookup, POST /email-finder, POST /email-validation,
+    GET /reverse-lookup/phones, POST /ip-to-company, POST /company-follower,
+    POST /lead-finder/search, POST /lead-finder/reveal) and their credit costs are
+    confirmed from the live Enrich documentation. The batch / progress / results sub-paths
+    are modeled from the documented batch-and-poll pattern (submit -> check progress ->
+    get results) and their exact URL segments should be confirmed against the current docs
+    before code generation. Modeled operations are marked with `x-endpoint-modeled: true`.
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3
+security:
+- apiKeyHeader: []
+- bearerAuth: []
+tags:
+- name: Person Enrichment
+  description: Reverse email lookup returning a person's professional profile.
+- name: Email Finder
+  description: Find a professional email from a name and company domain.
+- name: Email Verification
+  description: Validate email addresses for deliverability.
+- name: Phone Finder
+  description: Find phone and mobile numbers for a person.
+- name: Company Intelligence
+  description: IP-to-company resolution and LinkedIn company-follower scraping.
+- name: Lead Finder
+  description: Search and reveal leads across people and organizations.
+- name: Account
+  description: Credit balance and transaction history.
+paths:
+  /reverse-lookup/lookup:
+    post:
+      operationId: lookupProfileByEmail
+      tags:
+      - Person Enrichment
+      summary: Look up a professional profile by email
+      description: >-
+        Returns a person's professional profile - name, headline, current company,
+        position history, education, and skills - from an email address. 10 credits per
+        successful lookup; not charged when no profile is found.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LookupRequest'
+      responses:
+        '200':
+          description: Professional profile resolved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReverseLookupResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /reverse-lookup/batch:
+    post:
+      operationId: lookupProfilesBatch
+      tags:
+      - Person Enrichment
+      summary: Look up professional profiles in batch
+      description: >-
+        Submits up to many email addresses for asynchronous reverse-email-lookup
+        enrichment, returning a batch id to poll. 10 credits per successful profile.
+      x-endpoint-modeled: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchLookupRequest'
+      responses:
+        '202':
+          description: Batch accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchSubmitResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+  /reverse-lookup/batch/{batchId}:
+    get:
+      operationId: getBulkLookupResults
+      tags:
+      - Person Enrichment
+      summary: Check progress and get bulk lookup results
+      description: Returns the status and, when complete, the enriched profiles for a batch.
+      x-endpoint-modeled: true
+      parameters:
+      - name: batchId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Batch status or results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /email-finder:
+    post:
+      operationId: findProfessionalEmail
+      tags:
+      - Email Finder
+      summary: Find a professional email
+      description: >-
+        Finds a person's professional email address from first name, last name, and
+        company domain. 10 credits per successful find; not charged when found is false.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailFinderRequest'
+      responses:
+        '200':
+          description: Email found (or found=false).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailFinderResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /email-finder/batch:
+    post:
+      operationId: findEmailsBatch
+      tags:
+      - Email Finder
+      summary: Find emails in batch
+      description: Submits multiple name+domain rows for asynchronous email finding.
+      x-endpoint-modeled: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchEmailFinderRequest'
+      responses:
+        '202':
+          description: Batch accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchSubmitResponse'
+  /email-validation:
+    post:
+      operationId: validateEmail
+      tags:
+      - Email Verification
+      summary: Validate a single email
+      description: >-
+        Checks whether an email is deliverable, returning valid, invalid, or risky along
+        with confidence, mail provider, and catch-all status. 1 credit per request; not
+        charged when the result is risky.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailValidationRequest'
+      responses:
+        '200':
+          description: Validation result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailValidationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /email-validation/batch:
+    post:
+      operationId: validateEmailsBatch
+      tags:
+      - Email Verification
+      summary: Validate emails in batch
+      description: Submits up to 500,000 emails for asynchronous validation.
+      x-endpoint-modeled: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchEmailValidationRequest'
+      responses:
+        '202':
+          description: Batch accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchSubmitResponse'
+  /reverse-lookup/phones:
+    get:
+      operationId: findPhoneNumbers
+      tags:
+      - Phone Finder
+      summary: Find phone numbers
+      description: >-
+        Returns phone and mobile numbers for a person, keyed on their email address or
+        LinkedIn profile URL (at least one is required). 500 credits per successful
+        lookup; not charged when no numbers are found.
+      parameters:
+      - name: email
+        in: query
+        required: false
+        schema:
+          type: string
+          format: email
+        description: The person's email address.
+      - name: linkedin
+        in: query
+        required: false
+        schema:
+          type: string
+        description: The person's LinkedIn profile URL.
+      responses:
+        '200':
+          description: Phone numbers found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneLookupResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /reverse-lookup/phones/batch:
+    post:
+      operationId: findPhoneNumbersBatch
+      tags:
+      - Phone Finder
+      summary: Find phone numbers in batch
+      description: Submits multiple people for asynchronous phone lookup.
+      x-endpoint-modeled: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhoneBatchRequest'
+      responses:
+        '202':
+          description: Batch accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchSubmitResponse'
+  /ip-to-company:
+    post:
+      operationId: resolveCompanyFromIp
+      tags:
+      - Company Intelligence
+      summary: Resolve company from IP
+      description: >-
+        Resolves company, organization, and geolocation information from an IPv4 or IPv6
+        address. Results are cached for 7 days. 100 credits per request; not charged when
+        no domain is found.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IpToCompanyRequest'
+      responses:
+        '200':
+          description: Company and geolocation resolved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpToCompanyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /company-follower:
+    post:
+      operationId: startCompanyFollowerScrape
+      tags:
+      - Company Intelligence
+      summary: Start company follower scrape
+      description: >-
+        Starts an asynchronous scrape of a LinkedIn company's followers, with optional
+        filters for country, state, job title, department, and seniority level. Credits
+        are reserved upfront from max_limit and settled (excess refunded) when results are
+        fetched. Returns a batchId.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyFollowerRequest'
+      responses:
+        '202':
+          description: Scrape started.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartCompanyFollowerResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+  /company-follower/{batchId}:
+    get:
+      operationId: getCompanyFollowerResults
+      tags:
+      - Company Intelligence
+      summary: Check scrape progress and get follower results
+      description: Returns scrape progress and, when complete, the follower profiles.
+      x-endpoint-modeled: true
+      parameters:
+      - name: batchId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Scrape status or follower results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyFollowerResultsResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /lead-finder/search:
+    post:
+      operationId: searchLeads
+      tags:
+      - Lead Finder
+      summary: Search leads
+      description: >-
+        Searches across people, companies, and insights with roughly 135 filter fields
+        spanning person attributes, firmographics, and technology stack. The first 3 pages
+        (or 75 results) per search are free; pages beyond that cost 1 credit per result.
+        Max 40 pages per search.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadSearchRequest'
+      responses:
+        '200':
+          description: Matching leads.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadSearchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /lead-finder/count:
+    post:
+      operationId: countMatchingLeads
+      tags:
+      - Lead Finder
+      summary: Count matching leads
+      description: Returns the number of leads matching a set of filters without returning records.
+      x-endpoint-modeled: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadCountRequest'
+      responses:
+        '200':
+          description: Match count.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadCountResponse'
+  /lead-finder/reveal:
+    post:
+      operationId: revealContactInfo
+      tags:
+      - Lead Finder
+      summary: Reveal contact info
+      description: >-
+        Asynchronously reveals contact information (email and/or phone) for up to 25 leads,
+        returning a job id to poll. 50 credits per lead for email, 525 for phone, 575 for
+        both (the default). Previously revealed contacts return from cache at no cost.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadRevealRequest'
+      responses:
+        '202':
+          description: Reveal job accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadRevealResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+  /wallet/balance:
+    get:
+      operationId: getCreditBalance
+      tags:
+      - Account
+      summary: Get your credit balance
+      description: Returns the current prepaid credit balance for your account.
+      x-endpoint-modeled: true
+      responses:
+        '200':
+          description: Wallet balance.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletBalanceResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /wallet/transactions:
+    get:
+      operationId: getTransactionHistory
+      tags:
+      - Account
+      summary: Get transaction history
+      description: Returns the credit debit/refund transaction history for your account.
+      x-endpoint-modeled: true
+      responses:
+        '200':
+          description: Transaction history.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransactionsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (prefixed sk_) passed in the x-api-key header.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key passed as Authorization Bearer token.
+  responses:
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InsufficientCredits:
+      description: Not enough credits to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: No matching record was found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    RateLimited:
+      description: Rate limit exceeded. Includes a Retry-After header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  schemas:
+    EnrichmentMeta:
+      type: object
+      description: Metadata returned with every response, including remaining credit balance.
+      properties:
+        creditsCharged:
+          type: integer
+        creditsRemaining:
+          type: integer
+        cached:
+          type: boolean
+    ErrorEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    LookupRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+          description: The email address to look up.
+    ReverseLookupResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta'
+        data:
+          type: object
+          properties:
+            fullName:
+              type: string
+            headline:
+              type: string
+            company:
+              type: string
+            location:
+              type: string
+            linkedinUrl:
+              type: string
+            positions:
+              type: array
+              items:
+                type: object
+            education:
+              type: array
+              items:
+                type: object
+            skills:
+              type: array
+              items:
+                type: string
+    EmailFinderRequest:
+      type: object
+      required:
+      - firstName
+      - lastName
+      - domain
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        domain:
+          type: string
+          description: Company domain, e.g. figma.com.
+    EmailFinderResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta'
+        data:
+          type: object
+          properties:
+            found:
+              type: boolean
+            email:
+              type: string
+              format: email
+            confidence:
+              type: number
+    EmailValidationRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+    EmailValidationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta'
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+              enum:
+              - valid
+              - invalid
+              - risky
+            confidence:
+              type: number
+            mailProvider:
+              type: string
+            catchAll:
+              type: boolean
+    PhoneLookupResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta'
+        data:
+          type: object
+          properties:
+            phones:
+              type: array
+              items:
+                type: object
+                properties:
+                  number:
+                    type: string
+                  type:
+                    type: string
+    IpToCompanyRequest:
+      type: object
+      required:
+      - ip
+      properties:
+        ip:
+          type: string
+          description: IPv4 or IPv6 address to resolve.
+    IpToCompanyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta'
+        data:
+          type: object
+          properties:
+            domain:
+              type: string
+            organization:
+              type: string
+            country:
+              type: string
+            region:
+              type: string
+            city:
+              type: string
+            latitude:
+              type: number
+            longitude:
+              type: number
+            timezone:
+              type: string
+            isp:
+              type: string
+            usageType:
+              type: string
+    CompanyFollowerRequest:
+      type: object
+      required:
+      - companyUrl
+      - max_limit
+      properties:
+        companyUrl:
+          type: string
+          description: LinkedIn company URL to scrape.
+        max_limit:
+          type: integer
+          minimum: 1
+          maximum: 50000
+        countries:
+          type: array
+          items:
+            type: string
+        states:
+          type: array
+          items:
+            type: string
+        jobTitles:
+          type: array
+          items:
+            type: string
+        departments:
+          type: array
+          items:
+            type: string
+        levels:
+          type: array
+          items:
+            type: string
+        webhookUrl:
+          type: string
+        skipCache:
+          type: boolean
+    StartCompanyFollowerResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            batchId:
+              type: string
+            creditsReserved:
+              type: integer
+            perItemCost:
+              type: integer
+    CompanyFollowerResultsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+            followers:
+              type: array
+              items:
+                type: object
+    LeadSearchRequest:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          type: object
+          description: LeadFinderSearchFilters - person, organization, and technology filters.
+        page:
+          type: integer
+          default: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+        excludeFilters:
+          type: object
+    LeadSearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            pageSize:
+              type: integer
+            total:
+              type: integer
+        data:
+          type: array
+          items:
+            type: object
+    LeadCountRequest:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          type: object
+    LeadCountResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        count:
+          type: integer
+    LeadRevealRequest:
+      type: object
+      required:
+      - leads
+      properties:
+        leads:
+          type: array
+          maxItems: 25
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+        fields:
+          type: array
+          items:
+            type: string
+            enum:
+            - email
+            - phone
+    LeadRevealResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            jobId:
+              type: string
+    BatchLookupRequest:
+      type: object
+      required:
+      - emails
+      properties:
+        emails:
+          type: array
+          items:
+            type: string
+            format: email
+    BatchEmailFinderRequest:
+      type: object
+      required:
+      - rows
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmailFinderRequest'
+    BatchEmailValidationRequest:
+      type: object
+      required:
+      - emails
+      properties:
+        emails:
+          type: array
+          items:
+            type: string
+            format: email
+    PhoneBatchRequest:
+      type: object
+      required:
+      - rows
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              email:
+                type: string
+              linkedin:
+                type: string
+    BatchSubmitResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            batchId:
+              type: string
+            status:
+              type: string
+    BatchStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            batchId:
+              type: string
+            status:
+              type: string
+            results:
+              type: array
+              items:
+                type: object
+    WalletBalanceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            balance:
+              type: integer
+    WalletTransactionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              amount:
+                type: integer
+              type:
+                type: string
+              createdAt:
+                type: string
+                format: date-time

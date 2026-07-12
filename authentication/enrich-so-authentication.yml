@@ -1,0 +1,28 @@
+generated: '2026-07-11'
+method: derived
+source: openapi/enrich-so-openapi.yml
+summary:
+  types:
+  - apiKey
+  - http
+schemes:
+- name: apiKeyHeader
+  type: apiKey
+  in: header
+  keyName: x-api-key
+  description: >-
+    API key passed in the x-api-key header (recommended). Keys are created and managed in
+    the Enrich dashboard at https://dash.enrich.so/dashboard/api-keys and are prefixed with
+    sk_ (for example sk_prod_...). A missing, invalid, or disabled key returns 401.
+  sources:
+  - https://doc.enrich.so/authentication-1951026m0
+  - openapi/enrich-so-openapi.yml
+- name: bearerAuth
+  type: http
+  scheme: bearer
+  description: >-
+    The same API key may alternatively be sent as an Authorization Bearer token
+    (Authorization: Bearer sk_...).
+  sources:
+  - https://doc.enrich.so/authentication-1951026m0
+  - openapi/enrich-so-openapi.yml

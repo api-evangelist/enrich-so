@@ -1,0 +1,162 @@
+{
+  "info": {
+    "name": "Enrich API",
+    "description": "Person and company data enrichment API (enrich.so). Base URL: https://dev.enrich.so/api/v3. Authenticate with an API key (sk_ prefixed) via the x-api-key header or Authorization Bearer. Usage is metered against a prepaid credit balance; not-found results are refunded. Single-lookup endpoints and credit costs are confirmed from the live docs; batch/status sub-paths are modeled from the documented submit-poll-results pattern.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      { "key": "key", "value": "x-api-key", "type": "string" },
+      { "key": "value", "value": "{{apiKey}}", "type": "string" },
+      { "key": "in", "value": "header", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://dev.enrich.so/api/v3", "type": "string" },
+    { "key": "apiKey", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Person Enrichment",
+      "item": [
+        {
+          "name": "Look up a professional profile by email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"jane@figma.com\"\n}" },
+            "url": { "raw": "{{baseUrl}}/reverse-lookup/lookup", "host": ["{{baseUrl}}"], "path": ["reverse-lookup", "lookup"] },
+            "description": "Returns a person's professional profile from an email address. 10 credits per successful lookup; not charged when no profile is found."
+          }
+        },
+        {
+          "name": "Look up professional profiles in batch (modeled)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"emails\": [\"jane@figma.com\"]\n}" },
+            "url": { "raw": "{{baseUrl}}/reverse-lookup/batch", "host": ["{{baseUrl}}"], "path": ["reverse-lookup", "batch"] },
+            "description": "Modeled. Submits multiple emails for asynchronous reverse-email-lookup enrichment."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Email Finder",
+      "item": [
+        {
+          "name": "Find a professional email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"domain\": \"figma.com\"\n}" },
+            "url": { "raw": "{{baseUrl}}/email-finder", "host": ["{{baseUrl}}"], "path": ["email-finder"] },
+            "description": "Finds a professional email from first name, last name, and company domain. 10 credits per successful find; not charged when found is false."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Email Verification",
+      "item": [
+        {
+          "name": "Validate a single email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"jane@figma.com\"\n}" },
+            "url": { "raw": "{{baseUrl}}/email-validation", "host": ["{{baseUrl}}"], "path": ["email-validation"] },
+            "description": "Validates an email for deliverability, returning valid, invalid, or risky. 1 credit per request; not charged when risky."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Phone Finder",
+      "item": [
+        {
+          "name": "Find phone numbers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reverse-lookup/phones?email=jane@figma.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["reverse-lookup", "phones"],
+              "query": [
+                { "key": "email", "value": "jane@figma.com" },
+                { "key": "linkedin", "value": "", "disabled": true }
+              ]
+            },
+            "description": "Returns phone numbers for a person from an email or LinkedIn URL. 500 credits per successful lookup; not charged when none found."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Company Intelligence",
+      "item": [
+        {
+          "name": "Resolve company from IP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"8.8.8.8\"\n}" },
+            "url": { "raw": "{{baseUrl}}/ip-to-company", "host": ["{{baseUrl}}"], "path": ["ip-to-company"] },
+            "description": "Resolves company, organization, and geolocation from an IP address. Cached 7 days. 100 credits per request; not charged when no domain found."
+          }
+        },
+        {
+          "name": "Start company follower scrape",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"companyUrl\": \"https://www.linkedin.com/company/figma\",\n  \"max_limit\": 1000\n}" },
+            "url": { "raw": "{{baseUrl}}/company-follower", "host": ["{{baseUrl}}"], "path": ["company-follower"] },
+            "description": "Starts an asynchronous scrape of a LinkedIn company's followers. Credits reserved from max_limit and settled when results are fetched."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lead Finder",
+      "item": [
+        {
+          "name": "Search leads",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"filters\": {\n    \"jobTitle\": [\"Head of Engineering\"],\n    \"industry\": [\"Software\"]\n  },\n  \"page\": 1,\n  \"pageSize\": 25\n}" },
+            "url": { "raw": "{{baseUrl}}/lead-finder/search", "host": ["{{baseUrl}}"], "path": ["lead-finder", "search"] },
+            "description": "Searches people + organizations + insights across ~135 filters. First 3 pages / 75 results free; then 1 credit per result."
+          }
+        },
+        {
+          "name": "Reveal contact info",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"leads\": [{ \"id\": \"lead_123\" }],\n  \"fields\": [\"email\", \"phone\"]\n}" },
+            "url": { "raw": "{{baseUrl}}/lead-finder/reveal", "host": ["{{baseUrl}}"], "path": ["lead-finder", "reveal"] },
+            "description": "Asynchronously reveals email and/or phone for up to 25 leads. 50 credits email, 525 phone, 575 both."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Account",
+      "item": [
+        {
+          "name": "Get your credit balance (modeled)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/wallet/balance", "host": ["{{baseUrl}}"], "path": ["wallet", "balance"] },
+            "description": "Modeled. Returns the current prepaid credit balance for your account."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+aid: enrich-so
+url: https://raw.githubusercontent.com/api-evangelist/enrich-so/refs/heads/main/apis.yml
+name: Enrich
+kind: company
+description: >-
+  Enrich (enrich.so) is a person and company data enrichment API for B2B go-to-market,
+  sales, and web intelligence teams. From a single REST interface it resolves a
+  professional profile from an email address (reverse email lookup), finds and verifies
+  professional email addresses, finds mobile and phone numbers, resolves a company and
+  geolocation from an IP address, scrapes LinkedIn company followers, and searches a
+  lead-finder database of people and organizations for contact discovery and lead
+  enrichment. All endpoints share one base URL and are metered with a prepaid credit
+  balance; unsuccessful ("not found") lookups are refunded.
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+tags:
+- Data Enrichment
+- Contact Discovery
+- Web Intelligence
+- B2B Data
+- Lead Enrichment
+- Email Finder
+- Email Verification
+- Phone Numbers
+- LinkedIn
+- Reference Data
+created: '2026-07-11'
+modified: '2026-07-11'
+specificationVersion: '0.19'
+apis:
+- aid: enrich-so:enrich-so-person-enrichment-api
+  name: Enrich Person Enrichment API
+  tags:
+  - Person Enrichment
+  - Contact Discovery
+  - Reverse Email Lookup
+  - LinkedIn
+  - Web Intelligence
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  baseURL: https://dev.enrich.so/api/v3
+  properties:
+  - url: https://doc.enrich.so/introduction-1951028m0
+    type: Documentation
+  - url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+    type: APIReference
+  - url: openapi/enrich-so-openapi.yml
+    type: OpenAPI
+  - url: collections/enrich-so.postman_collection.json
+    type: PostmanCollection
+  - url: collections/enrich-so.opencollection.json
+    type: OpenCollection
+  description: >-
+    Reverse email lookup that returns a person's professional profile - name, headline,
+    current company, position history, education, and skills - from just an email address,
+    with a matching batch endpoint for bulk enrichment. Confirmed endpoint
+    POST /reverse-lookup/lookup at 10 credits per successful lookup (not charged when no
+    profile is found).
+- aid: enrich-so:enrich-so-email-finder-api
+  name: Enrich Email Finder API
+  tags:
+  - Email Finder
+  - Contact Discovery
+  - B2B Data
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://doc.enrich.so/find-a-professional-email-27483195e0
+  baseURL: https://dev.enrich.so/api/v3
+  properties:
+  - url: https://doc.enrich.so/introduction-1951028m0
+    type: Documentation
+  - url: https://doc.enrich.so/find-a-professional-email-27483195e0
+    type: APIReference
+  - url: openapi/enrich-so-openapi.yml
+    type: OpenAPI
+  - url: collections/enrich-so.postman_collection.json
+    type: PostmanCollection
+  - url: collections/enrich-so.opencollection.json
+    type: OpenCollection
+  description: >-
+    Finds a person's professional email address from their first name, last name, and
+    company domain, with a batch variant for bulk finding plus progress and results
+    endpoints. Confirmed endpoint POST /email-finder at 10 credits per successful find
+    (not charged when found is false).
+- aid: enrich-so:enrich-so-email-verification-api
+  name: Enrich Email Verification API
+  tags:
+  - Email Verification
+  - Deliverability
+  - Data Quality
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://doc.enrich.so/validate-a-single-email-27483191e0
+  baseURL: https://dev.enrich.so/api/v3
+  properties:
+  - url: https://doc.enrich.so/introduction-1951028m0
+    type: Documentation
+  - url: https://doc.enrich.so/validate-a-single-email-27483191e0
+    type: APIReference
+  - url: openapi/enrich-so-openapi.yml
+    type: OpenAPI
+  - url: collections/enrich-so.postman_collection.json
+    type: PostmanCollection
+  - url: collections/enrich-so.opencollection.json
+    type: OpenCollection
+  description: >-
+    Validates a single email address for deliverability, returning a status of valid,
+    invalid, or risky along with confidence, mail provider, and catch-all domain
+    detection, plus a batch validation flow. Confirmed endpoint POST /email-validation at
+    1 credit per request (not charged when the result is risky).
+- aid: enrich-so:enrich-so-phone-finder-api
+  name: Enrich Phone Finder API
+  tags:
+  - Phone Numbers
+  - Mobile Finder
+  - Contact Discovery
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://doc.enrich.so/find-phone-numbers-27483199e0
+  baseURL: https://dev.enrich.so/api/v3
+  properties:
+  - url: https://doc.enrich.so/introduction-1951028m0
+    type: Documentation
+  - url: https://doc.enrich.so/find-phone-numbers-27483199e0
+    type: APIReference
+  - url: openapi/enrich-so-openapi.yml
+    type: OpenAPI
+  - url: collections/enrich-so.postman_collection.json
+    type: PostmanCollection
+  - url: collections/enrich-so.opencollection.json
+    type: OpenCollection
+  description: >-
+    Finds phone and mobile numbers associated with a person from their email address or
+    LinkedIn profile URL, with a bulk variant plus progress and results endpoints.
+    Confirmed endpoint GET /reverse-lookup/phones at 500 credits per successful lookup
+    (not charged when no numbers are found).
+- aid: enrich-so:enrich-so-company-intelligence-api
+  name: Enrich Company Intelligence API
+  tags:
+  - Company Enrichment
+  - Web Intelligence
+  - B2B Data
+  - IP Intelligence
+  - LinkedIn
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+  baseURL: https://dev.enrich.so/api/v3
+  properties:
+  - url: https://doc.enrich.so/introduction-1951028m0
+    type: Documentation
+  - url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+    type: APIReference
+  - url: openapi/enrich-so-openapi.yml
+    type: OpenAPI
+  - url: collections/enrich-so.postman_collection.json
+    type: PostmanCollection
+  - url: collections/enrich-so.opencollection.json
+    type: OpenCollection
+  description: >-
+    Company-level web intelligence - resolve a company, organization, and geolocation
+    from an IPv4/IPv6 address (POST /ip-to-company, 100 credits, results cached 7 days),
+    scrape LinkedIn company followers asynchronously with filtering by location, title,
+    department, and seniority (POST /company-follower), find employees at a company, and
+    suggest company names.
+- aid: enrich-so:enrich-so-lead-finder-api
+  name: Enrich Lead Finder API
+  tags:
+  - Lead Enrichment
+  - Prospecting
+  - Contact Discovery
+  - B2B Data
+  - ICP
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://doc.enrich.so/search-leads-28165853e0
+  baseURL: https://dev.enrich.so/api/v3
+  properties:
+  - url: https://doc.enrich.so/introduction-1951028m0
+    type: Documentation
+  - url: https://doc.enrich.so/search-leads-28165853e0
+    type: APIReference
+  - url: openapi/enrich-so-openapi.yml
+    type: OpenAPI
+  - url: collections/enrich-so.postman_collection.json
+    type: PostmanCollection
+  - url: collections/enrich-so.opencollection.json
+    type: OpenCollection
+  description: >-
+    Lead-finder search across a database of people and organizations with roughly 135
+    filter fields (person attributes, firmographics, and technology stack), lead counting
+    and estimation, saved searches, and asynchronous reveal/enrich of contact email and
+    phone. Confirmed endpoints POST /lead-finder/search (first 3 pages / 75 results free,
+    then 1 credit per result) and POST /lead-finder/reveal (50 credits email, 525 phone,
+    575 both).
+common:
+- type: Authentication
+  url: authentication/enrich-so-authentication.yml
+- type: LinkedIn
+  url: https://www.linkedin.com/company/enrich-so
+- type: Website
+  url: https://www.enrich.so
+- type: Documentation
+  url: https://doc.enrich.so/introduction-1951028m0
+- type: Plans
+  url: plans/enrich-so-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/enrich-so-rate-limits.yml
+- type: FinOps
+  url: finops/enrich-so-finops.yml
+- url: https://www.enrich.so/blog
+  type: Blog
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com
