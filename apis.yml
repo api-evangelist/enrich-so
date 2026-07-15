@@ -188,6 +188,8 @@ apis:
     then 1 credit per result) and POST /lead-finder/reveal (50 credits email, 525 phone,
     575 both).
 common:
+- type: AgenticAccess
+  url: agentic-access/enrich-so-agentic-access.yml
 - type: Authentication
   url: authentication/enrich-so-authentication.yml
 - type: LinkedIn
