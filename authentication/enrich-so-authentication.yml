@@ -22,7 +22,7 @@ schemes:
   scheme: bearer
   description: >-
     The same API key may alternatively be sent as an Authorization Bearer token
-    (Authorization: Bearer sk_...).
+    (Authorization: Bearer [example key]).
   sources:
   - https://doc.enrich.so/authentication-1951026m0
   - openapi/enrich-so-openapi.yml
