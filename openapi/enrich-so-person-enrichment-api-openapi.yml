@@ -1,0 +1,236 @@
+openapi: 3.0.3
+info:
+  title: Enrich Account Person Enrichment API
+  description: 'Enrich (enrich.so) is a person and company data enrichment API. From one REST interface it resolves professional profiles from an email address (reverse email lookup), finds and verifies professional email addresses, finds phone/mobile numbers, resolves a company and geolocation from an IP address, scrapes LinkedIn company followers, and searches a lead-finder database of people and organizations. All requests use the base URL https://dev.enrich.so/api/v3 and authenticate with an API key passed either in the `x-api-key` header or as `Authorization: Bearer`. Usage is metered against a prepaid credit balance; "not found" results are refunded.
+
+    Grounding note: the single-lookup endpoints in this document (POST /reverse-lookup/lookup, POST /email-finder, POST /email-validation, GET /reverse-lookup/phones, POST /ip-to-company, POST /company-follower, POST /lead-finder/search, POST /lead-finder/reveal) and their credit costs are confirmed from the live Enrich documentation. The batch / progress / results sub-paths are modeled from the documented batch-and-poll pattern (submit -> check progress -> get results) and their exact URL segments should be confirmed against the current docs before code generation. Modeled operations are marked with `x-endpoint-modeled: true`.'
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3
+security:
+- apiKeyHeader: []
+- bearerAuth: []
+tags:
+- name: Person Enrichment
+  description: Reverse email lookup returning a person's professional profile.
+paths:
+  /reverse-lookup/lookup:
+    post:
+      operationId: lookupProfileByEmail
+      tags:
+      - Person Enrichment
+      summary: Look up a professional profile by email
+      description: Returns a person's professional profile - name, headline, current company, position history, education, and skills - from an email address. 10 credits per successful lookup; not charged when no profile is found.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LookupRequest'
+      responses:
+        '200':
+          description: Professional profile resolved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReverseLookupResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /reverse-lookup/batch:
+    post:
+      operationId: lookupProfilesBatch
+      tags:
+      - Person Enrichment
+      summary: Look up professional profiles in batch
+      description: Submits up to many email addresses for asynchronous reverse-email-lookup enrichment, returning a batch id to poll. 10 credits per successful profile.
+      x-endpoint-modeled: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchLookupRequest'
+      responses:
+        '202':
+          description: Batch accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchSubmitResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+  /reverse-lookup/batch/{batchId}:
+    get:
+      operationId: getBulkLookupResults
+      tags:
+      - Person Enrichment
+      summary: Check progress and get bulk lookup results
+      description: Returns the status and, when complete, the enriched profiles for a batch.
+      x-endpoint-modeled: true
+      parameters:
+      - name: batchId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Batch status or results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  responses:
+    NotFound:
+      description: No matching record was found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    RateLimited:
+      description: Rate limit exceeded. Includes a Retry-After header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InsufficientCredits:
+      description: Not enough credits to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  schemas:
+    EnrichmentMeta:
+      type: object
+      description: Metadata returned with every response, including remaining credit balance.
+      properties:
+        creditsCharged:
+          type: integer
+        creditsRemaining:
+          type: integer
+        cached:
+          type: boolean
+    ReverseLookupResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta'
+        data:
+          type: object
+          properties:
+            fullName:
+              type: string
+            headline:
+              type: string
+            company:
+              type: string
+            location:
+              type: string
+            linkedinUrl:
+              type: string
+            positions:
+              type: array
+              items:
+                type: object
+            education:
+              type: array
+              items:
+                type: object
+            skills:
+              type: array
+              items:
+                type: string
+    BatchLookupRequest:
+      type: object
+      required:
+      - emails
+      properties:
+        emails:
+          type: array
+          items:
+            type: string
+            format: email
+    BatchStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            batchId:
+              type: string
+            status:
+              type: string
+            results:
+              type: array
+              items:
+                type: object
+    BatchSubmitResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            batchId:
+              type: string
+            status:
+              type: string
+    ErrorEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    LookupRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+          description: The email address to look up.
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (prefixed sk_) passed in the x-api-key header.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key passed as Authorization Bearer token.

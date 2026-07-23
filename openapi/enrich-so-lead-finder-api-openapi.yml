@@ -1,0 +1,214 @@
+openapi: 3.0.3
+info:
+  title: Enrich Account Lead Finder API
+  description: 'Enrich (enrich.so) is a person and company data enrichment API. From one REST interface it resolves professional profiles from an email address (reverse email lookup), finds and verifies professional email addresses, finds phone/mobile numbers, resolves a company and geolocation from an IP address, scrapes LinkedIn company followers, and searches a lead-finder database of people and organizations. All requests use the base URL https://dev.enrich.so/api/v3 and authenticate with an API key passed either in the `x-api-key` header or as `Authorization: Bearer`. Usage is metered against a prepaid credit balance; "not found" results are refunded.
+
+    Grounding note: the single-lookup endpoints in this document (POST /reverse-lookup/lookup, POST /email-finder, POST /email-validation, GET /reverse-lookup/phones, POST /ip-to-company, POST /company-follower, POST /lead-finder/search, POST /lead-finder/reveal) and their credit costs are confirmed from the live Enrich documentation. The batch / progress / results sub-paths are modeled from the documented batch-and-poll pattern (submit -> check progress -> get results) and their exact URL segments should be confirmed against the current docs before code generation. Modeled operations are marked with `x-endpoint-modeled: true`.'
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3
+security:
+- apiKeyHeader: []
+- bearerAuth: []
+tags:
+- name: Lead Finder
+  description: Search and reveal leads across people and organizations.
+paths:
+  /lead-finder/search:
+    post:
+      operationId: searchLeads
+      tags:
+      - Lead Finder
+      summary: Search leads
+      description: Searches across people, companies, and insights with roughly 135 filter fields spanning person attributes, firmographics, and technology stack. The first 3 pages (or 75 results) per search are free; pages beyond that cost 1 credit per result. Max 40 pages per search.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadSearchRequest'
+      responses:
+        '200':
+          description: Matching leads.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadSearchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /lead-finder/count:
+    post:
+      operationId: countMatchingLeads
+      tags:
+      - Lead Finder
+      summary: Count matching leads
+      description: Returns the number of leads matching a set of filters without returning records.
+      x-endpoint-modeled: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadCountRequest'
+      responses:
+        '200':
+          description: Match count.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadCountResponse'
+  /lead-finder/reveal:
+    post:
+      operationId: revealContactInfo
+      tags:
+      - Lead Finder
+      summary: Reveal contact info
+      description: Asynchronously reveals contact information (email and/or phone) for up to 25 leads, returning a job id to poll. 50 credits per lead for email, 525 for phone, 575 for both (the default). Previously revealed contacts return from cache at no cost.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadRevealRequest'
+      responses:
+        '202':
+          description: Reveal job accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadRevealResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+components:
+  schemas:
+    LeadSearchRequest:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          type: object
+          description: LeadFinderSearchFilters - person, organization, and technology filters.
+        page:
+          type: integer
+          default: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+        excludeFilters:
+          type: object
+    LeadCountResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        count:
+          type: integer
+    LeadCountRequest:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          type: object
+    LeadRevealRequest:
+      type: object
+      required:
+      - leads
+      properties:
+        leads:
+          type: array
+          maxItems: 25
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+        fields:
+          type: array
+          items:
+            type: string
+            enum:
+            - email
+            - phone
+    LeadSearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            pageSize:
+              type: integer
+            total:
+              type: integer
+        data:
+          type: array
+          items:
+            type: object
+    ErrorEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    LeadRevealResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            jobId:
+              type: string
+  responses:
+    RateLimited:
+      description: Rate limit exceeded. Includes a Retry-After header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InsufficientCredits:
+      description: Not enough credits to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (prefixed sk_) passed in the x-api-key header.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key passed as Authorization Bearer token.

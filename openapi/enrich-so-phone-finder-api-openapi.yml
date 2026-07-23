@@ -1,0 +1,175 @@
+openapi: 3.0.3
+info:
+  title: Enrich Account Phone Finder API
+  description: 'Enrich (enrich.so) is a person and company data enrichment API. From one REST interface it resolves professional profiles from an email address (reverse email lookup), finds and verifies professional email addresses, finds phone/mobile numbers, resolves a company and geolocation from an IP address, scrapes LinkedIn company followers, and searches a lead-finder database of people and organizations. All requests use the base URL https://dev.enrich.so/api/v3 and authenticate with an API key passed either in the `x-api-key` header or as `Authorization: Bearer`. Usage is metered against a prepaid credit balance; "not found" results are refunded.
+
+    Grounding note: the single-lookup endpoints in this document (POST /reverse-lookup/lookup, POST /email-finder, POST /email-validation, GET /reverse-lookup/phones, POST /ip-to-company, POST /company-follower, POST /lead-finder/search, POST /lead-finder/reveal) and their credit costs are confirmed from the live Enrich documentation. The batch / progress / results sub-paths are modeled from the documented batch-and-poll pattern (submit -> check progress -> get results) and their exact URL segments should be confirmed against the current docs before code generation. Modeled operations are marked with `x-endpoint-modeled: true`.'
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3
+security:
+- apiKeyHeader: []
+- bearerAuth: []
+tags:
+- name: Phone Finder
+  description: Find phone and mobile numbers for a person.
+paths:
+  /reverse-lookup/phones:
+    get:
+      operationId: findPhoneNumbers
+      tags:
+      - Phone Finder
+      summary: Find phone numbers
+      description: Returns phone and mobile numbers for a person, keyed on their email address or LinkedIn profile URL (at least one is required). 500 credits per successful lookup; not charged when no numbers are found.
+      parameters:
+      - name: email
+        in: query
+        required: false
+        schema:
+          type: string
+          format: email
+        description: The person's email address.
+      - name: linkedin
+        in: query
+        required: false
+        schema:
+          type: string
+        description: The person's LinkedIn profile URL.
+      responses:
+        '200':
+          description: Phone numbers found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneLookupResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /reverse-lookup/phones/batch:
+    post:
+      operationId: findPhoneNumbersBatch
+      tags:
+      - Phone Finder
+      summary: Find phone numbers in batch
+      description: Submits multiple people for asynchronous phone lookup.
+      x-endpoint-modeled: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhoneBatchRequest'
+      responses:
+        '202':
+          description: Batch accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchSubmitResponse'
+components:
+  schemas:
+    PhoneBatchRequest:
+      type: object
+      required:
+      - rows
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              email:
+                type: string
+              linkedin:
+                type: string
+    EnrichmentMeta:
+      type: object
+      description: Metadata returned with every response, including remaining credit balance.
+      properties:
+        creditsCharged:
+          type: integer
+        creditsRemaining:
+          type: integer
+        cached:
+          type: boolean
+    PhoneLookupResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta'
+        data:
+          type: object
+          properties:
+            phones:
+              type: array
+              items:
+                type: object
+                properties:
+                  number:
+                    type: string
+                  type:
+                    type: string
+    BatchSubmitResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            batchId:
+              type: string
+            status:
+              type: string
+    ErrorEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+  responses:
+    RateLimited:
+      description: Rate limit exceeded. Includes a Retry-After header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InsufficientCredits:
+      description: Not enough credits to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (prefixed sk_) passed in the x-api-key header.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key passed as Authorization Bearer token.

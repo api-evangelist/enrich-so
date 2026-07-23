@@ -1,0 +1,257 @@
+openapi: 3.0.3
+info:
+  title: Enrich Account Company Intelligence API
+  description: 'Enrich (enrich.so) is a person and company data enrichment API. From one REST interface it resolves professional profiles from an email address (reverse email lookup), finds and verifies professional email addresses, finds phone/mobile numbers, resolves a company and geolocation from an IP address, scrapes LinkedIn company followers, and searches a lead-finder database of people and organizations. All requests use the base URL https://dev.enrich.so/api/v3 and authenticate with an API key passed either in the `x-api-key` header or as `Authorization: Bearer`. Usage is metered against a prepaid credit balance; "not found" results are refunded.
+
+    Grounding note: the single-lookup endpoints in this document (POST /reverse-lookup/lookup, POST /email-finder, POST /email-validation, GET /reverse-lookup/phones, POST /ip-to-company, POST /company-follower, POST /lead-finder/search, POST /lead-finder/reveal) and their credit costs are confirmed from the live Enrich documentation. The batch / progress / results sub-paths are modeled from the documented batch-and-poll pattern (submit -> check progress -> get results) and their exact URL segments should be confirmed against the current docs before code generation. Modeled operations are marked with `x-endpoint-modeled: true`.'
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3
+security:
+- apiKeyHeader: []
+- bearerAuth: []
+tags:
+- name: Company Intelligence
+  description: IP-to-company resolution and LinkedIn company-follower scraping.
+paths:
+  /ip-to-company:
+    post:
+      operationId: resolveCompanyFromIp
+      tags:
+      - Company Intelligence
+      summary: Resolve company from IP
+      description: Resolves company, organization, and geolocation information from an IPv4 or IPv6 address. Results are cached for 7 days. 100 credits per request; not charged when no domain is found.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IpToCompanyRequest'
+      responses:
+        '200':
+          description: Company and geolocation resolved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpToCompanyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /company-follower:
+    post:
+      operationId: startCompanyFollowerScrape
+      tags:
+      - Company Intelligence
+      summary: Start company follower scrape
+      description: Starts an asynchronous scrape of a LinkedIn company's followers, with optional filters for country, state, job title, department, and seniority level. Credits are reserved upfront from max_limit and settled (excess refunded) when results are fetched. Returns a batchId.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyFollowerRequest'
+      responses:
+        '202':
+          description: Scrape started.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartCompanyFollowerResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+  /company-follower/{batchId}:
+    get:
+      operationId: getCompanyFollowerResults
+      tags:
+      - Company Intelligence
+      summary: Check scrape progress and get follower results
+      description: Returns scrape progress and, when complete, the follower profiles.
+      x-endpoint-modeled: true
+      parameters:
+      - name: batchId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Scrape status or follower results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyFollowerResultsResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  responses:
+    NotFound:
+      description: No matching record was found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    RateLimited:
+      description: Rate limit exceeded. Includes a Retry-After header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InsufficientCredits:
+      description: Not enough credits to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  schemas:
+    EnrichmentMeta:
+      type: object
+      description: Metadata returned with every response, including remaining credit balance.
+      properties:
+        creditsCharged:
+          type: integer
+        creditsRemaining:
+          type: integer
+        cached:
+          type: boolean
+    CompanyFollowerRequest:
+      type: object
+      required:
+      - companyUrl
+      - max_limit
+      properties:
+        companyUrl:
+          type: string
+          description: LinkedIn company URL to scrape.
+        max_limit:
+          type: integer
+          minimum: 1
+          maximum: 50000
+        countries:
+          type: array
+          items:
+            type: string
+        states:
+          type: array
+          items:
+            type: string
+        jobTitles:
+          type: array
+          items:
+            type: string
+        departments:
+          type: array
+          items:
+            type: string
+        levels:
+          type: array
+          items:
+            type: string
+        webhookUrl:
+          type: string
+        skipCache:
+          type: boolean
+    CompanyFollowerResultsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+            followers:
+              type: array
+              items:
+                type: object
+    IpToCompanyRequest:
+      type: object
+      required:
+      - ip
+      properties:
+        ip:
+          type: string
+          description: IPv4 or IPv6 address to resolve.
+    StartCompanyFollowerResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            batchId:
+              type: string
+            creditsReserved:
+              type: integer
+            perItemCost:
+              type: integer
+    IpToCompanyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta'
+        data:
+          type: object
+          properties:
+            domain:
+              type: string
+            organization:
+              type: string
+            country:
+              type: string
+            region:
+              type: string
+            city:
+              type: string
+            latitude:
+              type: number
+            longitude:
+              type: number
+            timezone:
+              type: string
+            isp:
+              type: string
+            usageType:
+              type: string
+    ErrorEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (prefixed sk_) passed in the x-api-key header.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key passed as Authorization Bearer token.

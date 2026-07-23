@@ -1,0 +1,116 @@
+openapi: 3.0.3
+info:
+  title: Enrich Account API
+  description: 'Enrich (enrich.so) is a person and company data enrichment API. From one REST interface it resolves professional profiles from an email address (reverse email lookup), finds and verifies professional email addresses, finds phone/mobile numbers, resolves a company and geolocation from an IP address, scrapes LinkedIn company followers, and searches a lead-finder database of people and organizations. All requests use the base URL https://dev.enrich.so/api/v3 and authenticate with an API key passed either in the `x-api-key` header or as `Authorization: Bearer`. Usage is metered against a prepaid credit balance; "not found" results are refunded.
+
+    Grounding note: the single-lookup endpoints in this document (POST /reverse-lookup/lookup, POST /email-finder, POST /email-validation, GET /reverse-lookup/phones, POST /ip-to-company, POST /company-follower, POST /lead-finder/search, POST /lead-finder/reveal) and their credit costs are confirmed from the live Enrich documentation. The batch / progress / results sub-paths are modeled from the documented batch-and-poll pattern (submit -> check progress -> get results) and their exact URL segments should be confirmed against the current docs before code generation. Modeled operations are marked with `x-endpoint-modeled: true`.'
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3
+security:
+- apiKeyHeader: []
+- bearerAuth: []
+tags:
+- name: Account
+  description: Credit balance and transaction history.
+paths:
+  /wallet/balance:
+    get:
+      operationId: getCreditBalance
+      tags:
+      - Account
+      summary: Get your credit balance
+      description: Returns the current prepaid credit balance for your account.
+      x-endpoint-modeled: true
+      responses:
+        '200':
+          description: Wallet balance.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletBalanceResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /wallet/transactions:
+    get:
+      operationId: getTransactionHistory
+      tags:
+      - Account
+      summary: Get transaction history
+      description: Returns the credit debit/refund transaction history for your account.
+      x-endpoint-modeled: true
+      responses:
+        '200':
+          description: Transaction history.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransactionsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  responses:
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  schemas:
+    WalletTransactionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              amount:
+                type: integer
+              type:
+                type: string
+              createdAt:
+                type: string
+                format: date-time
+    WalletBalanceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            balance:
+              type: integer
+    ErrorEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (prefixed sk_) passed in the x-api-key header.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key passed as Authorization Bearer token.
