@@ -1,0 +1,26 @@
+{
+  "provider": "enrich-so",
+  "sources": [
+    "enrich-so-account-api-openapi.yml",
+    "enrich-so-company-intelligence-api-openapi.yml",
+    "enrich-so-email-finder-api-openapi.yml",
+    "enrich-so-email-verification-api-openapi.yml",
+    "enrich-so-lead-finder-api-openapi.yml",
+    "enrich-so-person-enrichment-api-openapi.yml",
+    "enrich-so-phone-finder-api-openapi.yml"
+  ],
+  "outputs": [
+    "enrich-so-account-api-openapi.yml",
+    "enrich-so-company-intelligence-api-openapi.yml",
+    "enrich-so-email-finder-api-openapi.yml",
+    "enrich-so-email-verification-api-openapi.yml",
+    "enrich-so-lead-finder-api-openapi.yml",
+    "enrich-so-person-enrichment-api-openapi.yml",
+    "enrich-so-phone-finder-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}
