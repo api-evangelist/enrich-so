@@ -2,15 +2,16 @@ aid: enrich-so
 url: https://raw.githubusercontent.com/api-evangelist/enrich-so/refs/heads/main/apis.yml
 name: Enrich
 kind: company
-description: >-
-  Enrich (enrich.so) is a person and company data enrichment API for B2B go-to-market,
-  sales, and web intelligence teams. From a single REST interface it resolves a
-  professional profile from an email address (reverse email lookup), finds and verifies
-  professional email addresses, finds mobile and phone numbers, resolves a company and
-  geolocation from an IP address, scrapes LinkedIn company followers, and searches a
-  lead-finder database of people and organizations for contact discovery and lead
-  enrichment. All endpoints share one base URL and are metered with a prepaid credit
-  balance; unsuccessful ("not found") lookups are refunded.
+description: Enrich (enrich.so), operated by Enrich Labs, is a person and company data enrichment API
+  for B2B go-to-market, sales, and web intelligence teams. From a single REST interface at https://dev.enrich.so/api/v3
+  it resolves a professional profile from an email address (reverse email lookup), finds and verifies
+  professional email addresses, finds mobile and phone numbers, resolves a company and geolocation from
+  an IP address, searches a lead-finder database of people and organizations, finds employees at a company,
+  and scrapes LinkedIn company followers. Fifty-one operations across nine products, every one of them
+  metered against a single prepaid credit balance and refunded when a lookup finds nothing. Every bulk
+  product follows one submit/poll/results shape with reserve-and-settle billing, ten typed webhook callbacks,
+  RFC 9457 problem details on every error, and official TypeScript and Go SDKs. Enrich also operates a
+  first-party remote MCP server at mcp.enrich.so with OAuth 2.0 and dynamic client registration.
 accessModel:
   pricing: freemium
   onboarding: self-serve
@@ -34,155 +35,124 @@ tags:
 - Email Finder
 - Email Verification
 - Phone Numbers
+- People Search
+- IP Intelligence
 - LinkedIn
 - Reference Data
+- MCP
 created: '2026-07-11'
-modified: '2026-07-11'
+modified: '2026-08-14'
 specificationVersion: '0.19'
 apis:
 - aid: enrich-so:enrich-so-account-api
   name: Enrich Account API
-  description: Credit balance and transaction history.
-  humanURL: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  description: Credit balance and transaction history for the organization behind the API key.
+  humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
   - Account
+  - Wallets
   properties:
   - type: OpenAPI
     url: openapi/enrich-so-account-api-openapi.yml
+  - type: Overlay
+    url: overlays/enrich-so-account-overlay.yaml
   - type: Documentation
     url: https://doc.enrich.so/introduction-1951028m0
   - type: APIReference
-    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+    url: https://doc.enrich.so/get-your-credit-balance-27483207e0
   - type: PostmanCollection
-    url: collections/enrich-so.postman_collection.json
+    url: collections/enrich-so-account-api.postman_collection.json
   - type: OpenCollection
-    url: collections/enrich-so.opencollection.json
-  - type: APIReference
-    url: https://doc.enrich.so/find-a-professional-email-27483195e0
-  - type: APIReference
-    url: https://doc.enrich.so/validate-a-single-email-27483191e0
-  - type: APIReference
-    url: https://doc.enrich.so/find-phone-numbers-27483199e0
-  - type: APIReference
-    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
-  - type: APIReference
-    url: https://doc.enrich.so/search-leads-28165853e0
+    url: collections/enrich-so-account-api.opencollection.json
 - aid: enrich-so:enrich-so-company-intelligence-api
   name: Enrich Company Intelligence API
-  description: IP-to-company resolution and LinkedIn company-follower scraping.
-  humanURL: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  description: IP-to-company resolution (single and batch) and LinkedIn company-follower scraping with
+    audience count estimation. The company-follower endpoints are restricted to approved accounts.
+  humanURL: https://doc.enrich.so/resolve-company-from-ip-35511038e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
   - Company Intelligence
+  - IP Intelligence
+  - LinkedIn
   properties:
   - type: OpenAPI
     url: openapi/enrich-so-company-intelligence-api-openapi.yml
+  - type: Overlay
+    url: overlays/enrich-so-company-intelligence-overlay.yaml
   - type: Documentation
     url: https://doc.enrich.so/introduction-1951028m0
   - type: APIReference
-    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
-  - type: PostmanCollection
-    url: collections/enrich-so.postman_collection.json
-  - type: OpenCollection
-    url: collections/enrich-so.opencollection.json
-  - type: APIReference
-    url: https://doc.enrich.so/find-a-professional-email-27483195e0
-  - type: APIReference
-    url: https://doc.enrich.so/validate-a-single-email-27483191e0
-  - type: APIReference
-    url: https://doc.enrich.so/find-phone-numbers-27483199e0
-  - type: APIReference
     url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
-  - type: APIReference
-    url: https://doc.enrich.so/search-leads-28165853e0
+  - type: PostmanCollection
+    url: collections/enrich-so-company-intelligence-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-company-intelligence-api.opencollection.json
 - aid: enrich-so:enrich-so-email-finder-api
   name: Enrich Email Finder API
-  description: Find a professional email from a name and company domain.
-  humanURL: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  description: Find a professional email from a first name, last name and company domain, single or in
+    batches of up to 500,000 leads.
+  humanURL: https://doc.enrich.so/find-a-professional-email-27483195e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
   - Email Finder
   properties:
   - type: OpenAPI
     url: openapi/enrich-so-email-finder-api-openapi.yml
+  - type: Overlay
+    url: overlays/enrich-so-email-finder-overlay.yaml
   - type: Documentation
     url: https://doc.enrich.so/introduction-1951028m0
   - type: APIReference
-    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
-  - type: PostmanCollection
-    url: collections/enrich-so.postman_collection.json
-  - type: OpenCollection
-    url: collections/enrich-so.opencollection.json
-  - type: APIReference
     url: https://doc.enrich.so/find-a-professional-email-27483195e0
-  - type: APIReference
-    url: https://doc.enrich.so/validate-a-single-email-27483191e0
-  - type: APIReference
-    url: https://doc.enrich.so/find-phone-numbers-27483199e0
-  - type: APIReference
-    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
-  - type: APIReference
-    url: https://doc.enrich.so/search-leads-28165853e0
+  - type: PostmanCollection
+    url: collections/enrich-so-email-finder-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-email-finder-api.opencollection.json
 - aid: enrich-so:enrich-so-email-verification-api
   name: Enrich Email Verification API
-  description: Validate email addresses for deliverability.
-  humanURL: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  description: Validate email addresses for deliverability, single or in batches of up to 500,000 emails.
+  humanURL: https://doc.enrich.so/validate-a-single-email-27483191e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
   - Email Verification
   properties:
   - type: OpenAPI
     url: openapi/enrich-so-email-verification-api-openapi.yml
+  - type: Overlay
+    url: overlays/enrich-so-email-verification-overlay.yaml
   - type: Documentation
     url: https://doc.enrich.so/introduction-1951028m0
   - type: APIReference
-    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
-  - type: PostmanCollection
-    url: collections/enrich-so.postman_collection.json
-  - type: OpenCollection
-    url: collections/enrich-so.opencollection.json
-  - type: APIReference
-    url: https://doc.enrich.so/find-a-professional-email-27483195e0
-  - type: APIReference
     url: https://doc.enrich.so/validate-a-single-email-27483191e0
-  - type: APIReference
-    url: https://doc.enrich.so/find-phone-numbers-27483199e0
-  - type: APIReference
-    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
-  - type: APIReference
-    url: https://doc.enrich.so/search-leads-28165853e0
+  - type: PostmanCollection
+    url: collections/enrich-so-email-verification-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-email-verification-api.opencollection.json
 - aid: enrich-so:enrich-so-lead-finder-api
   name: Enrich Lead Finder API
-  description: Search and reveal leads across people and organizations.
-  humanURL: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  description: Search, count, reveal, enrich, unlock and export leads across people and organizations,
+    with saved searches and asynchronous reveal and export jobs.
+  humanURL: https://doc.enrich.so/search-leads-28165853e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
   - Lead Finder
   properties:
   - type: OpenAPI
     url: openapi/enrich-so-lead-finder-api-openapi.yml
+  - type: Overlay
+    url: overlays/enrich-so-lead-finder-overlay.yaml
   - type: Documentation
     url: https://doc.enrich.so/introduction-1951028m0
   - type: APIReference
-    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
-  - type: PostmanCollection
-    url: collections/enrich-so.postman_collection.json
-  - type: OpenCollection
-    url: collections/enrich-so.opencollection.json
-  - type: APIReference
-    url: https://doc.enrich.so/find-a-professional-email-27483195e0
-  - type: APIReference
-    url: https://doc.enrich.so/validate-a-single-email-27483191e0
-  - type: APIReference
-    url: https://doc.enrich.so/find-phone-numbers-27483199e0
-  - type: APIReference
-    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
-  - type: APIReference
     url: https://doc.enrich.so/search-leads-28165853e0
+  - type: PostmanCollection
+    url: collections/enrich-so-lead-finder-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-lead-finder-api.opencollection.json
 - aid: enrich-so:enrich-so-person-enrichment-api
   name: Enrich Person Enrichment API
-  description: Reverse email lookup returning a person's professional profile.
+  description: Reverse email lookup returning a person's professional profile, single or in bulk.
   humanURL: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
@@ -190,53 +160,98 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/enrich-so-person-enrichment-api-openapi.yml
+  - type: Overlay
+    url: overlays/enrich-so-person-enrichment-overlay.yaml
   - type: Documentation
     url: https://doc.enrich.so/introduction-1951028m0
   - type: APIReference
     url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
   - type: PostmanCollection
-    url: collections/enrich-so.postman_collection.json
+    url: collections/enrich-so-person-enrichment-api.postman_collection.json
   - type: OpenCollection
-    url: collections/enrich-so.opencollection.json
-  - type: APIReference
-    url: https://doc.enrich.so/find-a-professional-email-27483195e0
-  - type: APIReference
-    url: https://doc.enrich.so/validate-a-single-email-27483191e0
-  - type: APIReference
-    url: https://doc.enrich.so/find-phone-numbers-27483199e0
-  - type: APIReference
-    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
-  - type: APIReference
-    url: https://doc.enrich.so/search-leads-28165853e0
+    url: collections/enrich-so-person-enrichment-api.opencollection.json
 - aid: enrich-so:enrich-so-phone-finder-api
   name: Enrich Phone Finder API
-  description: Find phone and mobile numbers for a person.
-  humanURL: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  description: Find phone and mobile numbers for a person from an email address or profile URL, single
+    or in bulk.
+  humanURL: https://doc.enrich.so/find-phone-numbers-27483199e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
   - Phone Finder
   properties:
   - type: OpenAPI
     url: openapi/enrich-so-phone-finder-api-openapi.yml
+  - type: Overlay
+    url: overlays/enrich-so-phone-finder-overlay.yaml
   - type: Documentation
     url: https://doc.enrich.so/introduction-1951028m0
   - type: APIReference
-    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
-  - type: PostmanCollection
-    url: collections/enrich-so.postman_collection.json
-  - type: OpenCollection
-    url: collections/enrich-so.opencollection.json
-  - type: APIReference
-    url: https://doc.enrich.so/find-a-professional-email-27483195e0
-  - type: APIReference
-    url: https://doc.enrich.so/validate-a-single-email-27483191e0
-  - type: APIReference
     url: https://doc.enrich.so/find-phone-numbers-27483199e0
+  - type: PostmanCollection
+    url: collections/enrich-so-phone-finder-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-phone-finder-api.opencollection.json
+- aid: enrich-so:enrich-so-teams-api
+  name: Enrich Teams API
+  description: List team members and manage pending team invitations for the organization behind the API
+    key.
+  humanURL: https://doc.enrich.so/list-team-members-27483209e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Teams
+  - Account
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-teams-api-openapi.yml
+  - type: Overlay
+    url: overlays/enrich-so-teams-overlay.yaml
+  - type: Documentation
+    url: https://doc.enrich.so/introduction-1951028m0
   - type: APIReference
-    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+    url: https://doc.enrich.so/list-team-members-27483209e0
+  - type: PostmanCollection
+    url: collections/enrich-so-teams-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-teams-api.opencollection.json
+- aid: enrich-so:enrich-so-people-search-api
+  name: Enrich People Search API
+  description: Find employees at a company and run cascading ICP (ideal customer profile) people searches.
+  humanURL: https://doc.enrich.so/find-employees-at-a-company-28537860e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - People Search
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-people-search-api-openapi.yml
+  - type: Overlay
+    url: overlays/enrich-so-people-search-overlay.yaml
+  - type: Documentation
+    url: https://doc.enrich.so/introduction-1951028m0
   - type: APIReference
-    url: https://doc.enrich.so/search-leads-28165853e0
+    url: https://doc.enrich.so/find-employees-at-a-company-28537860e0
+  - type: PostmanCollection
+    url: collections/enrich-so-people-search-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-people-search-api.opencollection.json
+- aid: enrich-so:enrich-so-legacy-api
+  name: Enrich Labs Legacy API (v1/v2)
+  description: 'The prior major version of the Enrich API, still live at api.enrich.so and still serving
+    its own Swagger UI at https://api.enrich.so/docs. Two operations: GET /v1/api/auth returns the account/credit
+    context for a JWT bearer token, and GET /v2/api/person enriches a person from an email address. Superseded
+    by the v3 API at dev.enrich.so/api/v3, but no deprecation notice or sunset date has been published.'
+  humanURL: https://api.enrich.so/docs
+  baseURL: https://api.enrich.so
+  tags:
+  - Person Enrichment
+  - Legacy
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-legacy-api-openapi.json
+  - type: APIReference
+    url: https://api.enrich.so/docs
 common:
+- type: DomainSecurity
+  url: security/enrich-so-domain-security.yml
 - type: AgenticAccess
   url: agentic-access/enrich-so-agentic-access.yml
 - type: Authentication
@@ -255,6 +270,65 @@ common:
   url: finops/enrich-so-finops.yml
 - url: https://www.enrich.so/blog
   type: Blog
+- type: Packages
+  url: packages/enrich-so-packages.yml
+- type: SDKs
+  url: packages/enrich-so-packages.yml
+- type: WellKnown
+  url: well-known/enrich-so-well-known.yml
+- type: MCPServer
+  url: mcp/enrich-so-mcp.yml
+- type: ToolCrosswalk
+  url: mcp/enrich-so-tool-crosswalk.yml
+- type: LLMsTxt
+  url: llms/enrich-so-llms.txt
+- type: Conformance
+  url: conformance/enrich-so-conformance.yml
+- type: ErrorCatalog
+  url: errors/enrich-so-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/enrich-so-lifecycle.yml
+- type: StatusPage
+  url: https://status.enrich.so
+- type: OAuthScopes
+  url: scopes/enrich-so-scopes.yml
+- type: Conventions
+  url: conventions/enrich-so-conventions.yml
+- type: ChangeLog
+  url: changelog/enrich-so-changelog.yml
+- type: DataModel
+  url: data-model/enrich-so-data-model.yml
+- type: Webhooks
+  url: asyncapi/enrich-so-webhooks.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: APIReference
+  url: https://doc.enrich.so/api-reference-1951025m0
+- type: DeveloperPortal
+  url: https://doc.enrich.so/introduction-1951028m0
+- type: GettingStarted
+  url: https://doc.enrich.so/quickstart-1951029m0
+- type: Pricing
+  url: https://doc.enrich.so/credits-pricing-1951027m0
+- type: SignUp
+  url: https://dash.enrich.so
+- type: Login
+  url: https://dash.enrich.so/dashboard/api-keys
+- type: TermsOfService
+  url: https://www.enrich.so/terms-of-service
+- type: PrivacyPolicy
+  url: https://www.enrich.so/privacy-policy
+- type: GitHubOrganization
+  url: https://github.com/maximiseai
+- type: PostmanCollection
+  url: collections/enrich-so.postman_collection.json
+- type: OpenCollection
+  url: collections/enrich-so.opencollection.json
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
+x-enrichment:
+  date: '2026-08-14'
+  status: enriched
+  artifacts_added: 53
+  pass: local-v1
