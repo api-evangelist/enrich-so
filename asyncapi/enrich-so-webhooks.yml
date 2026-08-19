@@ -1,0 +1,150 @@
+generated: '2026-08-14'
+method: searched
+source: >-
+  https://doc.enrich.so/email-validation-per-result-callback-27483213e0 and the nine
+  sibling webhook pages listed in https://doc.enrich.so/llms.txt — each page embeds an
+  OpenAPI 3.1 `webhooks` fragment, collected into
+  openapi/_original/enrich-so-v3-harvested-openapi.yml
+provider: Enrich
+providerId: enrich-so
+description: >-
+  Enrich publishes a real, typed webhook surface: ten callbacks covering five batch
+  products, each with a per-result callback that fires once per item and a completion
+  callback that fires exactly once when the job finishes. Enrich does NOT publish an
+  AsyncAPI document, so this is the webhook catalogue rather than an AsyncAPI spec. The
+  callbacks ARE, however, declared as OpenAPI 3.1 `webhooks` with full JSON Schemas on
+  Enrich's own documentation pages, which is a stronger position than most webhook
+  providers — the payload shapes are machine-readable even though the event catalogue is
+  not.
+asyncapi_published: false
+asyncapi_note: >-
+  No AsyncAPI document is served anywhere on enrich.so (probed /asyncapi.yaml,
+  /asyncapi.json on dev.enrich.so and doc.enrich.so — 404). Not fabricated here.
+delivery:
+  transport: https-post
+  registration: >-
+    Per-job, not per-account. There is no webhook management API and no dashboard
+    subscription model — you pass an optional `webhookUrl` string in the body of each
+    batch submit, and Enrich POSTs to it for that job only.
+  registration_field: webhookUrl
+  acknowledgement: Return any 2xx to acknowledge receipt.
+  retries: not documented
+  ordering: not guaranteed (per-result callbacks fire as each item completes)
+  signing:
+    supported: false
+    header: null
+    note: >-
+      NO payload signature. Enrich documents no signing secret, no HMAC header and no
+      timestamp-tolerance rule for any of the ten callbacks, and none of the published
+      webhook fragments declares a security scheme on the callback itself. A receiver
+      cannot cryptographically verify that a POST came from Enrich, and the payloads
+      carry personal data (names, work emails, phone numbers, LinkedIn profiles). Mitigate
+      with an unguessable webhookUrl per job plus source-IP allowlisting, and treat the
+      body as untrusted until re-fetched from the results endpoint. This is the single
+      most consequential gap in the Enrich event surface.
+envelope:
+  fields:
+  - name: event
+    description: Event type string.
+  - name: timestamp
+    description: ISO 8601 UTC timestamp.
+  - name: data
+    description: Event payload; shape depends on the event.
+  - name: batchId
+    description: Present on the Company Followers callbacks only.
+  inconsistency: >-
+    Event naming is not uniform. Eight of the ten events use a "webhook:<thing>.completed"
+    prefix, but the two Email Finder / Email Validation COMPLETION events use bare
+    "finder.completed" and "validation.completed". A consumer matching on a prefix will
+    silently drop the two completion events that matter most.
+events:
+- name: emailValidationResult
+  event: webhook:email_lookup.completed
+  operationId: webhookEmailValidationResult
+  product: Email Validation
+  cardinality: once per email in a batch validation job
+  schema: WebhookEmailValidationResult
+  docs: https://doc.enrich.so/email-validation-per-result-callback-27483213e0
+- name: emailValidationCompletion
+  event: validation.completed
+  operationId: webhookEmailValidationCompletion
+  product: Email Validation
+  cardinality: exactly once per batch
+  schema: WebhookEmailValidationCompletion
+  payload_fields:
+  - job_id
+  - status
+  - total_items
+  - successful
+  - failed
+  - completed_at
+  docs: https://doc.enrich.so/email-validation-batch-completion-callback-27483214e0
+- name: emailFinderResult
+  event: webhook:finder_lookup.completed
+  operationId: webhookEmailFinderResult
+  product: Email Finder
+  cardinality: once per lead in a batch finder job
+  schema: WebhookEmailFinderResult
+  docs: https://doc.enrich.so/email-finder-per-result-callback-27483215e0
+- name: emailFinderCompletion
+  event: finder.completed
+  operationId: webhookEmailFinderCompletion
+  product: Email Finder
+  cardinality: exactly once per batch
+  schema: WebhookEmailFinderCompletion
+  docs: https://doc.enrich.so/email-finder-batch-completion-callback-27483216e0
+- name: phoneResult
+  event: webhook:phone_result.completed
+  operationId: webhookPhoneResult
+  product: Phone Finder
+  cardinality: once per item (email or profile URL) in a bulk phone job
+  schema: WebhookPhoneResult
+  docs: https://doc.enrich.so/phone-finder-per-result-callback-27483217e0
+- name: phoneCompletion
+  event: webhook:phone_completion.completed
+  operationId: webhookPhoneCompletion
+  product: Phone Finder
+  cardinality: exactly once per bulk job
+  schema: WebhookPhoneCompletion
+  docs: https://doc.enrich.so/phone-finder-batch-completion-callback-27483218e0
+- name: reverseLookupResult
+  event: webhook:email_result.completed
+  operationId: webhookReverseLookupResult
+  product: Reverse Email Lookup
+  cardinality: once per email in a bulk reverse lookup
+  schema: WebhookReverseLookupResult
+  docs: https://doc.enrich.so/reverse-lookup-per-result-callback-27483219e0
+- name: reverseLookupCompletion
+  event: webhook:email_completion.completed
+  operationId: webhookReverseLookupCompletion
+  product: Reverse Email Lookup
+  cardinality: exactly once per bulk job
+  schema: WebhookReverseLookupCompletion
+  docs: https://doc.enrich.so/reverse-lookup-batch-completion-callback-27483220e0
+- name: companyFollowerResult
+  event: webhook:company_follower_result.completed
+  operationId: webhookCompanyFollowerResult
+  product: Company Followers
+  cardinality: once per follower profile scraped (100 followers = 100 callbacks)
+  schema: WebhookCompanyFollowerResult
+  envelope_extra: batchId
+  docs: https://doc.enrich.so/company-followers-per-result-callback-27730399e0
+  access: approved accounts only
+- name: companyFollowerCompletion
+  event: webhook:company_follower_completion.completed
+  operationId: webhookCompanyFollowerCompletion
+  product: Company Followers
+  cardinality: exactly once when the scrape finishes (success or failure)
+  schema: WebhookCompanyFollowerCompletion
+  envelope_extra: batchId
+  docs: https://doc.enrich.so/company-followers-completion-callback-27730400e0
+  access: approved accounts only
+volume_warning: >-
+  Per-result callbacks are 1:1 with items. A 500,000-email batch validation job with a
+  webhookUrl set will POST your endpoint 500,000 times plus one completion. Size the
+  receiver accordingly, or omit webhookUrl and poll the results endpoint instead
+  (polling is free).
+schemas_source: openapi/_original/enrich-so-v3-harvested-openapi.yml#/webhooks
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

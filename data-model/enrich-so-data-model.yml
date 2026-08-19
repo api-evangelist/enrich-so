@@ -1,0 +1,241 @@
+generated: '2026-08-14'
+method: derived
+source: openapi/_original/enrich-so-v3-harvested-openapi.yml
+docs: https://doc.enrich.so/api-reference-1951025m0
+provider: Enrich
+providerId: enrich-so
+description: >-
+  Entity-relationship view of the Enrich API v3, derived from the 115 component schemas
+  and 82 $ref edges in the provider-published OpenAPI. Enrich is not a CRUD API — there
+  are almost no persistent, addressable resources. It is a lookup API wrapped in a job
+  queue: you post an input, you get an enrichment result, and the only things that
+  actually persist and can be fetched by ID are JOBS, SAVED SEARCHES, WALLET
+  TRANSACTIONS and TEAM MEMBERSHIP. Understanding that shape is the difference between
+  integrating correctly and polling something that was never stored.
+identifiers:
+- field: batchId
+  used_by: 12 schemas
+  format: 24-character hexadecimal string (MongoDB ObjectId shape)
+  example_shape: 665a1f4e2c3b7800129dce01
+  scope: organization
+  note: >-
+    The primary handle in the API. Returned by every batch/bulk submit and required by
+    every progress and results call. Also spelled `jobId` on the Phone Finder bulk and
+    Lead Finder export/reveal paths — same shape, different name.
+- field: jobId
+  used_by: 2 schemas
+  format: 24-character hexadecimal string
+  note: Lead Finder export jobs and phone bulk jobs. Synonym of batchId.
+- field: requestId
+  used_by: 3 schemas
+  format: 24-character hexadecimal string
+  note: Per-call trace ID returned in meta. NOT addressable — there is no GET /requests/{id}.
+- field: organizationId
+  used_by: 2 schemas
+  note: The billing and rate-limit boundary. Implied by the API key; never passed by the client.
+- field: teamId
+  used_by: path parameter on all four Teams operations
+  note: >-
+    The only path-level tenant identifier in the API. Every other endpoint infers the
+    organization from the API key, which makes the Teams endpoints the odd ones out.
+- field: id
+  used_by: 8 schemas
+  note: Saved searches, team members, invitations.
+entities:
+- name: Organization
+  persistent: true
+  addressable: false
+  description: >-
+    The billing and rate-limiting boundary behind an API key. Owns the credit balance, the
+    transaction ledger, the team roster and every job. Never passed explicitly — it is
+    derived from the key.
+  schemas:
+  - WalletBalance
+- name: Wallet
+  persistent: true
+  addressable: true
+  endpoints:
+  - GET /wallets/balance
+  - GET /wallets/transactions
+  description: The organization's prepaid credit balance and its ledger.
+  schemas:
+  - WalletBalance
+  - WalletBalanceResponse
+  - WalletTransaction
+  - WalletTransactionsResponse
+- name: WalletTransaction
+  persistent: true
+  addressable: false
+  description: >-
+    A single credit movement — top-up, deduction, refund or adjustment. Listed and
+    paginated but not individually fetchable.
+- name: TeamMember
+  persistent: true
+  addressable: false
+  endpoints:
+  - GET /teams/{teamId}/members
+  roles:
+  - owner
+  - admin
+  - member
+- name: Invitation
+  persistent: true
+  addressable: true
+  endpoints:
+  - POST /teams/{teamId}/invitations
+  - GET /teams/{teamId}/invitations
+  - DELETE /teams/{teamId}/invitations/{invitationId}
+  description: A pending team invitation. Creatable, listable, cancellable — the only full CRUD-ish lifecycle in the API.
+- name: Job
+  persistent: true
+  addressable: true
+  description: >-
+    The central abstraction. Every bulk product creates one: batch email validation, batch
+    email finding, bulk reverse lookup, bulk phone lookup, batch IP-to-company, company
+    follower scrape, count estimate, lead reveal job, lead export job. All share the same
+    lifecycle (queued -> processing -> completed|failed), the same 24-hex identifier and
+    the same submit/poll/results triad. Enrich does not model it as one resource type —
+    there are nine parallel path families and nine parallel schema families for what is
+    one concept.
+  statuses:
+  - queued
+  - processing
+  - completed
+  - failed
+  schemas:
+  - BatchSubmitResponse
+  - BatchStatusResponse
+  - BatchSubmitData
+  - BatchStatusData
+  - PhoneBulkJobSubmitData
+  - PhoneBulkJobStatusData
+  - RevealJobSummary
+  - LeadExportJobSummary
+  - LeadExportJobProgress
+  - CountEstimateStatusData
+- name: SavedSearch
+  persistent: true
+  addressable: true
+  endpoints:
+  - GET /lead-finder/saved
+  - POST /lead-finder/saved
+  - DELETE /lead-finder/saved/{id}
+  description: A stored Lead Finder filter combination. Owner-scoped — only the creator can delete it.
+- name: Person
+  persistent: false
+  addressable: false
+  description: >-
+    An enrichment RESULT, not a stored record. Returned by reverse lookup, email finder,
+    phone finder, lead search and people search. Enrich states it holds no contact
+    database of its own, so there is no GET /people/{id} and no stable person identifier
+    across calls — the email address or profile URL is the only join key you get.
+  schemas:
+  - ReverseLookupResult
+  - PositionHistoryItem
+  - EducationHistoryItem
+  - StartEndDate
+  - PhoneLookupResult
+  - EmailFinderResult
+  - Lead
+  - LeadSearchPreviewResult
+  - RevealedContact
+  - LeadEnrichResult
+  - FollowerProfile
+- name: Company
+  persistent: false
+  addressable: false
+  description: >-
+    Resolved from an IP address or referenced from a person's position history. Also a
+    result, not a record. Company Followers scraping is keyed on a LinkedIn company URL,
+    not an Enrich company ID.
+- name: EmailValidationResult
+  persistent: false
+  addressable: false
+  fields:
+  - status
+  - subStatus
+  - freeEmail
+  - disposable
+  - catchAll
+relationships:
+- from: Organization
+  to: Wallet
+  type: has_one
+  via: implied by API key
+- from: Wallet
+  to: WalletTransaction
+  type: has_many
+  via: organizationId
+- from: Organization
+  to: TeamMember
+  type: has_many
+  via: teamId
+- from: Organization
+  to: Invitation
+  type: has_many
+  via: teamId
+- from: Organization
+  to: Job
+  type: has_many
+  via: implied by API key (a batchId from another org 404s)
+- from: Job
+  to: EmailValidationResult
+  type: has_many
+  via: batchId
+- from: Job
+  to: Person
+  type: has_many
+  via: batchId
+- from: Job
+  to: FollowerProfile
+  type: has_many
+  via: batchId
+- from: Person
+  to: PositionHistoryItem
+  type: has_many
+  via: '$ref ReverseLookupResult.position_history'
+- from: Person
+  to: EducationHistoryItem
+  type: has_many
+  via: '$ref ReverseLookupResult.education_history'
+- from: PositionHistoryItem
+  to: StartEndDate
+  type: has_one
+  via: $ref
+- from: Person
+  to: Company
+  type: belongs_to
+  via: current position / company domain (string, not an ID)
+- from: SavedSearch
+  to: LeadFinderSearchFilters
+  type: has_one
+  via: $ref
+- from: Lead
+  to: RevealedContact
+  type: has_one
+  via: reveal job output
+envelopes:
+  success: SuccessOperationResponse / per-product *Response wrappers around { success, data, meta }
+  meta: EnrichmentMeta
+  pagination: Pagination / LeadFinderPagination
+  error: ErrorEnvelope
+  note: >-
+    Two parallel pagination schemas exist — Pagination for the batch/wallet endpoints and
+    LeadFinderPagination for Lead Finder. Same concept, duplicated.
+observations:
+- >-
+  No stable person or company identifier is issued. Every result is keyed by the input you
+  supplied (email, profile URL, IP, domain). You cannot re-fetch an enrichment by ID, only
+  re-run and re-pay for it — except where Enrich caches: IP-to-company results are cached
+  7 days, reverse lookups 7 days, and cached lead reveals are free.
+- >-
+  Nine near-identical job families with nine near-identical schema sets is the largest
+  design cost in this model. One generic Job resource with a `type` discriminator would
+  collapse roughly a third of the 115 schemas.
+- >-
+  Field naming is inconsistent across products: the reverse-lookup result uses snake_case
+  (position_history, education_history) while the envelope and batch schemas use camelCase
+  (creditsUsed, totalPages, batchId). A single client has to handle both.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

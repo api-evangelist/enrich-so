@@ -1,11 +1,14 @@
+generated: '2026-08-14'
+method: searched
+source: https://doc.enrich.so/credits-pricing-1951027m0
 specification: FinOps Framework
 specificationVersion: '1.0'
 schema: https://www.finops.org/framework/
 provider: Enrich
 providerId: enrich-so
 created: '2026-07-11'
-modified: '2026-07-11'
-reconciled: false
+modified: '2026-08-14'
+reconciled: true
 tags:
 - Data Enrichment
 - Contact Discovery
@@ -18,15 +21,38 @@ description: >-
   FinOps view of Enrich spend. Enrich bills a prepaid, credit-metered model: you buy credits
   (via a monthly plan or top-up) and each API call debits credits by endpoint. Confirmed
   per-call costs are 1 credit for email validation, 10 for email finding, 10 for reverse
-  email lookup (person enrichment), 100 for IP-to-company, 500 for phone finding, 50/525/575
+  email lookup (person enrichment), 100 for IP-to-company, 500 for phone finding, 10/525/535
   for lead reveal (email/phone/both), and 1 credit per returned result for lead search beyond
   the free page allowance. Unsuccessful ("not found") lookups and cached results are not
   charged, so effective cost tracks successful matches rather than raw call volume.
 notes: >-
-  Per-endpoint credit costs are confirmed from the live Enrich endpoint documentation. The
-  dollar value of a credit depends on the monthly plan (larger plans lower the effective
-  per-credit rate); confirm current plan pricing on www.enrich.so/pricing during
-  reconciliation.
+  RECONCILED 2026-08-14. Per-endpoint credit costs are read from the OpenAPI fragments
+  Enrich publishes on each endpoint documentation page, and the credit-pack prices from
+  https://doc.enrich.so/credits-pricing-1951027m0, which also states the effective rate per
+  credit: Growth $0.00049, Scale $0.000298, Pro $0.0002. CORRECTION: an earlier round
+  recorded lead reveal at 50/525/575 credits; the published contract says 10/525/535 and
+  the earlier figures have been replaced. Enrich's own pricing page could not be read —
+  https://www.enrich.so/pricing returns 429 behind a Vercel Security Checkpoint bot
+  challenge for every non-browser client — so no list price for the Enterprise tier is
+  recorded.
+unitEconomics:
+  effectiveCostPerCredit:
+    growth: 0.00049
+    scale: 0.000298
+    pro: 0.0002
+  costPerLookupUSD:
+    emailValidation: {growth: 0.00049, pro: 0.0002}
+    emailFinder: {growth: 0.0049, pro: 0.002}
+    reverseEmailLookup: {growth: 0.0049, pro: 0.002}
+    ipToCompany: {growth: 0.049, pro: 0.02}
+    phoneFinder: {growth: 0.245, pro: 0.1}
+    leadRevealEmail: {growth: 0.0049, pro: 0.002}
+    leadRevealBoth: {growth: 0.26215, pro: 0.107}
+  note: >-
+    Derived by multiplying the published per-endpoint credit cost by the published
+    effective cost per credit on each pack. The spread between the cheapest and most
+    expensive single call is 535x in credits, so endpoint mix — not call volume — is what
+    determines this bill.
 sources:
 - https://doc.enrich.so/credits-pricing-1951027m0
 - https://doc.enrich.so/introduction-1951028m0
@@ -101,7 +127,10 @@ meters:
   - account
   - endpoint
 - name: lead_reveal_credits
-  description: 50 credits email-only, 525 phone-only, 575 both per revealed lead; cached reveals free.
+  description: >-
+    10 credits email-only, 525 phone-only, 535 both (the default) per revealed lead; cached
+    reveals free. Charged asynchronously inside the reveal worker, so an over-budget job
+    fails rather than returning a synchronous 402.
   unit: credits
   aggregation: sum
   dimensions:
@@ -120,7 +149,7 @@ principles:
 - name: Allocation
   description: Issue separate API keys per workload/team so credit consumption maps to internal cost centers.
 - name: Optimization
-  description: Validate and de-duplicate inputs before enriching; rely on not-found refunds and 7-day IP caching; prefer email reveal (50) over phone (525) when a phone is not required; keep lead searches within the free page allowance.
+  description: Validate and de-duplicate inputs before enriching; rely on not-found refunds and 7-day IP caching; prefer email reveal (10) over phone (525) when a phone is not required; keep lead searches within the free page allowance.
 - name: Accountability
   description: Assign owners per key; review monthly credit burn against the plan allotment and top-up thresholds.
 maintainers:

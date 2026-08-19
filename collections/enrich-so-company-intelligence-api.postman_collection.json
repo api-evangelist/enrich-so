@@ -1,0 +1,1505 @@
+{
+ "info": {
+  "_postman_id": "73884877-de25-5c39-99ff-4e343da69876",
+  "name": "Enrich Company Intelligence API",
+  "description": {
+   "content": "IP-to-company resolution (single and batch) and LinkedIn company-follower scraping with audience count estimation.\n\nAssembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so \u2014 every documentation page embeds its own OpenAPI fragment, and this document is the union of the fragments carrying these tags, with only the components they reference.",
+   "type": "text/plain"
+  },
+  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+ },
+ "item": [
+  {
+   "id": "b5b94c84-7de6-5d52-bd35-223db7e4ac7c",
+   "name": "Company Followers",
+   "description": {
+    "content": "",
+    "type": "text/plain"
+   },
+   "item": [
+    {
+     "id": "73b2ad90-25b4-5794-948b-eefdf6545b30",
+     "name": "Continue company follower scrape",
+     "request": {
+      "name": "Continue company follower scrape",
+      "description": {
+       "content": "> **Access required** \u2014 approved accounts only. [Contact us](https://enrich.so) to request access.\n\nContinue an under-delivered **partial** company-follower scrape to fill the gap. Re-runs **only** the filter combinations that under-delivered on the original run and appends the new profiles to the **same batch** (already-collected profiles are kept and de-duplicated within the batch).\n\n**How to call:** POST to this same `/company-follower` endpoint with the original batch id as the `batchId` query parameter and an **empty body**. The presence of `batchId` switches the endpoint from \u201cstart a new scrape\u201d to \u201ccontinue\u201d.\n\n**Eligibility:** only a batch whose status is `partial` and that is **less than 3 days old** can be continued (after 3 days the per-filter diagnostics used to target the gap have expired \u2192 `410 Gone`). A fully `completed` batch, or one already being continued, returns `409 Conflict`. If nothing is recoverable (every filter already delivered, or the remaining gap is unreachable) you get `422`.\n\n**Cost:** credits are reserved only for the recoverable **additional** profiles \u2014 not the whole batch again \u2014 under a separate reservation. On settle you are charged for the profiles the continue actually added and refunded the rest.\n\n**Polling & results:** keep using the **same** `batchId` with the progress and results endpoints; the continue tops up that same batch.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/company-follower",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "company-follower"
+       ],
+       "query": [
+        {
+         "key": "batchId",
+         "value": "string",
+         "description": "The batch id of the PARTIAL scrape you want to continue. Its presence switches this endpoint from 'start a new scrape' to 'continue (fill the gap)'.",
+         "disabled": false
+        }
+       ],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "60b6a7d7-b156-59e0-b0e5-d336b2634fc4",
+       "name": "Continue accepted \u2014 the gap scrape has been queued.",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665a1f4e2c3b7800129dce01\",\n    \"message\": \"Continuing scrape for the remaining 7076 profile(s).\",\n    \"estimatedAdditional\": 7076\n  },\n  \"meta\": {\n    \"requestId\": \"664f2b3c9a1e4d0012abcdef\",\n    \"creditsReserved\": 707600,\n    \"creditsPerItem\": 100\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "f2f751e8-1607-5cfe-925f-eddd22466041",
+       "name": "Missing batchId or team context.",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"string\",\n  \"message\": \"string\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "9791dc00-7b20-5467-889b-f22980f686e3",
+       "name": "Your API key is missing or invalid.",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "d4475b36-74a3-5d93-8991-6edd952cdd2e",
+       "name": "Not enough credits to reserve the recoverable gap.",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Payment Required\",\n  \"message\": \"Insufficient credits\",\n  \"detail\": {\n    \"required\": 707600,\n    \"itemCount\": 7076\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "1458683f-1765-5b70-be0c-e9c67fd9d620",
+       "name": "No batch with that id belongs to your team.",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Not Found\",\n  \"message\": \"Job not found\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "f0833d04-ddd4-5603-bd77-bf8dac117d61",
+       "name": "The batch is not partial (nothing to continue), a continue is already in progress, or the scrape is still running.",
+       "status": "409",
+       "code": 409,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Conflict\",\n  \"message\": \"This scrape completed fully \\u2014 there is nothing to continue.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "4d0c0bd5-218f-5616-8f85-2483f3ae6628",
+       "name": "The batch is older than 3 days \u2014 the diagnostics needed to target the gap have expired. Start a fresh scrape instead.",
+       "status": "410",
+       "code": 410,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Gone\",\n  \"message\": \"Continue is only available within 3 days of the scrape. Start a fresh scrape instead.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "cec8a70c-e1a0-5b01-83fd-58d6d9aac5d4",
+       "name": "Nothing is recoverable: every filter already delivered, or the remaining gap is unreachable.",
+       "status": "422",
+       "code": 422,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Unprocessable Entity\",\n  \"message\": \"Every filter fully delivered \\u2014 the remaining gap is unclassified followers that no filter can reach (not recoverable by re-running).\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "51d10faf-6e92-5d2a-8cb1-31a791b75bdc",
+       "name": "Rate limit exceeded.",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "8fba2ed7-1275-526f-9e7c-44b346baae52",
+     "name": "Check daily scraping limit",
+     "request": {
+      "name": "Check daily scraping limit",
+      "description": {
+       "content": "Check your team's daily company follower scraping limit and current usage. No credits consumed.\n\n**Possible statuses:**\n- `approved` \u2014 Team has access; `creditsPerProfile`, `dailyLimit`, `dailyUsed`, and `dailyRemaining` are included.\n- `pending` \u2014 Application is under review.\n- `rejected` \u2014 Application was rejected.\n- `revoked` \u2014 Access was revoked.\n- `none` \u2014 No application on file.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/company-follower/limit",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "company-follower",
+        "limit"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "255a1aab-0585-5b0d-b7a3-35a0987514f2",
+       "name": "Returns the team's current access status and daily limit info. For approved teams, includes dailyLimit, dailyUsed, and d",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": false,\n  \"data\": {\n    \"status\": \"approved\",\n    \"dailyLimit\": 5000,\n    \"dailyUsed\": 1200,\n    \"dailyRemaining\": 3800,\n    \"creditsPerProfile\": 100\n  },\n  \"meta\": {\n    \"requestId\": \"string\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "ec201146-40bf-5de1-b660-78c97a92de53",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "c1c6b574-6d98-5a61-8dc6-ce61d46a3923",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "01df5e8e-ce3d-53b8-a114-f92a16d5b462",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "98f7ce3a-973d-5490-9306-3a185865572c",
+     "name": "Export results as CSV",
+     "request": {
+      "name": "Export results as CSV",
+      "description": {
+       "content": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nDownload scrape results as a CSV file. Batch must be complete. No credits consumed.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/company-follower/{batchId}/export",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "company-follower",
+        ":batchId",
+        "export"
+       ],
+       "query": [],
+       "variable": [
+        {
+         "key": "batchId",
+         "value": "<batchId>",
+         "description": "The batch identifier returned when you started the scrape"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "e846ef42-ad8f-59cd-868a-c1d28d3c155f",
+       "name": "CSV file download containing all follower profiles",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "8237df12-27f4-5ede-ab65-984d54a130e9",
+       "name": "Batch is not yet complete. Wait for the scrape to finish before exporting.",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "c8300519-e0d3-5698-9bc7-76cc592c7882",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "80160c6e-b0f1-530e-9f1c-a3d2aeef1610",
+       "name": "The resource you requested doesn't exist or doesn't belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "38ff02ef-5561-56c9-a3a4-4f252cf9eb6e",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "35e3c42a-8830-59bb-b305-92350b29e6ed",
+     "name": "Check scrape progress",
+     "request": {
+      "name": "Check scrape progress",
+      "description": {
+       "content": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nPoll this endpoint to track the progress of your company follower scrape.\n\n**Cost:** Free \u2014 polling never costs credits.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/company-follower/{batchId}/progress",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "company-follower",
+        ":batchId",
+        "progress"
+       ],
+       "query": [],
+       "variable": [
+        {
+         "key": "batchId",
+         "value": "<batchId>",
+         "description": "The batch identifier returned when you started the scrape"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "20ad1554-cf09-538f-ba1f-3d8c809d0d18",
+       "name": "Current scrape progress",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665a1f4e2c3b7800129dce01\",\n    \"processed\": 125,\n    \"total\": 500,\n    \"errors\": 0,\n    \"done\": false,\n    \"message\": \"Fetching profiles... 25% complete (125/500)\"\n  },\n  \"meta\": {\n    \"requestId\": \"664f2b3c9a1e4d0012abcdef\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "f14349a4-f040-512d-9bc5-181a7e8f1a7c",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "2288a34b-804c-52a7-8919-7572c95d9702",
+       "name": "The resource you requested doesn't exist or doesn't belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"No batch found with that ID\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "b81554e3-3416-5844-879d-17ab8e604709",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "23fec6a7-d93a-5eff-9623-093d73ac9a73",
+     "name": "Get scrape results",
+     "request": {
+      "name": "Get scrape results",
+      "description": {
+       "content": "> **Access required** This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nReturns paginated follower profiles for a completed batch. Use `page` and `limit` query params to paginate through results.\n\nCredits are charged upfront when you start the scrape. If fewer profiles are found than `max_limit`, unused credits are refunded automatically.\n\nIf you provided a `webhookUrl`, results are already delivered via webhooks and credits are auto-settled. No need to call this endpoint.\n\nOnly call this after the progress endpoint reports `done: true`.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/company-follower/{batchId}/results",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "company-follower",
+        ":batchId",
+        "results"
+       ],
+       "query": [
+        {
+         "key": "page",
+         "value": "1",
+         "description": "Page number (default: 1)",
+         "disabled": true
+        },
+        {
+         "key": "limit",
+         "value": "100",
+         "description": "Results per page, max 500 (default: 100)",
+         "disabled": true
+        }
+       ],
+       "variable": [
+        {
+         "key": "batchId",
+         "value": "<batchId>",
+         "description": "The batch identifier returned when you started the scrape"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "3bf5c81e-59f8-56c9-ac4a-dc074e532c9f",
+       "name": "Follower profiles retrieved successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665a1f4e2c3b7800129dce01\",\n    \"count\": 100,\n    \"data\": [\n      {\n        \"objectURN\": \"urn:li:member:123456\",\n        \"name\": \"Sarah Chen\",\n        \"firstName\": \"Sarah\",\n        \"lastName\": \"Chen\",\n        \"profileUrl\": \"https://linkedin.com/in/sarahchen\",\n        \"title\": \"Senior Software Engineer\",\n        \"companyName\": \"Stripe\",\n        \"location\": \"San Francisco, CA\",\n        \"connectionDegree\": 2,\n        \"isPremium\": false,\n        \"isOpenProfile\": true\n      }\n    ],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 100,\n      \"total\": 342,\n      \"totalPages\": 4\n    }\n  },\n  \"meta\": {\n    \"requestId\": \"664f2b3c9a1e4d0012abcdef\",\n    \"creditsUsed\": 34200,\n    \"creditsRefunded\": 15800,\n    \"creditsRemaining\": 0\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "121391ab-73aa-5329-99b3-afeab7f554ba",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "40a96789-48f3-53cd-a08d-a2a222fa6796",
+       "name": "The resource you requested doesn't exist or doesn't belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"No batch found with that ID\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "22de3348-5076-5c9b-9e8a-3a41839af714",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "0f4b9047-6ff4-5b6e-91c0-77745b2b819a",
+     "name": "Start count estimation",
+     "request": {
+      "name": "Start count estimation",
+      "description": {
+       "content": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nStarts an asynchronous count estimation job. Returns the estimated number of followers matching your filters, with optional breakdowns by department and seniority.\n\n**Cost:** 100 credits (fixed). Cached results for the same company + filters within 24 hours are free.\n\n**Results:** Poll the status endpoint to get results. Typically completes within 30\u201360 seconds.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/count-estimate",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "count-estimate"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"companyUrl\": \"https://linkedin.com/company/stripe\",\n  \"departments\": [\n    \"Engineering\",\n    \"Sales\"\n  ]\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "9563f9b2-cde5-511a-b8b7-6aab720a11db",
+       "name": "Count estimation job started successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665b2a3f4c5d6e0013fgh002\",\n    \"status\": \"pending\",\n    \"message\": \"Count estimation job started. Results typically available within 30-60 seconds.\"\n  },\n  \"meta\": {\n    \"requestId\": \"664f2b3c9a1e4d0012abcdef\",\n    \"creditsUsed\": 100,\n    \"creditsRemaining\": 24900\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "9c4ce093-b4e8-5240-adff-2a4f6cc63189",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/companyUrl Invalid url\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "997eb4c4-3fdf-555d-834e-65151eb2a476",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "66aa2cdc-adf5-5d6d-a096-1ad6a304d15a",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/insufficient-credits\",\n  \"title\": \"Insufficient Credits\",\n  \"status\": 402,\n  \"detail\": \"Not enough credits. Required: 100, available: 3\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "907a55cf-545c-5b22-928c-15928343144e",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "f9b58913-07cf-5bb9-8dab-0d3420a95509",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "5ee75b20-31f5-58df-8aa3-0df97ced3390",
+     "name": "Get estimation status/results",
+     "request": {
+      "name": "Get estimation status/results",
+      "description": {
+       "content": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nCheck the status of a count estimation job and retrieve results when complete.\n\n**Cost:** Free \u2014 polling never costs credits.\n\n**Refunds:** If the job fails within 7 days, the 100 credits are refunded automatically on the next status check.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/count-estimate/{batchId}",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "count-estimate",
+        ":batchId"
+       ],
+       "query": [],
+       "variable": [
+        {
+         "key": "batchId",
+         "value": "<batchId>",
+         "description": "The batch identifier returned when you started the estimation"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "0fa17714-efcc-51a7-85ff-40621d578042",
+       "name": "Estimation status and results",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665b2a3f4c5d6e0013fgh002\",\n    \"status\": \"completed\",\n    \"companyUrl\": \"https://linkedin.com/company/stripe\",\n    \"message\": \"Count estimation complete. Found 8542 followers matching your criteria.\",\n    \"createdAt\": \"2025-06-03T14:30:00.000Z\",\n    \"completedAt\": \"2025-06-03T14:31:15.000Z\",\n    \"data\": {\n      \"totalCount\": 8542,\n      \"functionBreakdown\": [\n        {\n          \"functionName\": \"Engineering\",\n          \"functionId\": \"8\",\n          \"count\": 3200,\n          \"percentage\": 37.5\n        },\n        {\n          \"functionName\": \"Sales\",\n          \"functionId\": \"25\",\n          \"count\": 1850,\n          \"percentage\": 21.7\n        }\n      ],\n      \"filtersApplied\": {\n        \"departments\": [\n          \"Engineering\",\n          \"Sales\"\n        ]\n      }\n    }\n  },\n  \"meta\": {\n    \"requestId\": \"664f2b3c9a1e4d0012abcdef\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "2703d77b-76eb-5a01-b240-fab43afd7a40",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "b2fb64a6-c1df-5bdf-afbc-c6dee3da79e3",
+       "name": "The resource you requested doesn't exist or doesn't belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"No batch found with that ID\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "924ef563-f742-512d-a50f-6fe3bc275f4f",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "523a106e-25f5-56ec-acdb-738a7b8a4fa7",
+   "name": "IP to Company",
+   "description": {
+    "content": "",
+    "type": "text/plain"
+   },
+   "item": [
+    {
+     "id": "243c4a3e-c37a-5d01-b0ed-a6c1acd5edbf",
+     "name": "Resolve company from IP",
+     "request": {
+      "name": "Resolve company from IP",
+      "description": {
+       "content": "Resolves company, organization, and geolocation info from an IP address. Results are cached for 7 days.\n\n**Cost:** 100 credits. You are **not** charged if no domain is found (i.e. `ipDomain` is absent from the response).",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/ip-to-company",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "ip-to-company"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"ip\": \"8.8.8.8\"\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "b16ebb82-e6a2-5b65-9011-2886c48e0732",
+       "name": "Domain resolved successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"searchIp\": \"8.8.8.8\",\n    \"ipDomain\": \"google.com\",\n    \"ipOrganization\": \"Google LLC\",\n    \"ipCountryName\": \"United States\",\n    \"ipCountryCode\": \"US\",\n    \"ipRegionName\": \"California\",\n    \"ipCity\": \"Mountain View\",\n    \"ipSubContinent\": \"Northern America\",\n    \"ipLatitude\": 37.386,\n    \"ipLongitude\": -122.0838,\n    \"ipTimezone\": \"America/Los_Angeles\",\n    \"ipIsp\": \"Google LLC\",\n    \"ipRange\": \"8.8.8.0/24\",\n    \"ipUsageType\": \"DCH\"\n  },\n  \"meta\": {\n    \"requestId\": \"664f2b3c9a1e4d0012abcdef\",\n    \"creditsUsed\": 100,\n    \"creditsRemaining\": 4900\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "573c90f5-0dfd-5337-8535-17338f78a288",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"\\\"ip\\\" must be a non-empty string\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "befd85e3-010f-5a31-98d8-56de6f55f075",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"The API key provided is invalid or has been revoked\",\n  \"statusCode\": 401\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "6aecb10e-c1f9-5f25-9a70-cc7e1dcc2fa1",
+       "name": "You don\u2019t have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Payment Required\",\n  \"message\": \"Not enough credits. Required: 100, available: 0\",\n  \"statusCode\": 402\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "5c676cbe-0c18-56a7-80f0-20775dee29b4",
+       "name": "You\u2019ve sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Too Many Requests\",\n  \"message\": \"Rate limit exceeded. Please retry after 30 seconds.\",\n  \"statusCode\": 429\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "cd767734-17d7-5aad-a787-3d9e9e88cb5b",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Internal Server Error\",\n  \"message\": \"An unexpected error occurred. Please try again later.\",\n  \"statusCode\": 500\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "40b1508d-1628-534a-9cb5-731c0bba2be9",
+     "name": "Submit batch IP to company lookup",
+     "request": {
+      "name": "Submit batch IP to company lookup",
+      "description": {
+       "content": "Submit up to **500 000 IPs** in a single request for async company lookup. Duplicates are removed automatically before processing.\n\n**Cost:** 100 credits per unique IP, reserved when you submit. Credits are charged based on found domains when you fetch results \u2014 any excess is refunded automatically.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/ip-to-company/batch",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "ip-to-company",
+        "batch"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"ips\": [\n    {\n      \"ip\": \"8.8.8.8\"\n    },\n    {\n      \"ip\": \"1.1.1.1\"\n    },\n    {\n      \"ip\": \"104.16.132.229\"\n    }\n  ]\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "549a3c6a-6c26-5af9-8888-da65485b586a",
+       "name": "Batch submitted \u2014 credits have been reserved",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"status\": \"processing\",\n    \"itemCount\": 3,\n    \"originalCount\": 3,\n    \"duplicatesRemoved\": 0\n  },\n  \"meta\": {\n    \"requestId\": \"665a1f4e2c3b7800129dce00\",\n    \"creditsReserved\": 300,\n    \"creditsPerItem\": 100,\n    \"estimatedCredits\": 300\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "75e06a2e-4da7-53fb-8958-d1c91f345364",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"\\\"ips\\\" must be a non-empty array\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "27cd4929-b8ac-5f19-be32-5f784e83fe49",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"The API key provided is invalid or has been revoked\",\n  \"statusCode\": 401\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "ede819d2-9f59-5bd4-88bc-9393c66d0d8f",
+       "name": "You don\u2019t have enough credits \u2014 `detail.required` shows how many are needed",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Payment Required\",\n  \"message\": \"Insufficient credits for batch operation\",\n  \"detail\": {\n    \"required\": 50000,\n    \"itemCount\": 500,\n    \"creditCostPerItem\": 100\n  },\n  \"statusCode\": 402\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "7d111542-ea55-5603-abed-2ca3cdb99be4",
+       "name": "Duplicate batch submission",
+       "status": "409",
+       "code": 409,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Conflict\",\n  \"message\": \"Duplicate batch submission detected\",\n  \"statusCode\": 409\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "dbe9869b-c0f0-5eea-8b47-2bc8f2c928b1",
+       "name": "You\u2019ve sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Too Many Requests\",\n  \"message\": \"Rate limit exceeded. Please retry after 30 seconds.\",\n  \"statusCode\": 429\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "af662797-1444-51d6-b6fd-8ccca83cb9b6",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Internal Server Error\",\n  \"message\": \"An unexpected error occurred. Please try again later.\",\n  \"statusCode\": 500\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "1ed657a7-809e-53cd-88fc-80a76b46af46",
+       "name": "Database or credit service temporarily unavailable",
+       "status": "503",
+       "code": 503,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Service Unavailable\",\n  \"message\": \"The service is temporarily unavailable. Please try again later.\",\n  \"statusCode\": 503\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "dd7f5571-23ea-52fd-95fd-0abd4b0916df",
+     "name": "Check batch progress",
+     "request": {
+      "name": "Check batch progress",
+      "description": {
+       "content": "Poll this endpoint to track your batch. `progress` is a percentage (0\u2013100) and `status` will be `processing`, `completed`, or `failed`.\n\n**Cost:** Free \u2014 polling never costs credits.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/ip-to-company/batch/{batchId}",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "ip-to-company",
+        "batch",
+        ":batchId"
+       ],
+       "query": [],
+       "variable": [
+        {
+         "key": "batchId",
+         "value": "<batchId>",
+         "description": "The batch identifier returned when you submitted the job"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "b214da9a-7ad0-5a32-b300-1cc648210546",
+       "name": "Current batch status",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"status\": \"processing\",\n    \"totalItems\": 3,\n    \"processedItems\": 1,\n    \"foundCount\": 1,\n    \"progress\": 33,\n    \"createdAt\": \"2026-05-13T10:00:00.000Z\",\n    \"completedAt\": null\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "476946f8-53de-55d3-851f-337520f25ee5",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"The API key provided is invalid or has been revoked\",\n  \"statusCode\": 401\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "aea03f7e-0b3f-5114-a739-a5fdab9e735a",
+       "name": "The resource you requested doesn\u2019t exist or doesn\u2019t belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Not Found\",\n  \"message\": \"No batch found with that ID\",\n  \"statusCode\": 404\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "b145936c-dd1d-5e81-b243-438259e89f0b",
+       "name": "You\u2019ve sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Too Many Requests\",\n  \"message\": \"Rate limit exceeded. Please retry after 30 seconds.\",\n  \"statusCode\": 429\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "c4bbcb4c-40c1-527a-a54f-d530bb3d36ae",
+     "name": "Get batch results",
+     "request": {
+      "name": "Get batch results",
+      "description": {
+       "content": "Fetch results once your batch has finished. Results are paginated \u2014 use `page` and `limit` to walk through them.\n\n**Credit settlement:** The first time you call this after the batch reaches `completed` or `failed`, we calculate the final cost (100 credits per IP where a domain was found) and refund any excess. Subsequent calls return the cached settlement \u2014 you are never double-charged.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/ip-to-company/batch/{batchId}/results",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "ip-to-company",
+        "batch",
+        ":batchId",
+        "results"
+       ],
+       "query": [
+        {
+         "key": "page",
+         "value": "1",
+         "description": "Page number (default: 1)",
+         "disabled": true
+        },
+        {
+         "key": "limit",
+         "value": "100",
+         "description": "Results per page (default: 100, max: 1 000)",
+         "disabled": true
+        }
+       ],
+       "variable": [
+        {
+         "key": "batchId",
+         "value": "<batchId>",
+         "description": "The batch identifier returned when you submitted the job"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "a5433044-87e2-54d9-b500-d1c1e3944677",
+       "name": "Paginated IP to Company results",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"status\": \"completed\",\n    \"totalItems\": 3,\n    \"processedCount\": 3,\n    \"foundCount\": 2,\n    \"results\": [\n      {\n        \"searchIp\": \"8.8.8.8\",\n        \"ipDomain\": \"google.com\",\n        \"ipOrganization\": \"Google LLC\",\n        \"ipCountryName\": \"United States\",\n        \"ipCountryCode\": \"US\",\n        \"ipCity\": \"Mountain View\",\n        \"ipTimezone\": \"America/Los_Angeles\"\n      },\n      {\n        \"searchIp\": \"1.1.1.1\",\n        \"ipDomain\": \"cloudflare.com\",\n        \"ipOrganization\": \"Cloudflare Inc\",\n        \"ipCountryName\": \"Australia\",\n        \"ipCountryCode\": \"AU\",\n        \"ipCity\": \"Sydney\",\n        \"ipTimezone\": \"Australia/Sydney\"\n      },\n      {\n        \"searchIp\": \"104.16.132.229\",\n        \"ipDomain\": null,\n        \"ipOrganization\": \"Cloudflare Inc\"\n      }\n    ],\n    \"page\": 1,\n    \"limit\": 100\n  },\n  \"meta\": {\n    \"requestId\": \"665a23bc2c3b7800129dce10\",\n    \"creditsUsed\": 200,\n    \"creditsRefunded\": 100,\n    \"creditsRemaining\": 4700,\n    \"totalItems\": 3,\n    \"processedItems\": 3\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "de8da09e-2a0f-5cd9-b249-ffb553c16c4a",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"The API key provided is invalid or has been revoked\",\n  \"statusCode\": 401\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "3c6abdf8-7bf6-59f4-bd41-da06816e9143",
+       "name": "The resource you requested doesn\u2019t exist or doesn\u2019t belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Not Found\",\n  \"message\": \"No batch found with that ID\",\n  \"statusCode\": 404\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "f582a5ce-09df-5c82-9dee-1cbd0395c810",
+       "name": "You\u2019ve sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"error\": \"Too Many Requests\",\n  \"message\": \"Rate limit exceeded. Please retry after 30 seconds.\",\n  \"statusCode\": 429\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "variable": [
+  {
+   "key": "baseUrl",
+   "value": "https://dev.enrich.so/api/v3"
+  },
+  {
+   "key": "apiKey",
+   "value": "<your Enrich API key>"
+  }
+ ],
+ "auth": {
+  "type": "apikey",
+  "apikey": [
+   {
+    "key": "key",
+    "value": "x-api-key"
+   },
+   {
+    "key": "value",
+    "value": "{{apiKey}}"
+   },
+   {
+    "key": "in",
+    "value": "header"
+   }
+  ]
+ }
+}

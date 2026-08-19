@@ -1,0 +1,91 @@
+{
+ "opencollection": "1.0.0",
+ "info": {
+  "name": "Enrich Person Enrichment API",
+  "version": "3.0",
+  "docs": "https://doc.enrich.so/api-reference-1951025m0"
+ },
+ "request": {
+  "baseUrl": "https://dev.enrich.so/api/v3",
+  "auth": {
+   "type": "apikey",
+   "key": "x-api-key",
+   "value": "{{x-api-key}}",
+   "placement": "header"
+  }
+ },
+ "items": [
+  {
+   "info": {
+    "name": "Reverse Email Lookup",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Look up professional profiles in batch",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/bulk-lookup",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"emails\": [\n    \"emily.zhang@figma.com\",\n    \"david.kim@vercel.com\",\n    \"aisha.johnson@cloudflare.com\"\n  ],\n  \"webhookUrl\": \"https://api.yourapp.com/webhooks/enrich\"\n}"
+      }
+     },
+     "docs": "Submit up to **100 000 emails** and get back professional profile data for each\none. Duplicate emails are removed (case-insensitive) before processing.\n\n**Cost:** 10 credits per unique email, reserved upfront. Credits for emails\nwhere no profile was found are refunded.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** for every email as it is processed. See\n   [reverseLookupResult](#tag/Webhooks/operation/webhookReverseLookupResult) for the payload.\n\n2. **A completion callback** when the entire batch finishes. See\n   [reverseLookupCompletion](#tag/Webhooks/operation/webhookReverseLookupCompletion) for the payload."
+    },
+    {
+     "info": {
+      "name": "Check bulk lookup progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/bulk-lookup/{batchId}"
+     },
+     "docs": "Poll this endpoint to track the batch.\n\n**Cost:** Free."
+    },
+    {
+     "info": {
+      "name": "Get bulk lookup results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/bulk-lookup/{batchId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page (default: 100, max: 1 000)"
+       }
+      ]
+     },
+     "docs": "Retrieve paginated professional profile results. Each result contains the full\nprofile data, or the result is omitted if no profile was found for that email.\n\n**Credit settlement:** Emails with no matching profile are not charged.\nThe difference between reserved and actual credits is refunded."
+    },
+    {
+     "info": {
+      "name": "Look up a professional profile by email",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/lookup",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"email\": \"emily.zhang@figma.com\"\n}"
+      }
+     },
+     "docs": "Pass an email address and get back the person's professional profile \u2014 including\ntheir name, headline, current company, job history, education, and skills.\n\n**Cost:** 10 credits. You are **not** charged if no profile is found."
+    }
+   ]
+  }
+ ]
+}

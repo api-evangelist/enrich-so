@@ -1,0 +1,57 @@
+{
+ "opencollection": "1.0.0",
+ "info": {
+  "name": "Enrich People Search API",
+  "version": "3.0",
+  "docs": "https://doc.enrich.so/api-reference-1951025m0"
+ },
+ "request": {
+  "baseUrl": "https://dev.enrich.so/api/v3",
+  "auth": {
+   "type": "apikey",
+   "key": "x-api-key",
+   "value": "{{x-api-key}}",
+   "placement": "header"
+  }
+ },
+ "items": [
+  {
+   "info": {
+    "name": "People Search",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Find employees at a company",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/people-search/employee-finder",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"company_linkedin_url\": \"https://www.linkedin.com/company/google/\",\n  \"country\": [\n    \"United States\",\n    \"United Kingdom\"\n  ],\n  \"continent\": [\n    \"North America\"\n  ],\n  \"sales_region\": [\n    \"string\"\n  ],\n  \"job_level\": [\n    \"C-Level\",\n    \"VP\",\n    \"Director\"\n  ],\n  \"job_function\": [\n    \"Engineering\",\n    \"Marketing\"\n  ],\n  \"max_results\": 10,\n  \"page\": 1\n}"
+      }
+     },
+     "docs": "Find employees at a specific company by LinkedIn URL. Optionally filter by job level, job function, country, continent, or sales region.\n\n**Credits:** 1 credit per result returned. No charge if 0 results.\n\n**Pagination:** Use `page` and `max_results` to paginate through results."
+    },
+    {
+     "info": {
+      "name": "Cascading ICP people search",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/people-search/waterfall-icp-search",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"company_linkedin_url\": \"https://www.linkedin.com/company/google/\",\n  \"cascade\": [\n    {\n      \"include_title\": [\n        \"CTO\",\n        \"VP Engineering\"\n      ],\n      \"exclude_title\": [\n        \"Intern\",\n        \"Associate\"\n      ],\n      \"job_levels\": [\n        \"C-Level\",\n        \"VP\"\n      ],\n      \"job_functions\": [\n        \"Engineering\",\n        \"Technology\"\n      ],\n      \"skills\": [\n        \"Python\",\n        \"Machine Learning\"\n      ],\n      \"location\": [\n        \"US\",\n        \"UK\"\n      ],\n      \"include_headline_search\": false,\n      \"priority_bonus\": 0\n    }\n  ],\n  \"max_results\": 25,\n  \"min_score\": 0\n}"
+      }
+     },
+     "docs": "Search for people at a specific company using cascading ICP (Ideal Customer Profile) filter levels.\n\n**How it works:**\n1. Provide a company LinkedIn URL to target\n2. Optionally define 1-10 cascade levels, each with independent ICP criteria. If omitted, a default 4-level cascade is used: CEO/Founder \u2192 C-Suite \u2192 VP \u2192 Director.\n3. Levels are processed in order \u2014 results from earlier levels are excluded from later ones\n4. Each candidate is scored against the ICP criteria of their matching cascade level\n5. Results are returned sorted by score descending\n\n**Scoring:** Each candidate gets a normalized 0-100 score based on title match (30pts), job level (20pts), skills overlap (15pts), location match (15pts), current job status (10pts), profile completeness (5pts), tenure (5pts), and optional seniority priority bonus (0-30pts). The score is normalized against only the dimensions specified in the cascade level.\n\n**Credits:** 1 credit per profile returned. No charge if 0 results."
+    }
+   ]
+  }
+ ]
+}

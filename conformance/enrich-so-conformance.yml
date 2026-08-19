@@ -1,0 +1,176 @@
+generated: '2026-08-14'
+method: probed
+source: >-
+  Live probes of https://dev.enrich.so/api/v3 and https://mcp.enrich.so on 2026-08-14,
+  plus openapi/_original/enrich-so-v3-harvested-openapi.yml and the Enrich documentation
+  at https://doc.enrich.so
+provider: Enrich
+providerId: enrich-so
+description: >-
+  Cross-cutting standards conformance for Enrich. Each entry records whether Enrich
+  conforms and the evidence for it. Where the evidence is a live response, the status code
+  and content type observed are recorded; where it is a claim, it is marked as a claim.
+standards:
+- id: rfc9457
+  name: RFC 9457 Problem Details for HTTP APIs
+  conforms: true
+  evidence: >-
+    GET https://dev.enrich.so/api/v3/wallets/balance without credentials returned
+    HTTP 401 with Content-Type application/problem+json and a body carrying type, title,
+    status and detail (probed 2026-08-14). The API reference explicitly names RFC 9457,
+    all error problem types resolve under https://dev.enrich.so/errors/, and the
+    ErrorEnvelope schema requires type + title + status. Detail:
+    errors/enrich-so-problem-types.yml.
+- id: rfc6750
+  name: OAuth 2.0 Bearer Token Usage (Authorization header)
+  conforms: partial
+  evidence: >-
+    The REST API accepts "Authorization: Bearer <api-key>" as an alternative to the
+    x-api-key header, but the credential is a static API key, not an OAuth access token,
+    and no WWW-Authenticate challenge is returned on 401. Bearer transport only.
+- id: oauth2
+  name: OAuth 2.0 Authorization Framework
+  conforms: true
+  scope_of_conformance: MCP surface only
+  evidence: >-
+    https://mcp.enrich.so/.well-known/oauth-authorization-server returned HTTP 200 with
+    RFC 8414 metadata (probed 2026-08-14): authorization_code + refresh_token grants,
+    PKCE S256 required, revocation endpoint, dynamic client registration endpoint, and
+    scope mcp:tools. The REST API v3 does NOT offer OAuth.
+- id: rfc8414
+  name: OAuth 2.0 Authorization Server Metadata
+  conforms: true
+  evidence: >-
+    Served at https://mcp.enrich.so/.well-known/oauth-authorization-server, HTTP 200,
+    saved verbatim at well-known/enrich-so-mcp-oauth-authorization-server.json.
+- id: rfc7591
+  name: OAuth 2.0 Dynamic Client Registration
+  conforms: true
+  evidence: registration_endpoint https://mcp.enrich.so/register advertised in the RFC 8414 metadata.
+- id: rfc7636
+  name: PKCE
+  conforms: true
+  evidence: code_challenge_methods_supported ["S256"] in the authorization server metadata.
+- id: rfc9728
+  name: OAuth 2.0 Protected Resource Metadata
+  conforms: false
+  evidence: >-
+    https://mcp.enrich.so/.well-known/oauth-protected-resource returned HTTP 404
+    (probed 2026-08-14). The MCP endpoint returns a plain JSON 401 body rather than a
+    WWW-Authenticate challenge pointing at resource metadata, so an MCP client cannot
+    auto-discover the authorization server from the 401 alone.
+- id: mcp
+  name: Model Context Protocol
+  conforms: true
+  evidence: >-
+    First-party remote server at https://mcp.enrich.so/mcp speaking Streamable HTTP
+    (mcp-session-id exposed via CORS; a POST without a session returns
+    {"error":"Invalid or missing session ID"}). Tool list is auth-gated so the tool schemas
+    could not be verified. Detail: mcp/enrich-so-mcp.yml.
+- id: openapi
+  name: OpenAPI Specification
+  conforms: true
+  evidence: >-
+    Enrich publishes an OpenAPI fragment on every one of its 68 endpoint documentation
+    pages (OpenAPI 3.0.1/3.1.0), plus a complete OpenAPI 3.0.0 document embedded in the
+    Swagger UI at https://api.enrich.so/docs for the legacy v1/v2 API. There is, however,
+    NO single downloadable spec URL — /openapi.json, /openapi.yaml, /swagger.json and
+    /api-docs all 404 on dev.enrich.so, api.enrich.so and doc.enrich.so.
+- id: asyncapi
+  name: AsyncAPI
+  conforms: false
+  evidence: >-
+    No AsyncAPI document is served. The event surface is real (ten webhook callbacks) and
+    is typed as OpenAPI 3.1 `webhooks`, but it is not described in AsyncAPI. Detail:
+    asyncapi/enrich-so-webhooks.yml.
+- id: webhook-signing
+  name: Signed webhook payloads
+  conforms: false
+  evidence: >-
+    No signing secret, HMAC header or timestamp-tolerance rule is documented for any of
+    the ten callbacks, and none of the published webhook fragments declares a security
+    scheme. Payloads carry personal data.
+- id: pagination
+  name: Consistent pagination
+  conforms: true
+  evidence: >-
+    Page-number pagination throughout (page, limit) with a shared Pagination response
+    schema (page, limit, total, totalPages). limit maxes at 1000; wallet transactions
+    default to 20 rather than 100. No cursor pagination and no RFC 8288 Link headers.
+- id: idempotency
+  name: Request idempotency keys
+  conforms: false
+  evidence: >-
+    No Idempotency-Key header on any of the 51 operations and none documented. Enrich
+    guarantees idempotent SETTLEMENT of batch billing on repeated results fetches, which
+    is a billing property, not request idempotency. A retried submit is a second billable
+    job. Detail: conventions/enrich-so-conventions.yml#idempotency.
+- id: rate-limit-headers
+  name: RateLimit header fields for HTTP
+  conforms: partial
+  evidence: >-
+    Enrich returns X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset plus
+    Retry-After on 429 — the legacy X- prefixed form, not the IETF
+    RateLimit-Limit/Remaining/Reset fields. The signal is present and usable; the naming
+    is pre-standard.
+- id: rfc8594
+  name: Sunset HTTP header / deprecation policy
+  conforms: false
+  evidence: >-
+    No Sunset or Deprecation header is declared on any operation, and no deprecation or
+    versioning policy page exists in the documentation sitemap (probed 2026-08-14). The
+    legacy v1/v2 API on api.enrich.so is still serving with no published end-of-life.
+- id: llms-txt
+  name: llms.txt
+  conforms: true
+  evidence: >-
+    https://doc.enrich.so/llms.txt returned HTTP 200 with a 190-line index of every
+    documentation page, endpoint and schema, each with a .md twin. Saved verbatim at
+    llms/enrich-so-llms.txt.
+- id: security-txt
+  name: RFC 9116 security.txt
+  conforms: false
+  evidence: 404 on every Enrich host probed (dev, api, doc, dash, mcp); www.enrich.so returned 429 and is unmeasurable.
+- id: a2a
+  name: A2A Agent Card
+  conforms: false
+  evidence: >-
+    /.well-known/agent-card.json and /.well-known/agent.json returned 404 on every Enrich
+    host probed on 2026-08-14. No card was authored on Enrich's behalf.
+- id: dnssec
+  name: DNSSEC
+  conforms: false
+  evidence: 'security/enrich-so-domain-security.yml: dnssec false for enrich.so.'
+- id: dmarc
+  name: DMARC
+  conforms: true
+  evidence: 'security/enrich-so-domain-security.yml: DMARC present with policy p=reject; SPF present.'
+- id: caa
+  name: CAA records
+  conforms: false
+  evidence: 'security/enrich-so-domain-security.yml: no CAA records on enrich.so.'
+- id: hsts
+  name: HTTP Strict Transport Security
+  conforms: partial
+  evidence: >-
+    api.enrich.so returns strict-transport-security max-age=15552000; includeSubDomains.
+    doc.enrich.so returned no HSTS header. Not observed on www.enrich.so (429).
+compliance_claims:
+  status: unverified
+  note: >-
+    Third-party sources (G2, and an Enrich blog post at
+    https://www.enrich.so/blog/what-is-enrich) describe Enrich as SOC 2 Type II certified
+    and sourcing only from CCPA/GDPR-compliant providers. NO PRIMARY SOURCE WAS
+    REACHABLE: every path on www.enrich.so — including /security, /robots.txt and the blog
+    itself — returns HTTP 429 behind a Vercel Security Checkpoint bot challenge for every
+    non-browser client (probed 2026-08-14), and no trust centre, no certification page and
+    no compliance page exists on any reachable Enrich host. These claims are therefore
+    recorded as UNVERIFIED and no Compliance pointer is emitted in apis.yml. Verify by
+    hand in a browser, or ask Enrich for the report.
+  claimed:
+  - SOC 2 Type II
+  - GDPR
+  - CCPA
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

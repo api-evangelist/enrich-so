@@ -1,0 +1,190 @@
+# Enrich API
+
+## Docs
+- [Introduction](https://doc.enrich.so/introduction-1951028m0.md): 
+- [Quickstart](https://doc.enrich.so/quickstart-1951029m0.md): 
+- [API Reference](https://doc.enrich.so/api-reference-1951025m0.md): 
+- [Credits & Pricing](https://doc.enrich.so/credits-pricing-1951027m0.md): 
+- [Rate Limits](https://doc.enrich.so/rate-limits-1951030m0.md): 
+- [Authentication](https://doc.enrich.so/authentication-1951026m0.md): 
+
+## API Docs
+- Company Followers > Count Estimation [Start count estimation](https://doc.enrich.so/start-count-estimation-27728074e0.md): > **Access required** — This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.
+- Company Followers > Count Estimation [Get estimation status/results](https://doc.enrich.so/get-estimation-statusresults-27728075e0.md): > **Access required** — This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.
+- Company Followers [Start company follower scrape](https://doc.enrich.so/start-company-follower-scrape-27728071e0.md): > **Access required** — This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.
+- Company Followers [Check scrape progress](https://doc.enrich.so/check-scrape-progress-27728072e0.md): > **Access required** — This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.
+- Company Followers [Get scrape results](https://doc.enrich.so/get-scrape-results-27728073e0.md): > **Access required** This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.
+- Company Followers [Export results as CSV](https://doc.enrich.so/export-results-as-csv-27730401e0.md): > **Access required** — This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.
+- Company Followers [Continue company follower scrape](https://doc.enrich.so/continue-company-follower-scrape-40599317e0.md): > **Access required** — approved accounts only. [Contact us](https://enrich.so) to request access.
+- Company Followers [Check daily scraping limit](https://doc.enrich.so/check-daily-scraping-limit-27814759e0.md): Check your team's daily company follower scraping limit and current usage. No credits consumed.
+- Email Validation [Validate a single email](https://doc.enrich.so/validate-a-single-email-27483191e0.md): Checks whether an email address is deliverable. The response tells you the
+- Email Validation [Validate emails in batch](https://doc.enrich.so/validate-emails-in-batch-27483192e0.md): Submit up to **500 000 emails** in a single request. We automatically
+- Email Validation [Check batch validation progress](https://doc.enrich.so/check-batch-validation-progress-27483193e0.md): Poll this endpoint to see how your batch is doing. The `progress` field
+- Email Validation [Get batch validation results](https://doc.enrich.so/get-batch-validation-results-27483194e0.md): Fetch the results once your batch has finished. Results are paginated — use
+- Email Finder [Find a professional email](https://doc.enrich.so/find-a-professional-email-27483195e0.md): Give us a person's first name, last name, and their company domain, and we'll
+- Email Finder [Find emails in batch](https://doc.enrich.so/find-emails-in-batch-27483196e0.md): Submit up to **500 000 leads** in one request. Each lead is a combination
+- Email Finder [Check batch finder progress](https://doc.enrich.so/check-batch-finder-progress-27483197e0.md): Poll this endpoint to track your batch. The `status` moves through
+- Email Finder [Get batch finder results](https://doc.enrich.so/get-batch-finder-results-27483198e0.md): Retrieve the results once the batch has finished. Results are paginated.
+- Phone Finder [Find phone numbers](https://doc.enrich.so/find-phone-numbers-27483199e0.md): Find phone numbers associated with a person's email address or social
+- Phone Finder [Find phone numbers in batch](https://doc.enrich.so/find-phone-numbers-in-batch-27483200e0.md): Submit up to **500 000 items** (email addresses and/or profile URLs) for
+- Phone Finder [Check bulk phone lookup progress](https://doc.enrich.so/check-bulk-phone-lookup-progress-27483201e0.md): Poll this endpoint to track the job. The `progress` field is a percentage
+- Phone Finder [Get bulk phone lookup results](https://doc.enrich.so/get-bulk-phone-lookup-results-27483202e0.md): Retrieve paginated results. Each item shows the phones found (or an error
+- Reverse Email Lookup [Look up professional profiles in batch](https://doc.enrich.so/look-up-professional-profiles-in-batch-27483204e0.md): Submit up to **100 000 emails** and get back professional profile data for each
+- Reverse Email Lookup [Look up a professional profile by email](https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0.md): Pass an email address and get back the person's professional profile — including
+- Reverse Email Lookup [Check bulk lookup progress](https://doc.enrich.so/check-bulk-lookup-progress-27483205e0.md): Poll this endpoint to track the batch.
+- Reverse Email Lookup [Get bulk lookup results](https://doc.enrich.so/get-bulk-lookup-results-27483206e0.md): Retrieve paginated professional profile results. Each result contains the full
+- Wallets [Get your credit balance](https://doc.enrich.so/get-your-credit-balance-27483207e0.md): Returns the current credit balance for your organization.
+- Wallets [Get transaction history](https://doc.enrich.so/get-transaction-history-27483208e0.md): Browse your credit transactions — top-ups, deductions, refunds, and
+- Teams [List team members](https://doc.enrich.so/list-team-members-27483209e0.md): Returns everyone in your team along with their role (owner, admin, or member).
+- Teams [Invite someone to your team](https://doc.enrich.so/invite-someone-to-your-team-27483210e0.md): Sends an email invitation to join your team. You must be an **admin** or
+- Teams [List pending invitations](https://doc.enrich.so/list-pending-invitations-27483211e0.md): See all outstanding invitations for your team. You must be an **admin** or
+- Teams [Cancel a pending invitation](https://doc.enrich.so/cancel-a-pending-invitation-27483212e0.md): Withdraws an invitation before the invitee accepts it. You must be an
+- Webhooks [Email Validation: per-result callback](https://doc.enrich.so/email-validation-per-result-callback-27483213e0.md): Your server receives this POST **once for every email** in a batch validation
+- Webhooks [Email Validation: batch completion callback](https://doc.enrich.so/email-validation-batch-completion-callback-27483214e0.md): Your server receives this POST **exactly once** when every email in the
+- Webhooks [Email Finder: per-result callback](https://doc.enrich.so/email-finder-per-result-callback-27483215e0.md): Your server receives this POST **once for every lead** in a batch finder job.
+- Webhooks [Email Finder: batch completion callback](https://doc.enrich.so/email-finder-batch-completion-callback-27483216e0.md): Your server receives this POST **exactly once** when every lead in the batch
+- Webhooks [Phone Finder: per-result callback](https://doc.enrich.so/phone-finder-per-result-callback-27483217e0.md): Your server receives this POST **once for every item** (email or profile URL)
+- Webhooks [Phone Finder: batch completion callback](https://doc.enrich.so/phone-finder-batch-completion-callback-27483218e0.md): Your server receives this POST **exactly once** when every item in the bulk
+- Webhooks [Reverse Lookup: per-result callback](https://doc.enrich.so/reverse-lookup-per-result-callback-27483219e0.md): Your server receives this POST **once for every email** in a bulk reverse
+- Webhooks [Reverse Lookup: batch completion callback](https://doc.enrich.so/reverse-lookup-batch-completion-callback-27483220e0.md): Your server receives this POST **exactly once** when every email in the bulk
+- Webhooks [Company Followers: per-result callback](https://doc.enrich.so/company-followers-per-result-callback-27730399e0.md): Fires once per follower profile as results are scraped. For 100 followers, expect 100 webhooks. Process results in real-time without waiting for the full job to finish.
+- Webhooks [Company Followers: completion callback](https://doc.enrich.so/company-followers-completion-callback-27730400e0.md): Fires exactly once when the entire scraping job finishes (success or failure).
+- Lead Finder [Search leads](https://doc.enrich.so/search-leads-28165853e0.md): Search across people, companies, and insights dimensions with comprehensive filters. Returns combined person + org + insights data.
+- Lead Finder [Export leads to CSV (async)](https://doc.enrich.so/export-leads-to-csv-async-28165855e0.md): Submit an async CSV export job. Returns a `jobId` immediately — poll `GET /lead-finder/export-jobs/{jobId}` for status. Once the job reaches `completed` status, download the file via `GET /lead-finder/export-jobs/{jobId}/download`.
+- Lead Finder [Count matching leads](https://doc.enrich.so/count-matching-leads-28165854e0.md): Get the total count of leads matching your filters. This endpoint is free and does not consume credits.
+- Lead Finder [Reveal contact info](https://doc.enrich.so/reveal-contact-info-28165856e0.md): Reveal contact info for up to 25 leads. Choose which fields to reveal via the optional `fields` parameter:
+- Lead Finder [Enrich contacts with specific fields](https://doc.enrich.so/enrich-contacts-with-specific-fields-28165857e0.md): Reveal specific contact fields (email and/or phone) for up to 25 leads.
+- Lead Finder [Unlock full last names](https://doc.enrich.so/unlock-full-last-names-28165858e0.md): Pay 1 credit per lead to unlock full last names. Search results mask last names by default; this endpoint reveals them.
+- Lead Finder [List saved searches](https://doc.enrich.so/list-saved-searches-28165859e0.md): List all saved searches for the current user. Free endpoint.
+- Lead Finder [Save a search](https://doc.enrich.so/save-a-search-28165860e0.md): Save a search filter combination for reuse. Free endpoint.
+- Lead Finder [Delete a saved search](https://doc.enrich.so/delete-a-saved-search-28165861e0.md): Delete a saved search by ID. Only the owner can delete their own saved searches.
+- Lead Finder [Get filter options](https://doc.enrich.so/get-filter-options-28165862e0.md): Returns available values for multi-select filter fields (countries, departments, industries, job functions, etc.). Values are fetched from the database and cached for performance. Free endpoint.
+- Lead Finder [Suggest company names](https://doc.enrich.so/suggest-company-names-28165863e0.md): Prefix-based company name autocomplete. Returns matching company names for search typeahead. Free endpoint.
+- Lead Finder [Poll reveal/enrich job](https://doc.enrich.so/poll-revealenrich-job-29163791e0.md): Poll the status of a reveal or enrich job. Call repeatedly until `status` is `"completed"` or `"failed"`. Polling is always free.
+- Lead Finder [List reveal/enrich jobs](https://doc.enrich.so/list-revealenrich-jobs-29163792e0.md): List recent reveal/enrich jobs for the team (last 30 days). Free endpoint — polling is always free.
+- Lead Finder [List export jobs](https://doc.enrich.so/list-export-jobs-29249239e0.md): List recent CSV export jobs for your team (last 30 days). Paginated, optionally filtered by status.
+- Lead Finder [Poll export job status](https://doc.enrich.so/poll-export-job-status-29249240e0.md): Poll the status of a CSV export job. The response shape varies by status:
+- Lead Finder [Download export CSV](https://doc.enrich.so/download-export-csv-29249241e0.md): Stream the completed CSV file for an export job. Returns the file with `Content-Type: text/csv`.
+- People Search [Cascading ICP people search](https://doc.enrich.so/cascading-icp-people-search-28537859e0.md): Search for people at a specific company using cascading ICP (Ideal Customer Profile) filter levels.
+- People Search [Find employees at a company](https://doc.enrich.so/find-employees-at-a-company-28537860e0.md): Find employees at a specific company by LinkedIn URL. Optionally filter by job level, job function, country, continent, or sales region.
+- IP to Company [Resolve company from IP](https://doc.enrich.so/resolve-company-from-ip-35511038e0.md): Resolves company, organization, and geolocation info from an IP address. Results are cached for 7 days.
+- IP to Company [Submit batch IP to company lookup](https://doc.enrich.so/submit-batch-ip-to-company-lookup-35511039e0.md): Submit up to **500 000 IPs** in a single request for async company lookup. Duplicates are removed automatically before processing.
+- IP to Company [Check batch progress](https://doc.enrich.so/check-batch-progress-35511040e0.md): Poll this endpoint to track your batch. `progress` is a percentage (0–100) and `status` will be `processing`, `completed`, or `failed`.
+- IP to Company [Get batch results](https://doc.enrich.so/get-batch-results-35511041e0.md): Fetch results once your batch has finished. Results are paginated — use `page` and `limit` to walk through them.
+
+## Schemas
+- Schemas [EmailValidationRequest](https://doc.enrich.so/emailvalidationrequest-12679594d0.md): 
+- Schemas [BatchEmailValidationRequest](https://doc.enrich.so/batchemailvalidationrequest-12679595d0.md): 
+- Schemas [EmailValidationResponse](https://doc.enrich.so/emailvalidationresponse-12679597d0.md): 
+- Schemas [EmailValidationBatchResultsResponse](https://doc.enrich.so/emailvalidationbatchresultsresponse-12679598d0.md): 
+- Schemas [EmailFinderRequest](https://doc.enrich.so/emailfinderrequest-12679599d0.md): 
+- Schemas [BatchEmailFinderRequest](https://doc.enrich.so/batchemailfinderrequest-12679601d0.md): 
+- Schemas [EmailFinderResponse](https://doc.enrich.so/emailfinderresponse-12679603d0.md): 
+- Schemas [EmailFinderBatchResultsResponse](https://doc.enrich.so/emailfinderbatchresultsresponse-12679604d0.md): 
+- Schemas [BatchSubmitResponse](https://doc.enrich.so/batchsubmitresponse-12679606d0.md): 
+- Schemas [BatchStatusResponse](https://doc.enrich.so/batchstatusresponse-12679608d0.md): 
+- Schemas [LookupRequest](https://doc.enrich.so/lookuprequest-12679609d0.md): 
+- Schemas [ReverseLookupResponse](https://doc.enrich.so/reverselookupresponse-12679615d0.md): 
+- Schemas [BulkLookupResultsResponse](https://doc.enrich.so/bulklookupresultsresponse-12679618d0.md): 
+- Schemas [PhoneBatchRequest](https://doc.enrich.so/phonebatchrequest-12679619d0.md): 
+- Schemas [PhoneLookupResponse](https://doc.enrich.so/phonelookupresponse-12679621d0.md): 
+- Schemas [PhoneBulkJobSubmitResponse](https://doc.enrich.so/phonebulkjobsubmitresponse-12679623d0.md): 
+- Schemas [PhoneBulkJobStatusResponse](https://doc.enrich.so/phonebulkjobstatusresponse-12679625d0.md): 
+- Schemas [PhoneBulkJobResultsResponse](https://doc.enrich.so/phonebulkjobresultsresponse-12679627d0.md): 
+- Schemas [WalletBalanceResponse](https://doc.enrich.so/walletbalanceresponse-12679629d0.md): 
+- Schemas [WalletTransactionsResponse](https://doc.enrich.so/wallettransactionsresponse-12679632d0.md): 
+- Schemas [InviteBody](https://doc.enrich.so/invitebody-12679635d0.md): 
+- Schemas [TeamMemberListResponse](https://doc.enrich.so/teammemberlistresponse-12679636d0.md): 
+- Schemas [InvitationResponse](https://doc.enrich.so/invitationresponse-12679637d0.md): 
+- Schemas [InvitationListResponse](https://doc.enrich.so/invitationlistresponse-12679638d0.md): 
+- Schemas [SuccessOperationResponse](https://doc.enrich.so/successoperationresponse-12679639d0.md): 
+- Schemas [WebhookEmailValidationResult](https://doc.enrich.so/webhookemailvalidationresult-12679640d0.md): 
+- Schemas [WebhookEmailFinderResult](https://doc.enrich.so/webhookemailfinderresult-12679641d0.md): 
+- Schemas [WebhookPhoneResult](https://doc.enrich.so/webhookphoneresult-12679642d0.md): 
+- Schemas [WebhookReverseLookupResult](https://doc.enrich.so/webhookreverselookupresult-12679643d0.md): 
+- Schemas [WebhookEmailValidationCompletion](https://doc.enrich.so/webhookemailvalidationcompletion-12679644d0.md): 
+- Schemas [WebhookEmailFinderCompletion](https://doc.enrich.so/webhookemailfindercompletion-12679645d0.md): 
+- Schemas [WebhookPhoneCompletion](https://doc.enrich.so/webhookphonecompletion-12679646d0.md): 
+- Schemas [WebhookReverseLookupCompletion](https://doc.enrich.so/webhookreverselookupcompletion-12679647d0.md): 
+- Schemas [WebhookCompanyFollowerResult](https://doc.enrich.so/webhookcompanyfollowerresult-12767311d0.md): 
+- Schemas [WebhookCompanyFollowerCompletion](https://doc.enrich.so/webhookcompanyfollowercompletion-12767312d0.md): 
+- Schemas [EmailValidationResult](https://doc.enrich.so/emailvalidationresult-12679596d0.md): 
+- Schemas [EnrichmentMeta](https://doc.enrich.so/enrichmentmeta-12679591d0.md): 
+- Schemas [BatchResultsMeta](https://doc.enrich.so/batchresultsmeta-12679593d0.md): 
+- Schemas [Lead](https://doc.enrich.so/lead-12679600d0.md): 
+- Schemas [EmailFinderResult](https://doc.enrich.so/emailfinderresult-12679602d0.md): 
+- Schemas [BatchSubmitData](https://doc.enrich.so/batchsubmitdata-12679605d0.md): 
+- Schemas [BatchStatusData](https://doc.enrich.so/batchstatusdata-12679607d0.md): 
+- Schemas [ReverseLookupResult](https://doc.enrich.so/reverselookupresult-12679614d0.md): 
+- Schemas [EducationHistoryItem](https://doc.enrich.so/educationhistoryitem-12679612d0.md): 
+- Schemas [StartEndDate](https://doc.enrich.so/startenddate-12679611d0.md): 
+- Schemas [PositionHistoryItem](https://doc.enrich.so/positionhistoryitem-12679613d0.md): 
+- Schemas [PhoneLookupResult](https://doc.enrich.so/phonelookupresult-12679620d0.md): 
+- Schemas [PhoneBulkJobSubmitData](https://doc.enrich.so/phonebulkjobsubmitdata-12679622d0.md): 
+- Schemas [PhoneBulkJobStatusData](https://doc.enrich.so/phonebulkjobstatusdata-12679624d0.md): 
+- Schemas [PhoneBulkResultItem](https://doc.enrich.so/phonebulkresultitem-12679626d0.md): 
+- Schemas [WalletBalance](https://doc.enrich.so/walletbalance-12679628d0.md): 
+- Schemas [WalletTransaction](https://doc.enrich.so/wallettransaction-12679630d0.md): 
+- Schemas [Pagination](https://doc.enrich.so/pagination-12679631d0.md): 
+- Schemas [TeamMember](https://doc.enrich.so/teammember-12679633d0.md): 
+- Schemas [Invitation](https://doc.enrich.so/invitation-12679634d0.md): 
+- Response [BadRequest](https://doc.enrich.so/badrequest-12679648d0.md): 
+- Response [Unauthorized](https://doc.enrich.so/unauthorized-12679649d0.md): 
+- Response [InsufficientCredits](https://doc.enrich.so/insufficientcredits-12679650d0.md): 
+- Response [NotFound](https://doc.enrich.so/notfound-12679651d0.md): 
+- Response [RateLimited](https://doc.enrich.so/ratelimited-12679652d0.md): 
+- Response [InternalError](https://doc.enrich.so/internalerror-12679653d0.md): 
+- [ErrorEnvelope](https://doc.enrich.so/errorenvelope-12679590d0.md): 
+- [AsyncExportResponse](https://doc.enrich.so/asyncexportresponse-13228321d0.md): 
+- [LeadExportJobStatusResponse](https://doc.enrich.so/leadexportjobstatusresponse-13228323d0.md): 
+- [LeadExportJobListResponse](https://doc.enrich.so/leadexportjoblistresponse-13228325d0.md): 
+- [BulkLookupRequest](https://doc.enrich.so/bulklookuprequest-12679610d0.md): 
+- [RevealJobSubmitResponse](https://doc.enrich.so/revealjobsubmitresponse-13221153d0.md): 
+- [RevealJobPollResponse](https://doc.enrich.so/revealjobpollresponse-13221154d0.md): 
+- [BulkLookupResponse](https://doc.enrich.so/bulklookupresponse-12679617d0.md): 
+- [RevealJobListResponse](https://doc.enrich.so/revealjoblistresponse-13221156d0.md): 
+- [LeadExportJobProgress](https://doc.enrich.so/leadexportjobprogress-13228322d0.md): 
+- [CompanyFollowerRequest](https://doc.enrich.so/companyfollowerrequest-12766739d0.md): 
+- [StartCompanyFollowerResponse](https://doc.enrich.so/startcompanyfollowerresponse-12766740d0.md): 
+- [CompanyFollowerProgressResponse](https://doc.enrich.so/companyfollowerprogressresponse-12766742d0.md): 
+- [CompanyFollowerResultsResponse](https://doc.enrich.so/companyfollowerresultsresponse-12766744d0.md): 
+- [CountEstimateRequest](https://doc.enrich.so/countestimaterequest-12766747d0.md): 
+- [StartCountEstimateResponse](https://doc.enrich.so/startcountestimateresponse-12766748d0.md): 
+- [CountEstimateStatusResponse](https://doc.enrich.so/countestimatestatusresponse-12766750d0.md): 
+- [LeadSearchRequest](https://doc.enrich.so/leadsearchrequest-12942006d0.md): 
+- [LeadSearchResponse](https://doc.enrich.so/leadsearchresponse-12942007d0.md): 
+- [LeadCountRequest](https://doc.enrich.so/leadcountrequest-12942008d0.md): 
+- [LeadCountResponse](https://doc.enrich.so/leadcountresponse-12942009d0.md): 
+- [LeadExportRequest](https://doc.enrich.so/leadexportrequest-12942010d0.md): 
+- [LeadRevealRequest](https://doc.enrich.so/leadrevealrequest-12942011d0.md): 
+- [LeadEnrichRequest](https://doc.enrich.so/leadenrichrequest-12942014d0.md): 
+- [UnlockNamesRequest](https://doc.enrich.so/unlocknamesrequest-12942017d0.md): 
+- [UnlockNamesResponse](https://doc.enrich.so/unlocknamesresponse-12942018d0.md): 
+- [SavedSearchCreateRequest](https://doc.enrich.so/savedsearchcreaterequest-12942020d0.md): 
+- [SavedSearchListResponse](https://doc.enrich.so/savedsearchlistresponse-12942021d0.md): 
+- [SavedSearchResponse](https://doc.enrich.so/savedsearchresponse-12942022d0.md): 
+- [LeadFinderFilterOptionsResponse](https://doc.enrich.so/leadfinderfilteroptionsresponse-12942023d0.md): 
+- [LeadFinderSuggestResponse](https://doc.enrich.so/leadfindersuggestresponse-12942024d0.md): 
+- [LeadFinderDeletedResponse](https://doc.enrich.so/leadfinderdeletedresponse-12942025d0.md): 
+- [AccessDeniedResponse](https://doc.enrich.so/accessdeniedresponse-12942051d0.md): 
+- [LeadExportJobSummary](https://doc.enrich.so/leadexportjobsummary-13228324d0.md): 
+- [RevealedContact](https://doc.enrich.so/revealedcontact-12942012d0.md): 
+- [BulkLookupSubmitData](https://doc.enrich.so/bulklookupsubmitdata-12679616d0.md): 
+- [BatchSubmitMeta](https://doc.enrich.so/batchsubmitmeta-12679592d0.md): 
+- [RevealJobSummary](https://doc.enrich.so/revealjobsummary-13221155d0.md): 
+- [StartCompanyFollowerData](https://doc.enrich.so/startcompanyfollowerdata-12766741d0.md): 
+- [CompanyFollowerProgressData](https://doc.enrich.so/companyfollowerprogressdata-12766743d0.md): 
+- [CompanyFollowerResultsData](https://doc.enrich.so/companyfollowerresultsdata-12766745d0.md): 
+- [FollowerProfile](https://doc.enrich.so/followerprofile-12766746d0.md): 
+- [StartCountEstimateData](https://doc.enrich.so/startcountestimatedata-12766749d0.md): 
+- [CountEstimateResultData](https://doc.enrich.so/countestimateresultdata-12766752d0.md): 
+- [FunctionBreakdownItem](https://doc.enrich.so/functionbreakdownitem-12766753d0.md): 
+- [SeniorityBreakdownItem](https://doc.enrich.so/senioritybreakdownitem-12766754d0.md): 
+- [CountEstimateStatusData](https://doc.enrich.so/countestimatestatusdata-12766751d0.md): 
+- [LeadFinderSearchFilters](https://doc.enrich.so/leadfindersearchfilters-12942003d0.md): 
+- [LeadSearchPreviewResult](https://doc.enrich.so/leadsearchpreviewresult-12942004d0.md): 
+- [LeadFinderPagination](https://doc.enrich.so/leadfinderpagination-12942005d0.md): 
+- [SavedSearchItem](https://doc.enrich.so/savedsearchitem-12942019d0.md): 
+- [LeadRevealResponse](https://doc.enrich.so/leadrevealresponse-12942013d0.md): 
+- [LeadEnrichResult](https://doc.enrich.so/leadenrichresult-12942015d0.md): 
+- [LeadEnrichResponse](https://doc.enrich.so/leadenrichresponse-12942016d0.md): 

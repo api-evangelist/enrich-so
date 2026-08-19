@@ -1,0 +1,345 @@
+generated: '2026-08-14'
+method: derived
+source: openapi/_original/enrich-so-v3-harvested-openapi.yml + probe of https://mcp.enrich.so/mcp
+provider: Enrich
+providerId: enrich-so
+description: 'Crosswalk between the Enrich remote MCP server and the Enrich REST API v3. Enrich ships
+  BOTH surfaces, but only one of them is readable: the REST contract is fully published (49 paths / 51
+  operations, harvested from the OpenAPI fragments Enrich embeds in every documentation page), while the
+  MCP tool list is authenticated and is not documented anywhere. So crosswalk[] is deliberately EMPTY
+  — binding a tool to an operationId without having seen the tool would be a guess, and a guessed binding
+  is worse than a recorded gap. rest_only[] below is the complete REST surface an authenticated tools/list
+  should be reconciled against; every row an Enrich tool covers moves out of rest_only and into crosswalk
+  on the next authenticated pass.'
+surfaces:
+  openapi:
+    file: openapi/_original/enrich-so-v3-harvested-openapi.yml
+    base_url: https://dev.enrich.so/api/v3
+    gated: false
+    note: Published. Assembled from the per-page OpenAPI fragments on https://doc.enrich.so.
+  mcp:
+    url: https://mcp.enrich.so/mcp
+    transport: streamable-http
+    gated: true
+    note: tools/list returns HTTP 401 anonymously; OAuth (scope mcp:tools) or an API key is required.
+  graphql:
+    present: false
+    note: 'No GraphQL surface: /graphql returns 404 on dev.enrich.so and api.enrich.so.'
+crosswalk: []
+mcp_only: []
+rest_only:
+- operation: continueCompanyFollowerScrape
+  method: POST
+  path: /company-follower
+  category: Company Followers
+  summary: Continue company follower scrape
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: checkCompanyFollowerLimit
+  method: GET
+  path: /company-follower/limit
+  category: Company Followers
+  summary: Check daily scraping limit
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: exportCompanyFollowerCsv
+  method: GET
+  path: /company-follower/{batchId}/export
+  category: Company Followers
+  summary: Export results as CSV
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getCompanyFollowerProgress
+  method: GET
+  path: /company-follower/{batchId}/progress
+  category: Company Followers
+  summary: Check scrape progress
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getCompanyFollowerResults
+  method: GET
+  path: /company-follower/{batchId}/results
+  category: Company Followers
+  summary: Get scrape results
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: startCountEstimate
+  method: POST
+  path: /count-estimate
+  category: Company Followers
+  summary: Start count estimation
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getCountEstimateStatus
+  method: GET
+  path: /count-estimate/{batchId}
+  category: Company Followers
+  summary: Get estimation status/results
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: findEmail
+  method: POST
+  path: /email-finder
+  category: Email Finder
+  summary: Find a professional email
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: batchFindEmails
+  method: POST
+  path: /email-finder/batch
+  category: Email Finder
+  summary: Find emails in batch
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getEmailFinderBatchStatus
+  method: GET
+  path: /email-finder/batch/{batchId}
+  category: Email Finder
+  summary: Check batch finder progress
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getEmailFinderBatchResults
+  method: GET
+  path: /email-finder/batch/{batchId}/results
+  category: Email Finder
+  summary: Get batch finder results
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: validateEmail
+  method: POST
+  path: /email-validation
+  category: Email Validation
+  summary: Validate a single email
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: batchValidateEmails
+  method: POST
+  path: /email-validation/batch
+  category: Email Validation
+  summary: Validate emails in batch
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getEmailValidationBatchStatus
+  method: GET
+  path: /email-validation/batch/{batchId}
+  category: Email Validation
+  summary: Check batch validation progress
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getEmailValidationBatchResults
+  method: GET
+  path: /email-validation/batch/{batchId}/results
+  category: Email Validation
+  summary: Get batch validation results
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: ipToCompany
+  method: POST
+  path: /ip-to-company
+  category: IP to Company
+  summary: Resolve company from IP
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: batchIpToCompany
+  method: POST
+  path: /ip-to-company/batch
+  category: IP to Company
+  summary: Submit batch IP to company lookup
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getIpToCompanyBatchStatus
+  method: GET
+  path: /ip-to-company/batch/{batchId}
+  category: IP to Company
+  summary: Check batch progress
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getIpToCompanyBatchResults
+  method: GET
+  path: /ip-to-company/batch/{batchId}/results
+  category: IP to Company
+  summary: Get batch results
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: countLeads
+  method: POST
+  path: /lead-finder/count
+  category: Lead Finder
+  summary: Count matching leads
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: enrichLeads
+  method: POST
+  path: /lead-finder/enrich
+  category: Lead Finder
+  summary: Enrich contacts with specific fields
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: exportLeads
+  method: POST
+  path: /lead-finder/export
+  category: Lead Finder
+  summary: Export leads to CSV (async)
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: listExportJobs
+  method: GET
+  path: /lead-finder/export-jobs
+  category: Lead Finder
+  summary: List export jobs
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getExportJob
+  method: GET
+  path: /lead-finder/export-jobs/{jobId}
+  category: Lead Finder
+  summary: Poll export job status
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: downloadExportJob
+  method: GET
+  path: /lead-finder/export-jobs/{jobId}/download
+  category: Lead Finder
+  summary: Download export CSV
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getFilterOptions
+  method: GET
+  path: /lead-finder/filter-options
+  category: Lead Finder
+  summary: Get filter options
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: revealLeads
+  method: POST
+  path: /lead-finder/reveal
+  category: Lead Finder
+  summary: Reveal contact info
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: listRevealJobs
+  method: GET
+  path: /lead-finder/reveal-jobs
+  category: Lead Finder
+  summary: List reveal/enrich jobs
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getRevealJob
+  method: GET
+  path: /lead-finder/reveal-jobs/{jobId}
+  category: Lead Finder
+  summary: Poll reveal/enrich job
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: listSavedSearches
+  method: GET
+  path: /lead-finder/saved
+  category: Lead Finder
+  summary: List saved searches
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: createSavedSearch
+  method: POST
+  path: /lead-finder/saved
+  category: Lead Finder
+  summary: Save a search
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: deleteSavedSearch
+  method: DELETE
+  path: /lead-finder/saved/{id}
+  category: Lead Finder
+  summary: Delete a saved search
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: searchLeads
+  method: POST
+  path: /lead-finder/search
+  category: Lead Finder
+  summary: Search leads
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: suggestCompanyNames
+  method: GET
+  path: /lead-finder/suggest
+  category: Lead Finder
+  summary: Suggest company names
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: unlockNames
+  method: POST
+  path: /lead-finder/unlock-names
+  category: Lead Finder
+  summary: Unlock full last names
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: employeeFinder
+  method: POST
+  path: /people-search/employee-finder
+  category: People Search
+  summary: Find employees at a company
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: waterfallIcpSearch
+  method: POST
+  path: /people-search/waterfall-icp-search
+  category: People Search
+  summary: Cascading ICP people search
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: bulkReverseLookup
+  method: POST
+  path: /reverse-lookup/bulk-lookup
+  category: Reverse Email Lookup
+  summary: Look up professional profiles in batch
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getBulkLookupStatus
+  method: GET
+  path: /reverse-lookup/bulk-lookup/{batchId}
+  category: Reverse Email Lookup
+  summary: Check bulk lookup progress
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getBulkLookupResults
+  method: GET
+  path: /reverse-lookup/bulk-lookup/{batchId}/results
+  category: Reverse Email Lookup
+  summary: Get bulk lookup results
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: reverseLookup
+  method: POST
+  path: /reverse-lookup/lookup
+  category: Reverse Email Lookup
+  summary: Look up a professional profile by email
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: phoneLookup
+  method: GET
+  path: /reverse-lookup/phones
+  category: Phone Finder
+  summary: Find phone numbers
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: createPhoneBulkJob
+  method: POST
+  path: /reverse-lookup/phones/bulk
+  category: Phone Finder
+  summary: Find phone numbers in batch
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getPhoneBulkJobStatus
+  method: GET
+  path: /reverse-lookup/phones/bulk/{jobId}
+  category: Phone Finder
+  summary: Check bulk phone lookup progress
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getPhoneBulkJobResults
+  method: GET
+  path: /reverse-lookup/phones/bulk/{jobId}/results
+  category: Phone Finder
+  summary: Get bulk phone lookup results
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: inviteTeamMember
+  method: POST
+  path: /teams/{teamId}/invitations
+  category: Teams
+  summary: Invite someone to your team
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: listTeamInvitations
+  method: GET
+  path: /teams/{teamId}/invitations
+  category: Teams
+  summary: List pending invitations
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: cancelInvitation
+  method: DELETE
+  path: /teams/{teamId}/invitations/{invitationId}
+  category: Teams
+  summary: Cancel a pending invitation
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: listTeamMembers
+  method: GET
+  path: /teams/{teamId}/members
+  category: Teams
+  summary: List team members
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getWalletBalance
+  method: GET
+  path: /wallets/balance
+  category: Wallets
+  summary: Get your credit balance
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+- operation: getWalletTransactions
+  method: GET
+  path: /wallets/transactions
+  category: Wallets
+  summary: Get transaction history
+  reason: 'No MCP tool can be bound: the Enrich MCP tool list is auth-gated and unpublished.'
+coverage:
+  rest_operations: 51
+  mcp_tools: null
+  bound: 0
+  rest_unbound: 51
+  note: mcp_tools is null (unknown, auth-gated), not 0. Do not read this as "the MCP server has no tools".
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

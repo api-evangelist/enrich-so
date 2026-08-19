@@ -1,0 +1,567 @@
+{
+ "info": {
+  "_postman_id": "a1c30d3a-5137-5898-aff0-56cbe9873435",
+  "name": "Enrich Email Finder API",
+  "description": {
+   "content": "Find a professional email from a first name, last name and company domain, single or in batches of up to 500,000 leads.\n\nAssembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so \u2014 every documentation page embeds its own OpenAPI fragment, and this document is the union of the fragments carrying these tags, with only the components they reference.",
+   "type": "text/plain"
+  },
+  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+ },
+ "item": [
+  {
+   "id": "090d7ed1-4ac9-50e1-aa60-bc26ea8ebc60",
+   "name": "Email Finder",
+   "description": {
+    "content": "",
+    "type": "text/plain"
+   },
+   "item": [
+    {
+     "id": "5e952444-538a-5ef6-8a10-16aca248a87b",
+     "name": "Find a professional email",
+     "request": {
+      "name": "Find a professional email",
+      "description": {
+       "content": "Give us a person's first name, last name, and their company domain, and we'll\nfind their professional email address.\n\n**Cost:** 10 credits. You are **not** charged if we can't find an email\n(`found: false`).",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/email-finder",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "email-finder"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"firstName\": \"Emily\",\n  \"lastName\": \"Zhang\",\n  \"domain\": \"figma.com\"\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "45060f85-5bab-50ef-b557-704da2b35e38",
+       "name": "Finder result returned successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"firstName\": \"Emily\",\n    \"lastName\": \"Zhang\",\n    \"domain\": \"figma.com\",\n    \"found\": true,\n    \"email\": \"emily.zhang@figma.com\",\n    \"confidence\": \"high\",\n    \"isCatchAll\": false,\n    \"provider\": \"GOOGLE\",\n    \"message\": \"Email found with high confidence\"\n  },\n  \"meta\": {\n    \"requestId\": \"665b0a7f3e4c9200138eaf01\",\n    \"creditsUsed\": 10,\n    \"creditsRemaining\": 24990,\n    \"processingTimeMs\": 912\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "9cbcc64a-6296-5988-af1d-11f7e2a7d518",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "336ab839-6f43-5edf-9081-9fc4c7f038af",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "2f0cbfff-05c0-587c-a3e6-ea09a43b2331",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/insufficient-credits\",\n  \"title\": \"Insufficient Credits\",\n  \"status\": 402,\n  \"detail\": \"Not enough credits. Required: 10, available: 3\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "f251ce40-8b5f-5548-aa86-080df26686dc",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "f3253a33-5083-5aa2-b825-84fbd4ee77e2",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "35d9c390-6109-5aee-97c9-c82b921301d2",
+     "name": "Find emails in batch",
+     "request": {
+      "name": "Find emails in batch",
+      "description": {
+       "content": "Submit up to **500 000 leads** in one request. Each lead is a combination\nof first name, last name, and domain. We deduplicate the list\n(case-insensitive) so you are only charged for unique leads.\n\n**Cost:** 10 credits per unique lead, reserved at submission. Unused credits\nare refunded when you fetch results.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** each time a single lead is processed. See\n   [emailFinderResult](#tag/Webhooks/operation/webhookEmailFinderResult) for the payload.\n\n2. **A completion callback** once the entire batch is done. See\n   [emailFinderCompletion](#tag/Webhooks/operation/webhookEmailFinderCompletion) for the payload.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/email-finder/batch",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "email-finder",
+        "batch"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"leads\": [\n    {\n      \"firstName\": \"Emily\",\n      \"lastName\": \"Zhang\",\n      \"domain\": \"figma.com\"\n    },\n    {\n      \"firstName\": \"David\",\n      \"lastName\": \"Kim\",\n      \"domain\": \"vercel.com\"\n    },\n    {\n      \"firstName\": \"Aisha\",\n      \"lastName\": \"Johnson\",\n      \"domain\": \"cloudflare.com\"\n    }\n  ],\n  \"webhookUrl\": \"https://api.yourapp.com/webhooks/enrich\"\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "410d46a4-8ed3-5b98-bfd5-de5d356f7c79",
+       "name": "Batch submitted \u2014 credits have been reserved",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665b12cf3e4c9200138eaf10\",\n    \"status\": \"queued\",\n    \"itemCount\": 3,\n    \"originalCount\": 3,\n    \"duplicatesRemoved\": 0\n  },\n  \"meta\": {\n    \"requestId\": \"665b12cf3e4c9200138eaf0f\",\n    \"creditsReserved\": 30,\n    \"creditsPerItem\": 10,\n    \"estimatedCredits\": 30\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "5cb9dcd3-ee45-52b9-a578-5cba96e8d559",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "4605a885-d929-50ad-8443-30d63ac2a950",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "10141eff-344d-54ce-b21a-66ca981e06af",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/insufficient-credits\",\n  \"title\": \"Insufficient Credits\",\n  \"status\": 402,\n  \"detail\": \"Not enough credits. Required: 10, available: 3\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "26239199-b9fb-5716-8b0e-aa062287794b",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "7a37bd3e-7d12-5431-bab5-cb5530d5436d",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "9060ad8d-8423-57b7-9d49-526b1151a45f",
+     "name": "Check batch finder progress",
+     "request": {
+      "name": "Check batch finder progress",
+      "description": {
+       "content": "Poll this endpoint to track your batch. The `status` moves through\n`queued` \u2192 `processing` \u2192 `completed` (or `failed`).\n\n**Cost:** Free.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/email-finder/batch/{batchId}",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "email-finder",
+        "batch",
+        ":batchId"
+       ],
+       "query": [],
+       "variable": [
+        {
+         "key": "batchId",
+         "value": "<batchId>",
+         "description": "The batch identifier returned when you submitted the job"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "fc3e122d-5401-5d6e-b82c-2c64fa1bae58",
+       "name": "Current batch status",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665b12cf3e4c9200138eaf10\",\n    \"status\": \"processing\",\n    \"totalItems\": 3,\n    \"processedItems\": 1,\n    \"progress\": 33.3\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "99bdb458-b6b1-57cd-9e2a-33aa06eac165",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "fe839dda-7bfc-5e03-b346-783a64cb0417",
+       "name": "The resource you requested doesn't exist or doesn't belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"No batch found with that ID\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "9045c052-adf0-5231-a123-10afbe4797f2",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "ff5f17f0-d4cc-5228-b8eb-10b5cde126ad",
+     "name": "Get batch finder results",
+     "request": {
+      "name": "Get batch finder results",
+      "description": {
+       "content": "Retrieve the results once the batch has finished. Results are paginated.\n\n**Credit settlement:** On the first call after the batch reaches a terminal\nstatus, we settle the final credit charge. Leads where no email was found\nare not charged, and the difference is refunded.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/email-finder/batch/{batchId}/results",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "email-finder",
+        "batch",
+        ":batchId",
+        "results"
+       ],
+       "query": [
+        {
+         "key": "page",
+         "value": "1",
+         "description": "Page number (default: 1)",
+         "disabled": true
+        },
+        {
+         "key": "limit",
+         "value": "100",
+         "description": "Results per page (default: 100, max: 1 000)",
+         "disabled": true
+        }
+       ],
+       "variable": [
+        {
+         "key": "batchId",
+         "value": "<batchId>",
+         "description": "The batch identifier returned when you submitted the job"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "afa0bc15-4e10-518b-88a7-4b462f4a7170",
+       "name": "Paginated finder results",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665b12cf3e4c9200138eaf10\",\n    \"status\": \"completed\",\n    \"totalItems\": 3,\n    \"processedCount\": 3,\n    \"results\": [\n      {\n        \"firstName\": \"Emily\",\n        \"lastName\": \"Zhang\",\n        \"domain\": \"figma.com\",\n        \"found\": true,\n        \"email\": \"emily.zhang@figma.com\",\n        \"confidence\": \"high\",\n        \"isCatchAll\": false,\n        \"provider\": \"GOOGLE\",\n        \"message\": \"Email found with high confidence\"\n      },\n      {\n        \"firstName\": \"David\",\n        \"lastName\": \"Kim\",\n        \"domain\": \"vercel.com\",\n        \"found\": true,\n        \"email\": \"david.kim@vercel.com\",\n        \"confidence\": \"medium\",\n        \"isCatchAll\": false,\n        \"provider\": \"GOOGLE\",\n        \"message\": \"Email found with medium confidence\"\n      },\n      {\n        \"firstName\": \"Aisha\",\n        \"lastName\": \"Johnson\",\n        \"domain\": \"cloudflare.com\",\n        \"found\": false,\n        \"message\": \"No professional email could be found for this person\"\n      }\n    ]\n  },\n  \"meta\": {\n    \"requestId\": \"665b18a03e4c9200138eaf20\",\n    \"creditsUsed\": 20,\n    \"creditsRefunded\": 10,\n    \"creditsRemaining\": 24970,\n    \"totalItems\": 3,\n    \"processedItems\": 3\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "dd3dd59d-1f29-5603-a6cd-c9f066aac705",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "012e6be0-373a-5794-b7de-e702a8100e5a",
+       "name": "The resource you requested doesn't exist or doesn't belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"No batch found with that ID\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "c09931d2-ada0-5604-a394-3e45693e62eb",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "variable": [
+  {
+   "key": "baseUrl",
+   "value": "https://dev.enrich.so/api/v3"
+  },
+  {
+   "key": "apiKey",
+   "value": "<your Enrich API key>"
+  }
+ ],
+ "auth": {
+  "type": "apikey",
+  "apikey": [
+   {
+    "key": "key",
+    "value": "x-api-key"
+   },
+   {
+    "key": "value",
+    "value": "{{apiKey}}"
+   },
+   {
+    "key": "in",
+    "value": "header"
+   }
+  ]
+ }
+}

@@ -1,0 +1,2137 @@
+{
+ "info": {
+  "_postman_id": "be0530f1-633e-5d1f-8244-d1dfd4c03018",
+  "name": "Enrich Lead Finder API",
+  "description": {
+   "content": "Search, count, reveal, enrich, unlock and export leads across people and organizations, with saved searches and async reveal/export jobs.\n\nAssembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so \u2014 every documentation page embeds its own OpenAPI fragment, and this document is the union of the fragments carrying these tags, with only the components they reference.",
+   "type": "text/plain"
+  },
+  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+ },
+ "item": [
+  {
+   "id": "0a48c0a3-b040-5edd-9fcf-3eabf589b6f9",
+   "name": "Lead Finder",
+   "description": {
+    "content": "",
+    "type": "text/plain"
+   },
+   "item": [
+    {
+     "id": "cfca2e51-9b70-569f-85a0-d19d3fde2bb6",
+     "name": "Count matching leads",
+     "request": {
+      "name": "Count matching leads",
+      "description": {
+       "content": "Get the total count of leads matching your filters. This endpoint is free and does not consume credits.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/count",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "count"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"filters\": {\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"middleName\": \"string\",\n    \"city\": \"string\",\n    \"stateName\": null,\n    \"stateCode\": null,\n    \"countryName\": null,\n    \"countryCode\": null,\n    \"continent\": null,\n    \"countryRegion\": null,\n    \"linkedinUrl\": \"string\",\n    \"linkedinHeadline\": \"string\",\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"linkedinIndustry\": null,\n    \"logoUrl\": \"string\",\n    \"emailDomain\": \"string\",\n    \"emailAddress\": \"string\",\n    \"jobTitle\": null,\n    \"jobFunction\": null,\n    \"jobLevel\": null,\n    \"jobDescription\": \"string\",\n    \"jobLocationCity\": \"string\",\n    \"jobLocationState\": \"string\",\n    \"jobLocationCountry\": null,\n    \"jobIsCurrent\": false,\n    \"jobStartDate\": \"string\",\n    \"jobCount\": 0,\n    \"companyName\": null,\n    \"companyNameMode\": \"string\",\n    \"persona\": \"string\",\n    \"languages\": null,\n    \"skills\": null,\n    \"certifications\": \"string\",\n    \"patents\": \"string\",\n    \"publications\": \"string\",\n    \"websites\": \"string\",\n    \"education\": \"string\",\n    \"phone\": \"string\",\n    \"cellphone\": \"string\",\n    \"orgName\": \"string\",\n    \"domain\": null,\n    \"aboutUs\": null,\n    \"companyEntityType\": null,\n    \"companyLegalType\": null,\n    \"employeeCount\": 0,\n    \"employeeCountMax\": 0,\n    \"employeeCountMin\": 0,\n    \"foundedOn\": 0,\n    \"headquartersCity\": \"string\",\n    \"headquartersState\": \"string\",\n    \"headquartersCountry\": null,\n    \"industrySicCode\": null,\n    \"industrySicDescription\": null,\n    \"industryNaicsCode\": null,\n    \"industryNaicsDescription\": null,\n    \"orgLinkedinUrl\": \"string\",\n    \"locationCity\": \"string\",\n    \"locationState\": \"string\",\n    \"locationCountry\": null,\n    \"revenueMax\": 0,\n    \"revenueMin\": 0,\n    \"revenueBuckets\": null,\n    \"specialties\": \"string\",\n    \"crmTechOrg\": null,\n    \"marketingAutomationTechOrg\": null,\n    \"abmTechOrg\": null,\n    \"salesAutomationTechOrg\": null,\n    \"analyticsTechOrg\": null,\n    \"cmsTechOrg\": null,\n    \"martechCategoriesOrg\": null,\n    \"conversationIntelligenceTechOrg\": null,\n    \"cloudProviderTechOrg\": null,\n    \"emailHostingTechOrg\": null,\n    \"emailSecurityTechOrg\": null,\n    \"applicationSecurityTechOrg\": null,\n    \"cloudSecurityTechOrg\": null,\n    \"developmentTechOrg\": null,\n    \"eCommercePlatformTechOrg\": null,\n    \"erpTechOrg\": null,\n    \"hasMobileAppOrg\": false,\n    \"hasWebAppOrg\": false,\n    \"hasCisoOrg\": false,\n    \"hasCioOrg\": false,\n    \"locationCountOrg\": 0,\n    \"isLinkedinUrlClaimedOrg\": false,\n    \"marketingRoleCountOrg\": 0,\n    \"salesRoleCountOrg\": 0,\n    \"operationsRoleCountOrg\": 0,\n    \"businessDevelopmentRoleCountOrg\": 0,\n    \"customerSuccessRoleCountOrg\": 0,\n    \"itRoleCountOrg\": 0,\n    \"grcRoleCountOrg\": 0,\n    \"securityRoleCountOrg\": 0,\n    \"devopsRoleCountOrg\": 0,\n    \"networkInfrastructureRoleCountOrg\": 0,\n    \"mobileDevRoleCountOrg\": 0,\n    \"iosDevRoleCountOrg\": 0,\n    \"androidDevRoleCountOrg\": 0,\n    \"engineerRoleCountOrg\": 0,\n    \"qaRoleCountOrg\": 0,\n    \"marketingOpenRolesCountOrg\": 0,\n    \"operationsOpenRolesCountOrg\": 0,\n    \"salesOpenRolesCountOrg\": 0,\n    \"accountExecutiveOpenRolesCountOrg\": 0,\n    \"customerSuccessOpenRolesCountOrg\": 0,\n    \"demandGenerationOpenRolesCountOrg\": 0,\n    \"businessDevelopmentOpenRolesCountOrg\": 0,\n    \"itOpenRolesCountOrg\": 0,\n    \"securityOpenRolesCountOrg\": 0,\n    \"grcOpenRolesCountOrg\": 0,\n    \"devopsOpenRolesCountOrg\": 0,\n    \"networkInfrastructureOpenRolesCountOrg\": 0,\n    \"monthlyOrganicTrafficOrg\": 0,\n    \"monthlyPaidTrafficOrg\": 0,\n    \"totalMonthlyTrafficOrg\": 0,\n    \"monthlyGoogleAdspendOrg\": 0,\n    \"employeeOnLinkedinGrowthRateOrg\": 0,\n    \"isWebsiteForSaleOrg\": false,\n    \"topAppleappstoreUrlOrg\": \"string\",\n    \"topAppstoreRatingOrg\": 0,\n    \"topAppstoreReviewCountOrg\": 0,\n    \"lastAppstoreUpdateOrg\": \"string\",\n    \"appstoreUpdateCountOrg\": 0,\n    \"appstoreAppCategoryOrg\": \"string\",\n    \"topPlaystoreUrlOrg\": \"string\",\n    \"topPlaystoreRatingOrg\": 0,\n    \"topPlaystoreReviewCountOrg\": 0,\n    \"lastPlaystoreUpdateOrg\": \"string\",\n    \"playstoreDownloadCountOrg\": 0,\n    \"playstoreAppCategoryOrg\": \"string\",\n    \"totalReviewsOrg\": 0,\n    \"lastFundingDateOrg\": \"string\",\n    \"lastFundingAmountOrg\": 0,\n    \"leadInvestorsOrg\": \"string\",\n    \"lastFundingTypeOrg\": null,\n    \"fundingRoundNumberOfInvestorsOrg\": 0,\n    \"totalFundingAmountOrg\": 0\n  },\n  \"excludeFilters\": {\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"aboutUs\": null,\n    \"domain\": null,\n    \"jobTitle\": null\n  }\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "365ebbb1-c09f-5c3a-b655-89e1ccb3b51e",
+       "name": "Count returned successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"count\": 18420,\n    \"searchType\": \"unified\",\n    \"searchedTotalResult\": 18420\n  },\n  \"meta\": {\n    \"requestId\": \"req_664f2b3c9a1e4d0012abcdf0\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "295d5887-1952-513a-a07e-c817757d83c9",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "74f9d2ca-ab8d-5de8-90eb-66230e07dbdf",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "f8fa70ce-619b-5754-816e-206753b3070a",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "0968d439-f9a5-58b4-b001-a1897a7dad2f",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "c940ea43-5a1b-58c5-b962-3b512dc5adc8",
+     "name": "Enrich contacts with specific fields",
+     "request": {
+      "name": "Enrich contacts with specific fields",
+      "description": {
+       "content": "Reveal specific contact fields (email and/or phone) for up to 25 leads.\n\n**Pricing:**\n- Email: 10 credits per lead\n- Phone: 525 credits per lead\n\nPreviously revealed fields are returned from cache at no cost.\n\n**Async:** Returns a `jobId` immediately (< 100ms). Poll `GET /lead-finder/reveal-jobs/:jobId` every 2 seconds until `status` is `completed` or `failed`. Credits are charged inside the worker \u2014 insufficient credits cause the job to fail asynchronously (no synchronous 402).",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/enrich",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "enrich"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"leads\": [\n    {\n      \"id\": \"string\"\n    }\n  ],\n  \"fields\": [\n    \"string\"\n  ]\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "80be082a-e360-5696-8d5c-2362c36ccc77",
+       "name": "Enrich job submitted \u2014 poll the returned jobId for results",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"jobId\": \"rj_a1b2c3d4e5f6g7h8\",\n    \"status\": \"pending\",\n    \"totalLeads\": 3,\n    \"fields\": [\n      \"email\"\n    ],\n    \"message\": \"Enrich job submitted. Poll GET /api/v3/lead-finder/reveal-jobs/rj_a1b2c3d4e5f6g7h8 for results.\"\n  },\n  \"meta\": {\n    \"requestId\": \"req_664f2b3c9a1e4d0012abcdf3\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "21341be5-7f80-5fd7-9296-7f19beddbb70",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "51213133-997e-5603-9348-bace2480198f",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "3370512b-808b-5f39-9c9a-30795081966a",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "8338b116-1ef6-5f87-aa66-4de26173da42",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "085fece7-1988-5e68-a2c1-e0a27cde750b",
+     "name": "Export leads to CSV (async)",
+     "request": {
+      "name": "Export leads to CSV (async)",
+      "description": {
+       "content": "Submit an async CSV export job. Returns a `jobId` immediately \u2014 poll `GET /lead-finder/export-jobs/{jobId}` for status. Once the job reaches `completed` status, download the file via `GET /lead-finder/export-jobs/{jobId}/download`.\n\nCredits are estimated upfront and deducted during processing. Refunds are issued for leads where the requested contact info was not found.\n\n**Pricing:**\n- Preview fields only: Free\n- `includeEmail`: 10 credits per lead\n- `includePhone`: 525 credits per lead\n- `includeNames`: 1 credit per lead (full last names)\n- `includeContactInfo`: Shorthand for email + phone (535 credits/lead)",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/export",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "export"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"filters\": {\n    \"jobLevel\": [\n      \"C-Suite\",\n      \"VP\"\n    ],\n    \"domain\": [\n      \"stripe.com\",\n      \"vercel.com\"\n    ]\n  },\n  \"maxResults\": 500,\n  \"includeEmail\": true,\n  \"includeNames\": true\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "8a80dfb7-67a5-5cba-b94e-6f23d51567d2",
+       "name": "Export job submitted \u2014 poll for status using the returned jobId",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"jobId\": \"ej_a1b2c3d4e5f6a7b8\",\n    \"status\": \"pending\",\n    \"estimatedRows\": 500,\n    \"estimatedCredits\": 25000,\n    \"message\": \"Export job queued. Poll GET /lead-finder/export-jobs/ej_a1b2c3d4e5f6a7b8 for status.\"\n  },\n  \"meta\": {\n    \"requestId\": \"665d2f8b9c5b2a0015d0bc0f\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "986685a2-8240-5d59-9d18-628e01797c79",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "bb274750-5234-5efb-952f-747da11cd687",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "24da73be-cf9a-5d5f-8923-009b8a063c05",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/insufficient-credits\",\n  \"title\": \"Insufficient Credits\",\n  \"status\": 402,\n  \"detail\": \"Not enough credits. Required: 575, available: 100\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "464011c5-fff0-53e2-8f25-d8b174415ce8",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "72491c3f-01bb-5f57-a2cf-0d105a1af9a1",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "1163e15c-1e0e-5b63-bdb8-5f636983852a",
+     "name": "List export jobs",
+     "request": {
+      "name": "List export jobs",
+      "description": {
+       "content": "List recent CSV export jobs for your team (last 30 days). Paginated, optionally filtered by status.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/export-jobs",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "export-jobs"
+       ],
+       "query": [
+        {
+         "key": "page",
+         "value": "1",
+         "description": "Page number (default: 1)",
+         "disabled": true
+        },
+        {
+         "key": "limit",
+         "value": "20",
+         "description": "Results per page (default: 20, max: 100)",
+         "disabled": true
+        },
+        {
+         "key": "status",
+         "value": "string",
+         "description": "Filter by job status",
+         "disabled": true
+        }
+       ],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "263d2857-bb5e-511f-bbaf-bfb4ad6fb88a",
+       "name": "Paginated list of export jobs",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"jobs\": [\n      {\n        \"jobId\": \"ej_a1b2c3d4e5f6a7b8\",\n        \"status\": \"completed\",\n        \"total\": 500,\n        \"processed\": 500,\n        \"creditsUsed\": 24750,\n        \"creditsRefunded\": 250,\n        \"createdAt\": \"2025-06-03T14:30:00.000Z\",\n        \"completedAt\": \"2025-06-03T14:35:00.000Z\"\n      }\n    ],\n    \"total\": 1,\n    \"page\": 1,\n    \"limit\": 20\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "c0ea41da-3a05-52fd-9c41-bd697b9eba03",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "7d325d95-9ce1-585d-b6fe-39fcd8bcfa35",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "724b1a64-4ed4-51f5-8d52-57ffc3fd5d82",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "8673ca45-5bac-5f4a-b193-e9f701ae8acc",
+     "name": "Poll export job status",
+     "request": {
+      "name": "Poll export job status",
+      "description": {
+       "content": "Poll the status of a CSV export job. The response shape varies by status:\n\n- **`pending`** \u2014 Job is queued, not yet started.\n- **`processing`** \u2014 Job is actively running. Check `progress` for completion percentage.\n- **`completed`** \u2014 Job finished successfully. Includes `results` with final credit usage. Download the file via `GET /lead-finder/export-jobs/{jobId}/download`.\n- **`failed`** \u2014 Job encountered an error. Includes `error` message and any `creditsRefunded`.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/export-jobs/{jobId}",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "export-jobs",
+        ":jobId"
+       ],
+       "query": [],
+       "variable": [
+        {
+         "key": "jobId",
+         "value": "<jobId>",
+         "description": "Export job ID (format: `ej_` followed by 16 hex characters)"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "9a700a62-1801-59a1-a446-f1215b5e888f",
+       "name": "Export job status",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": false,\n  \"data\": {\n    \"jobId\": \"ej_a1b2c3d4e5f6a7b8\",\n    \"name\": \"string\",\n    \"status\": \"string\",\n    \"phase\": \"string\",\n    \"progress\": 0,\n    \"totalRows\": 0,\n    \"processedRows\": 0,\n    \"creditsUsed\": 0,\n    \"creditsRefunded\": 0,\n    \"error\": \"string\",\n    \"downloadUrl\": \"string\",\n    \"createdAt\": \"string\",\n    \"completedAt\": \"string\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "5020f440-ccfa-566b-b0a2-2dd1ca77c479",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "62bd05a2-6684-5b00-bc55-54460e0fad9b",
+       "name": "Export job not found or does not belong to your team",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"Export job not found\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "e45260e4-a684-5cda-94a5-a1b4f78d1a30",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "203e6321-7007-5f46-8ad2-3c9fe8810754",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "f0a0caa0-2ac0-5f41-8979-6088b7cee950",
+     "name": "Download export CSV",
+     "request": {
+      "name": "Download export CSV",
+      "description": {
+       "content": "Stream the completed CSV file for an export job. Returns the file with `Content-Type: text/csv`.\n\nReturns **409 Conflict** if the job has not yet reached `completed` status or has failed. Poll `GET /lead-finder/export-jobs/{jobId}` first to confirm the job is complete before downloading.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/export-jobs/{jobId}/download",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "export-jobs",
+        ":jobId",
+        "download"
+       ],
+       "query": [],
+       "variable": [
+        {
+         "key": "jobId",
+         "value": "<jobId>",
+         "description": "Export job ID (format: `ej_` followed by 16 hex characters)"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "bf8a2140-4d14-5e74-95ba-4911a0700b1a",
+       "name": "CSV file stream",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "57e438db-f860-5165-ab17-891b89a65bfc",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "390269f9-6d15-5235-ad75-8e403d0e3d9d",
+       "name": "Export job not found or does not belong to your team",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"Export job not found\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "0697d54a-b5e5-51ae-b2af-25a002f45d28",
+       "name": "Job is not yet completed or has failed \u2014 cannot download",
+       "status": "409",
+       "code": 409,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/conflict\",\n  \"title\": \"Conflict\",\n  \"status\": 409,\n  \"detail\": \"Export job is not yet completed. Current status: processing\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "a755af35-d5b5-531f-857b-2491954e4111",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "a3ee3ad5-543c-582a-8ed3-72af2fc0fbb5",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "ed859faf-bd62-5eda-b589-37057ac73f52",
+     "name": "Get filter options",
+     "request": {
+      "name": "Get filter options",
+      "description": {
+       "content": "Returns available values for multi-select filter fields (countries, departments, industries, job functions, etc.). Values are fetched from the database and cached for performance. Free endpoint.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/filter-options",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "filter-options"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "519dbf4a-1334-5bd7-9dc9-10d79d9611a8",
+       "name": "Filter options returned successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"countryName\": [\n      \"United States\",\n      \"United Kingdom\",\n      \"Germany\",\n      \"...\"\n    ],\n    \"jobFunction\": [\n      \"Engineering\",\n      \"Marketing\",\n      \"Sales\",\n      \"...\"\n    ],\n    \"jobLevel\": [\n      \"C-Suite\",\n      \"VP\",\n      \"Director\",\n      \"Manager\",\n      \"...\"\n    ],\n    \"industrySicDescription\": [\n      \"Computer Processing & Data Preparation\",\n      \"...\"\n    ]\n  },\n  \"meta\": {\n    \"requestId\": \"req_664f2b3c9a1e4d0012abcdf8\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "e5159e1f-2f83-589b-a8cc-906729bbf167",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "7b1ddfcb-83a9-548c-8f75-ff5091f327a0",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "c8131b6b-f2fa-590b-9a9b-ce6a3336bf75",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "64c55778-02ca-5c8c-b16e-5f533c55e9cc",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "b9ffbb31-1031-5af8-982f-977954d28aea",
+     "name": "Reveal contact info",
+     "request": {
+      "name": "Reveal contact info",
+      "description": {
+       "content": "Reveal contact info for up to 25 leads. Choose which fields to reveal via the optional `fields` parameter:\n\n- `[\"email\"]` \u2014 10 credits per lead\n- `[\"phone\"]` \u2014 525 credits per lead\n- `[\"email\", \"phone\"]` \u2014 535 credits per lead (default if omitted)\n\nPreviously revealed contacts are returned from cache at no cost.\n\n**Async:** Returns a `jobId` immediately (< 100ms). Poll `GET /lead-finder/reveal-jobs/:jobId` every 2 seconds until `status` is `completed` or `failed`. Credits are charged inside the worker \u2014 insufficient credits cause the job to fail asynchronously (no synchronous 402).",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/reveal",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "reveal"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"leads\": [\n    {\n      \"id\": \"enc_abc123def456\"\n    }\n  ],\n  \"fields\": [\n    \"email\"\n  ]\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "9e2f9854-fbe4-5e51-a708-1df902a4d0c0",
+       "name": "Reveal job submitted \u2014 poll the returned jobId for results",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"jobId\": \"rj_a1b2c3d4e5f6g7h8\",\n    \"status\": \"pending\",\n    \"totalLeads\": 1,\n    \"fields\": [\n      \"email\"\n    ],\n    \"message\": \"Reveal job submitted. Poll GET /api/v3/lead-finder/reveal-jobs/rj_a1b2c3d4e5f6g7h8 for results.\"\n  },\n  \"meta\": {\n    \"requestId\": \"req_664f2b3c9a1e4d0012abcdf2\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "1476326c-bbe7-52bc-8506-408b67605449",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "701aac81-196c-59c9-9b5f-82eda1196698",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "a8201d2c-3ae6-5cac-ba62-5847f446dc86",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "c56eb475-5b03-5dae-aca5-1d2bba2acdb3",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "83271c34-be56-5f74-9366-fe61d3070c3e",
+     "name": "List reveal/enrich jobs",
+     "request": {
+      "name": "List reveal/enrich jobs",
+      "description": {
+       "content": "List recent reveal/enrich jobs for the team (last 30 days). Free endpoint \u2014 polling is always free.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/reveal-jobs",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "reveal-jobs"
+       ],
+       "query": [
+        {
+         "key": "page",
+         "value": "1",
+         "description": "Page number",
+         "disabled": true
+        },
+        {
+         "key": "limit",
+         "value": "20",
+         "description": "Results per page (max 100)",
+         "disabled": true
+        },
+        {
+         "key": "status",
+         "value": "string",
+         "description": "Filter by job status",
+         "disabled": true
+        }
+       ],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "b93ba710-5c54-58e9-b0ae-c25b7019191c",
+       "name": "Jobs listed successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"jobs\": [\n      {\n        \"jobId\": \"rj_a1b2c3d4e5f6g7h8\",\n        \"status\": \"completed\",\n        \"jobType\": \"reveal\",\n        \"fields\": [\n          \"email\",\n          \"phone\"\n        ],\n        \"total\": 5,\n        \"processed\": 5,\n        \"creditsUsed\": 1725,\n        \"creditsRefunded\": 50,\n        \"createdAt\": \"2026-03-02T10:00:00.000Z\",\n        \"completedAt\": \"2026-03-02T10:00:12.000Z\"\n      }\n    ],\n    \"total\": 42,\n    \"page\": 1,\n    \"limit\": 20\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "7134b530-48fb-5d01-9a3a-acabbc415821",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "5b4a6bf4-4685-5de6-a8b6-735936aebe23",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "556bc65d-9197-5591-87f4-396c202a61d9",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "1996b607-a3f5-5adc-947d-03c73d5dabd2",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "6d855881-6e40-5f30-a240-e8421123fd1b",
+     "name": "Poll reveal/enrich job",
+     "request": {
+      "name": "Poll reveal/enrich job",
+      "description": {
+       "content": "Poll the status of a reveal or enrich job. Call repeatedly until `status` is `\"completed\"` or `\"failed\"`. Polling is always free.\n\n**Recommended interval:** 2 seconds.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/reveal-jobs/{jobId}",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "reveal-jobs",
+        ":jobId"
+       ],
+       "query": [],
+       "variable": [
+        {
+         "key": "jobId",
+         "value": "<jobId>",
+         "description": "Reveal/enrich job ID (starts with `rj_`)"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "c4e875e4-99cc-545a-8b85-680f1cacb428",
+       "name": "Job status returned",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": false,\n  \"data\": {\n    \"jobId\": \"string\",\n    \"status\": \"string\",\n    \"jobType\": \"string\",\n    \"fields\": [\n      \"string\"\n    ],\n    \"progress\": {\n      \"processed\": 0,\n      \"total\": 0\n    },\n    \"results\": {\n      \"revealed\": [\n        {\n          \"id\": null,\n          \"firstName\": null,\n          \"lastName\": null,\n          \"jobTitle\": null,\n          \"companyName\": null,\n          \"emailAddress\": null,\n          \"phone\": null,\n          \"cellphone\": null,\n          \"linkedinUrl\": null,\n          \"domain\": null\n        }\n      ],\n      \"alreadyRevealed\": 0,\n      \"newlyRevealed\": 0,\n      \"creditsUsed\": 0,\n      \"creditsRefunded\": 0\n    },\n    \"error\": \"string\",\n    \"creditsRefunded\": 0,\n    \"createdAt\": \"string\",\n    \"completedAt\": \"string\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "0ba2e150-9b02-5f80-9ded-872ffcb4d117",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "c06c405e-3cef-5900-8f23-8fd1afdfc378",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "eee77db4-98a7-52f2-a281-a7e0a5d4a8cf",
+       "name": "Job not found or belongs to another team",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"Reveal job not found\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "dc31340c-cbc6-5bcf-a06e-ea104627ee9f",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "23de9156-c96c-5880-8644-647cf3bfae1e",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "c04882b8-82f3-5545-930a-b6619be97bba",
+     "name": "List saved searches",
+     "request": {
+      "name": "List saved searches",
+      "description": {
+       "content": "List all saved searches for the current user. Free endpoint.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/saved",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "saved"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "5eba8389-1132-5359-bc95-de56abb909df",
+       "name": "Saved searches listed successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"665e0b2f4a6d8c001abc1234\",\n      \"name\": \"Engineering VPs in Bay Area\",\n      \"filters\": {\n        \"jobFunction\": [\n          \"Engineering\"\n        ],\n        \"jobLevel\": [\n          \"VP\"\n        ],\n        \"city\": \"San Francisco\"\n      },\n      \"createdAt\": \"2025-06-03T14:00:00.000Z\",\n      \"updatedAt\": \"2025-06-03T14:00:00.000Z\"\n    }\n  ],\n  \"meta\": {\n    \"requestId\": \"req_664f2b3c9a1e4d0012abcdf5\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "d173c204-081c-5bd5-879e-051659f45e63",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "fed1186e-96d6-5de7-b598-3515797a89c6",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "9d34ae10-620b-58b1-ad42-4ed32c235c1c",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "f7c45cca-6e9c-5f53-8804-07368585e319",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "39a7cee5-cf48-5a69-9b87-992719c91044",
+     "name": "Save a search",
+     "request": {
+      "name": "Save a search",
+      "description": {
+       "content": "Save a search filter combination for reuse. Free endpoint.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/saved",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "saved"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"name\": \"string\",\n  \"filters\": {\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"middleName\": \"string\",\n    \"city\": \"string\",\n    \"stateName\": null,\n    \"stateCode\": null,\n    \"countryName\": null,\n    \"countryCode\": null,\n    \"continent\": null,\n    \"countryRegion\": null,\n    \"linkedinUrl\": \"string\",\n    \"linkedinHeadline\": \"string\",\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"linkedinIndustry\": null,\n    \"logoUrl\": \"string\",\n    \"emailDomain\": \"string\",\n    \"emailAddress\": \"string\",\n    \"jobTitle\": null,\n    \"jobFunction\": null,\n    \"jobLevel\": null,\n    \"jobDescription\": \"string\",\n    \"jobLocationCity\": \"string\",\n    \"jobLocationState\": \"string\",\n    \"jobLocationCountry\": null,\n    \"jobIsCurrent\": false,\n    \"jobStartDate\": \"string\",\n    \"jobCount\": 0,\n    \"companyName\": null,\n    \"companyNameMode\": \"string\",\n    \"persona\": \"string\",\n    \"languages\": null,\n    \"skills\": null,\n    \"certifications\": \"string\",\n    \"patents\": \"string\",\n    \"publications\": \"string\",\n    \"websites\": \"string\",\n    \"education\": \"string\",\n    \"phone\": \"string\",\n    \"cellphone\": \"string\",\n    \"orgName\": \"string\",\n    \"domain\": null,\n    \"aboutUs\": null,\n    \"companyEntityType\": null,\n    \"companyLegalType\": null,\n    \"employeeCount\": 0,\n    \"employeeCountMax\": 0,\n    \"employeeCountMin\": 0,\n    \"foundedOn\": 0,\n    \"headquartersCity\": \"string\",\n    \"headquartersState\": \"string\",\n    \"headquartersCountry\": null,\n    \"industrySicCode\": null,\n    \"industrySicDescription\": null,\n    \"industryNaicsCode\": null,\n    \"industryNaicsDescription\": null,\n    \"orgLinkedinUrl\": \"string\",\n    \"locationCity\": \"string\",\n    \"locationState\": \"string\",\n    \"locationCountry\": null,\n    \"revenueMax\": 0,\n    \"revenueMin\": 0,\n    \"revenueBuckets\": null,\n    \"specialties\": \"string\",\n    \"crmTechOrg\": null,\n    \"marketingAutomationTechOrg\": null,\n    \"abmTechOrg\": null,\n    \"salesAutomationTechOrg\": null,\n    \"analyticsTechOrg\": null,\n    \"cmsTechOrg\": null,\n    \"martechCategoriesOrg\": null,\n    \"conversationIntelligenceTechOrg\": null,\n    \"cloudProviderTechOrg\": null,\n    \"emailHostingTechOrg\": null,\n    \"emailSecurityTechOrg\": null,\n    \"applicationSecurityTechOrg\": null,\n    \"cloudSecurityTechOrg\": null,\n    \"developmentTechOrg\": null,\n    \"eCommercePlatformTechOrg\": null,\n    \"erpTechOrg\": null,\n    \"hasMobileAppOrg\": false,\n    \"hasWebAppOrg\": false,\n    \"hasCisoOrg\": false,\n    \"hasCioOrg\": false,\n    \"locationCountOrg\": 0,\n    \"isLinkedinUrlClaimedOrg\": false,\n    \"marketingRoleCountOrg\": 0,\n    \"salesRoleCountOrg\": 0,\n    \"operationsRoleCountOrg\": 0,\n    \"businessDevelopmentRoleCountOrg\": 0,\n    \"customerSuccessRoleCountOrg\": 0,\n    \"itRoleCountOrg\": 0,\n    \"grcRoleCountOrg\": 0,\n    \"securityRoleCountOrg\": 0,\n    \"devopsRoleCountOrg\": 0,\n    \"networkInfrastructureRoleCountOrg\": 0,\n    \"mobileDevRoleCountOrg\": 0,\n    \"iosDevRoleCountOrg\": 0,\n    \"androidDevRoleCountOrg\": 0,\n    \"engineerRoleCountOrg\": 0,\n    \"qaRoleCountOrg\": 0,\n    \"marketingOpenRolesCountOrg\": 0,\n    \"operationsOpenRolesCountOrg\": 0,\n    \"salesOpenRolesCountOrg\": 0,\n    \"accountExecutiveOpenRolesCountOrg\": 0,\n    \"customerSuccessOpenRolesCountOrg\": 0,\n    \"demandGenerationOpenRolesCountOrg\": 0,\n    \"businessDevelopmentOpenRolesCountOrg\": 0,\n    \"itOpenRolesCountOrg\": 0,\n    \"securityOpenRolesCountOrg\": 0,\n    \"grcOpenRolesCountOrg\": 0,\n    \"devopsOpenRolesCountOrg\": 0,\n    \"networkInfrastructureOpenRolesCountOrg\": 0,\n    \"monthlyOrganicTrafficOrg\": 0,\n    \"monthlyPaidTrafficOrg\": 0,\n    \"totalMonthlyTrafficOrg\": 0,\n    \"monthlyGoogleAdspendOrg\": 0,\n    \"employeeOnLinkedinGrowthRateOrg\": 0,\n    \"isWebsiteForSaleOrg\": false,\n    \"topAppleappstoreUrlOrg\": \"string\",\n    \"topAppstoreRatingOrg\": 0,\n    \"topAppstoreReviewCountOrg\": 0,\n    \"lastAppstoreUpdateOrg\": \"string\",\n    \"appstoreUpdateCountOrg\": 0,\n    \"appstoreAppCategoryOrg\": \"string\",\n    \"topPlaystoreUrlOrg\": \"string\",\n    \"topPlaystoreRatingOrg\": 0,\n    \"topPlaystoreReviewCountOrg\": 0,\n    \"lastPlaystoreUpdateOrg\": \"string\",\n    \"playstoreDownloadCountOrg\": 0,\n    \"playstoreAppCategoryOrg\": \"string\",\n    \"totalReviewsOrg\": 0,\n    \"lastFundingDateOrg\": \"string\",\n    \"lastFundingAmountOrg\": 0,\n    \"leadInvestorsOrg\": \"string\",\n    \"lastFundingTypeOrg\": null,\n    \"fundingRoundNumberOfInvestorsOrg\": 0,\n    \"totalFundingAmountOrg\": 0\n  }\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "dd94950d-a3da-51a0-be43-4180cbaeb5a7",
+       "name": "Search saved successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"665e0b2f4a6d8c001abc1234\",\n    \"name\": \"Engineering VPs in Bay Area\",\n    \"filters\": {\n      \"jobFunction\": [\n        \"Engineering\"\n      ],\n      \"jobLevel\": [\n        \"VP\"\n      ]\n    },\n    \"createdAt\": \"2025-06-03T14:00:00.000Z\",\n    \"updatedAt\": \"2025-06-03T14:00:00.000Z\"\n  },\n  \"meta\": {\n    \"requestId\": \"req_664f2b3c9a1e4d0012abcdf6\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "ff21c947-e754-5872-8b5b-0f3fa8373921",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "3e1cf3b5-db3a-5870-b940-9ad58cc7aa61",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "fa7cf9af-8c6b-5237-a4d8-e783de7f9289",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "1c07f142-6538-5495-9d83-7858ca973599",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "2dfad644-8c76-531a-807d-1689a9ff9fbd",
+     "name": "Delete a saved search",
+     "request": {
+      "name": "Delete a saved search",
+      "description": {
+       "content": "Delete a saved search by ID. Only the owner can delete their own saved searches.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/saved/{id}",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "saved",
+        ":id"
+       ],
+       "query": [],
+       "variable": [
+        {
+         "key": "id",
+         "value": "<id>",
+         "description": "Saved search ID"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "DELETE",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "6a91eb52-1a59-5f27-962f-0ab6fe017e86",
+       "name": "Saved search deleted successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"deleted\": true\n  },\n  \"meta\": {\n    \"requestId\": \"req_664f2b3c9a1e4d0012abcdf7\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "f53669da-ba8e-53b1-b54e-bd8a3d7d61fc",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "af9b9584-00a3-59b0-92b1-208acde269c9",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "4a5b8713-5b04-516a-a3a7-1dd4208c56c9",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "db02ff26-aa50-51b4-8cc5-dbe1402a893c",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "85550464-cd7c-51e3-8cb5-fad73f898e77",
+     "name": "Search leads",
+     "request": {
+      "name": "Search leads",
+      "description": {
+       "content": "Search across people, companies, and insights dimensions with comprehensive filters. Returns combined person + org + insights data.\n\n**Free tier:**\n- First 3 pages OR 75 results free per search, whichever comes first (at the default page size of 25 these match; with a larger page size the 75-result cap applies first)\n- 50 free searches per month, where a search = a unique filter combination. Paging through results or re-running the same search does not consume additional free searches.\n\n**Paid tier (page 4+):**\n- 1 credit per result returned\n- Max 40 pages\n\nResults include preview fields only. Use the **Reveal** or **Enrich** endpoints to get email and phone.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/search",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "search"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"filters\": {\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"middleName\": \"string\",\n    \"city\": \"string\",\n    \"stateName\": null,\n    \"stateCode\": null,\n    \"countryName\": null,\n    \"countryCode\": null,\n    \"continent\": null,\n    \"countryRegion\": null,\n    \"linkedinUrl\": \"string\",\n    \"linkedinHeadline\": \"string\",\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"linkedinIndustry\": null,\n    \"logoUrl\": \"string\",\n    \"emailDomain\": \"string\",\n    \"emailAddress\": \"string\",\n    \"jobTitle\": null,\n    \"jobFunction\": null,\n    \"jobLevel\": null,\n    \"jobDescription\": \"string\",\n    \"jobLocationCity\": \"string\",\n    \"jobLocationState\": \"string\",\n    \"jobLocationCountry\": null,\n    \"jobIsCurrent\": false,\n    \"jobStartDate\": \"string\",\n    \"jobCount\": 0,\n    \"companyName\": null,\n    \"companyNameMode\": \"string\",\n    \"persona\": \"string\",\n    \"languages\": null,\n    \"skills\": null,\n    \"certifications\": \"string\",\n    \"patents\": \"string\",\n    \"publications\": \"string\",\n    \"websites\": \"string\",\n    \"education\": \"string\",\n    \"phone\": \"string\",\n    \"cellphone\": \"string\",\n    \"orgName\": \"string\",\n    \"domain\": null,\n    \"aboutUs\": null,\n    \"companyEntityType\": null,\n    \"companyLegalType\": null,\n    \"employeeCount\": 0,\n    \"employeeCountMax\": 0,\n    \"employeeCountMin\": 0,\n    \"foundedOn\": 0,\n    \"headquartersCity\": \"string\",\n    \"headquartersState\": \"string\",\n    \"headquartersCountry\": null,\n    \"industrySicCode\": null,\n    \"industrySicDescription\": null,\n    \"industryNaicsCode\": null,\n    \"industryNaicsDescription\": null,\n    \"orgLinkedinUrl\": \"string\",\n    \"locationCity\": \"string\",\n    \"locationState\": \"string\",\n    \"locationCountry\": null,\n    \"revenueMax\": 0,\n    \"revenueMin\": 0,\n    \"revenueBuckets\": null,\n    \"specialties\": \"string\",\n    \"crmTechOrg\": null,\n    \"marketingAutomationTechOrg\": null,\n    \"abmTechOrg\": null,\n    \"salesAutomationTechOrg\": null,\n    \"analyticsTechOrg\": null,\n    \"cmsTechOrg\": null,\n    \"martechCategoriesOrg\": null,\n    \"conversationIntelligenceTechOrg\": null,\n    \"cloudProviderTechOrg\": null,\n    \"emailHostingTechOrg\": null,\n    \"emailSecurityTechOrg\": null,\n    \"applicationSecurityTechOrg\": null,\n    \"cloudSecurityTechOrg\": null,\n    \"developmentTechOrg\": null,\n    \"eCommercePlatformTechOrg\": null,\n    \"erpTechOrg\": null,\n    \"hasMobileAppOrg\": false,\n    \"hasWebAppOrg\": false,\n    \"hasCisoOrg\": false,\n    \"hasCioOrg\": false,\n    \"locationCountOrg\": 0,\n    \"isLinkedinUrlClaimedOrg\": false,\n    \"marketingRoleCountOrg\": 0,\n    \"salesRoleCountOrg\": 0,\n    \"operationsRoleCountOrg\": 0,\n    \"businessDevelopmentRoleCountOrg\": 0,\n    \"customerSuccessRoleCountOrg\": 0,\n    \"itRoleCountOrg\": 0,\n    \"grcRoleCountOrg\": 0,\n    \"securityRoleCountOrg\": 0,\n    \"devopsRoleCountOrg\": 0,\n    \"networkInfrastructureRoleCountOrg\": 0,\n    \"mobileDevRoleCountOrg\": 0,\n    \"iosDevRoleCountOrg\": 0,\n    \"androidDevRoleCountOrg\": 0,\n    \"engineerRoleCountOrg\": 0,\n    \"qaRoleCountOrg\": 0,\n    \"marketingOpenRolesCountOrg\": 0,\n    \"operationsOpenRolesCountOrg\": 0,\n    \"salesOpenRolesCountOrg\": 0,\n    \"accountExecutiveOpenRolesCountOrg\": 0,\n    \"customerSuccessOpenRolesCountOrg\": 0,\n    \"demandGenerationOpenRolesCountOrg\": 0,\n    \"businessDevelopmentOpenRolesCountOrg\": 0,\n    \"itOpenRolesCountOrg\": 0,\n    \"securityOpenRolesCountOrg\": 0,\n    \"grcOpenRolesCountOrg\": 0,\n    \"devopsOpenRolesCountOrg\": 0,\n    \"networkInfrastructureOpenRolesCountOrg\": 0,\n    \"monthlyOrganicTrafficOrg\": 0,\n    \"monthlyPaidTrafficOrg\": 0,\n    \"totalMonthlyTrafficOrg\": 0,\n    \"monthlyGoogleAdspendOrg\": 0,\n    \"employeeOnLinkedinGrowthRateOrg\": 0,\n    \"isWebsiteForSaleOrg\": false,\n    \"topAppleappstoreUrlOrg\": \"string\",\n    \"topAppstoreRatingOrg\": 0,\n    \"topAppstoreReviewCountOrg\": 0,\n    \"lastAppstoreUpdateOrg\": \"string\",\n    \"appstoreUpdateCountOrg\": 0,\n    \"appstoreAppCategoryOrg\": \"string\",\n    \"topPlaystoreUrlOrg\": \"string\",\n    \"topPlaystoreRatingOrg\": 0,\n    \"topPlaystoreReviewCountOrg\": 0,\n    \"lastPlaystoreUpdateOrg\": \"string\",\n    \"playstoreDownloadCountOrg\": 0,\n    \"playstoreAppCategoryOrg\": \"string\",\n    \"totalReviewsOrg\": 0,\n    \"lastFundingDateOrg\": \"string\",\n    \"lastFundingAmountOrg\": 0,\n    \"leadInvestorsOrg\": \"string\",\n    \"lastFundingTypeOrg\": null,\n    \"fundingRoundNumberOfInvestorsOrg\": 0,\n    \"totalFundingAmountOrg\": 0\n  },\n  \"excludeFilters\": {\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"aboutUs\": null,\n    \"domain\": null,\n    \"jobTitle\": null\n  },\n  \"page\": 1,\n  \"pageSize\": 25\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "bbadb2ec-fb4f-5036-a9ee-c184fe1aa68c",
+       "name": "Search results returned successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"results\": [\n      {\n        \"id\": \"enc_abc123def456\",\n        \"firstName\": \"Sarah\",\n        \"lastName\": \"C.\",\n        \"logoUrl\": \"https://media.licdn.com/dms/image/stripe-logo.jpg\",\n        \"emailDomain\": \"stripe.com\",\n        \"linkedinUrl\": \"https://linkedin.com/in/sarahc\",\n        \"linkedinHeadline\": \"VP of Engineering at Stripe\",\n        \"jobTitle\": \"VP of Engineering\",\n        \"jobFunction\": \"Engineering\",\n        \"jobLevel\": \"VP\",\n        \"companyName\": \"Stripe\",\n        \"skills\": \"Python, Distributed Systems, Cloud Architecture\",\n        \"city\": \"San Francisco\",\n        \"stateName\": \"California\",\n        \"countryName\": \"United States\",\n        \"domain\": \"stripe.com\",\n        \"orgLinkedinUrl\": \"https://linkedin.com/company/stripe\",\n        \"employeeCount\": 8000,\n        \"industrySicDescription\": \"Computer Processing & Data Preparation\",\n        \"industryNaicsDescription\": \"Data Processing, Hosting, and Related Services\",\n        \"revenue\": \"$1B+\",\n        \"specialties\": \"Payments, Financial Infrastructure\",\n        \"foundedOn\": \"2010\",\n        \"headquartersCity\": \"San Francisco\",\n        \"headquartersState\": \"California\",\n        \"headquartersCountry\": \"United States\",\n        \"employeeOnLinkedinGrowthRateOrg\": 12,\n        \"totalMonthlyTrafficOrg\": 5000000,\n        \"totalFundingAmountOrg\": 8700000000,\n        \"lastFundingTypeOrg\": \"Series I\",\n        \"lastFundingDateOrg\": \"2023-03-15\"\n      }\n    ],\n    \"pagination\": {\n      \"page\": 1,\n      \"pageSize\": 25,\n      \"totalResults\": 1842,\n      \"totalPages\": 74,\n      \"hasMore\": true,\n      \"searchedTotalResult\": 1842\n    }\n  },\n  \"meta\": {\n    \"requestId\": \"req_664f2b3c9a1e4d0012abcdef\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "e8359b84-05df-51db-908e-d236a9223010",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "3fd0decc-0356-51ac-bb32-c365ebc3b6eb",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "6ee311ba-dcf0-5f4b-b948-f36ad9cd8086",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/insufficient-credits\",\n  \"title\": \"Insufficient Credits\",\n  \"status\": 402,\n  \"detail\": \"Not enough credits. Required: 575, available: 100\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "51306cd5-3d00-5433-aa84-1d4b4dee4f91",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "0cc31f03-8fe9-572c-8b70-c6dd16edca22",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "470fd9be-abcd-5634-b663-748865dfdb83",
+     "name": "Suggest company names",
+     "request": {
+      "name": "Suggest company names",
+      "description": {
+       "content": "Prefix-based company name autocomplete. Returns matching company names for search typeahead. Free endpoint.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/suggest",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "suggest"
+       ],
+       "query": [
+        {
+         "key": "q",
+         "value": "string",
+         "description": "Search prefix (min 2 characters)",
+         "disabled": false
+        },
+        {
+         "key": "limit",
+         "value": "",
+         "description": "Max suggestions (1\u201350, default: 20)",
+         "disabled": true
+        }
+       ],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "cbcbb785-0542-5bd2-8118-919076c0b4c0",
+       "name": "Suggestions returned successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"values\": [\n      \"Stripe\",\n      \"Stripe Atlas\",\n      \"StripChat\"\n    ]\n  },\n  \"meta\": {\n    \"requestId\": \"req_664f2b3c9a1e4d0012abcdf9\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "a139b000-935c-5333-b53c-cad9552f6512",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "8c2bc816-584d-5a86-8ccd-10f2456f447a",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "c340ad07-361c-51d1-ac48-342502adc008",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "bf4fcdb8-ac9d-5dc7-907a-bb622d805e79",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "823a0d5f-7669-543a-8de8-03b2105c6c08",
+     "name": "Unlock full last names",
+     "request": {
+      "name": "Unlock full last names",
+      "description": {
+       "content": "Pay 1 credit per lead to unlock full last names. Search results mask last names by default; this endpoint reveals them.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/lead-finder/unlock-names",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "lead-finder",
+        "unlock-names"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"leads\": [\n    {\n      \"id\": \"string\"\n    }\n  ]\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "20ec4022-e028-5743-b3f7-72363a96ab81",
+       "name": "Names unlocked successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"results\": [\n      {\n        \"id\": \"enc_abc123def456\",\n        \"lastName\": \"Chen\"\n      },\n      {\n        \"id\": \"enc_xyz789ghi012\",\n        \"lastName\": \"Johnson\"\n      }\n    ]\n  },\n  \"meta\": {\n    \"requestId\": \"req_664f2b3c9a1e4d0012abcdf4\",\n    \"creditsUsed\": 2\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "4a887849-83ce-55e2-918e-14ea473cd12f",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body Invalid request\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "850b6483-0c7b-5ff3-9c3c-e07744bf37e2",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "0471997c-c8a3-5671-92ef-a5711565eb7c",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/insufficient-credits\",\n  \"title\": \"Insufficient Credits\",\n  \"status\": 402,\n  \"detail\": \"Not enough credits. Required: 575, available: 100\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "c7d4cccc-e207-5728-b0cf-b2ad3a15a55b",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "229ac986-ae9e-5f91-8cce-68e56b1f6ef7",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "variable": [
+  {
+   "key": "baseUrl",
+   "value": "https://dev.enrich.so/api/v3"
+  },
+  {
+   "key": "apiKey",
+   "value": "<your Enrich API key>"
+  }
+ ],
+ "auth": {
+  "type": "apikey",
+  "apikey": [
+   {
+    "key": "key",
+    "value": "x-api-key"
+   },
+   {
+    "key": "value",
+    "value": "{{apiKey}}"
+   },
+   {
+    "key": "in",
+    "value": "header"
+   }
+  ]
+ }
+}

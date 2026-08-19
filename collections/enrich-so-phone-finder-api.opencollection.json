@@ -1,0 +1,99 @@
+{
+ "opencollection": "1.0.0",
+ "info": {
+  "name": "Enrich Phone Finder API",
+  "version": "3.0",
+  "docs": "https://doc.enrich.so/api-reference-1951025m0"
+ },
+ "request": {
+  "baseUrl": "https://dev.enrich.so/api/v3",
+  "auth": {
+   "type": "apikey",
+   "key": "x-api-key",
+   "value": "{{x-api-key}}",
+   "placement": "header"
+  }
+ },
+ "items": [
+  {
+   "info": {
+    "name": "Phone Finder",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Find phone numbers",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/phones",
+      "query": [
+       {
+        "key": "email",
+        "value": "string",
+        "docs": "The person's email address"
+       },
+       {
+        "key": "linkedin",
+        "value": "string",
+        "docs": "The person's profile URL"
+       }
+      ]
+     },
+     "docs": "Find phone numbers associated with a person's email address or social\nprofile URL. You must provide at least one of the two.\n\n**Cost:** 500 credits. You are **not** charged if no phone numbers are found."
+    },
+    {
+     "info": {
+      "name": "Find phone numbers in batch",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/phones/bulk",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"emails\": [\n    \"sarah.chen@stripe.com\",\n    \"james.rodriguez@hubspot.com\"\n  ],\n  \"linkedins\": [\n    \"https://www.example.com/in/priyapatel\"\n  ],\n  \"webhookUrl\": \"https://api.yourapp.com/webhooks/enrich\"\n}"
+      }
+     },
+     "docs": "Submit up to **500 000 items** (email addresses and/or profile URLs) for\nbulk phone lookup. Emails are deduplicated case-insensitively; profile\nURLs are deduplicated as-is.\n\n**Cost:** 10 credits per unique item, reserved upfront. At settlement,\nonly items where phones were actually found are charged \u2014 the rest are\nrefunded.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** for every item as it is processed. See\n   [phoneResult](#tag/Webhooks/operation/webhookPhoneResult) for the payload.\n\n2. **A completion callback** when every item has been processed. See\n   [phoneCompletion](#tag/Webhooks/operation/webhookPhoneCompletion) for the payload."
+    },
+    {
+     "info": {
+      "name": "Check bulk phone lookup progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/phones/bulk/{jobId}"
+     },
+     "docs": "Poll this endpoint to track the job. The `progress` field is a percentage\nfrom 0 to 100.\n\n**Cost:** Free."
+    },
+    {
+     "info": {
+      "name": "Get bulk phone lookup results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/phones/bulk/{jobId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page (default: 100, max: 1 000)"
+       }
+      ]
+     },
+     "docs": "Retrieve paginated results. Each item shows the phones found (or an error\nmessage if the lookup failed).\n\n**Credit settlement:** Only items where at least one phone number was found\nare charged. Everything else is refunded."
+    }
+   ]
+  }
+ ]
+}

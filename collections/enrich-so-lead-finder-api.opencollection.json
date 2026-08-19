@@ -1,0 +1,277 @@
+{
+ "opencollection": "1.0.0",
+ "info": {
+  "name": "Enrich Lead Finder API",
+  "version": "3.0",
+  "docs": "https://doc.enrich.so/api-reference-1951025m0"
+ },
+ "request": {
+  "baseUrl": "https://dev.enrich.so/api/v3",
+  "auth": {
+   "type": "apikey",
+   "key": "x-api-key",
+   "value": "{{x-api-key}}",
+   "placement": "header"
+  }
+ },
+ "items": [
+  {
+   "info": {
+    "name": "Lead Finder",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Count matching leads",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/count",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"filters\": {\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"middleName\": \"string\",\n    \"city\": \"string\",\n    \"stateName\": null,\n    \"stateCode\": null,\n    \"countryName\": null,\n    \"countryCode\": null,\n    \"continent\": null,\n    \"countryRegion\": null,\n    \"linkedinUrl\": \"string\",\n    \"linkedinHeadline\": \"string\",\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"linkedinIndustry\": null,\n    \"logoUrl\": \"string\",\n    \"emailDomain\": \"string\",\n    \"emailAddress\": \"string\",\n    \"jobTitle\": null,\n    \"jobFunction\": null,\n    \"jobLevel\": null,\n    \"jobDescription\": \"string\",\n    \"jobLocationCity\": \"string\",\n    \"jobLocationState\": \"string\",\n    \"jobLocationCountry\": null,\n    \"jobIsCurrent\": false,\n    \"jobStartDate\": \"string\",\n    \"jobCount\": 0,\n    \"companyName\": null,\n    \"companyNameMode\": \"string\",\n    \"persona\": \"string\",\n    \"languages\": null,\n    \"skills\": null,\n    \"certifications\": \"string\",\n    \"patents\": \"string\",\n    \"publications\": \"string\",\n    \"websites\": \"string\",\n    \"education\": \"string\",\n    \"phone\": \"string\",\n    \"cellphone\": \"string\",\n    \"orgName\": \"string\",\n    \"domain\": null,\n    \"aboutUs\": null,\n    \"companyEntityType\": null,\n    \"companyLegalType\": null,\n    \"employeeCount\": 0,\n    \"employeeCountMax\": 0,\n    \"employeeCountMin\": 0,\n    \"foundedOn\": 0,\n    \"headquartersCity\": \"string\",\n    \"headquartersState\": \"string\",\n    \"headquartersCountry\": null,\n    \"industrySicCode\": null,\n    \"industrySicDescription\": null,\n    \"industryNaicsCode\": null,\n    \"industryNaicsDescription\": null,\n    \"orgLinkedinUrl\": \"string\",\n    \"locationCity\": \"string\",\n    \"locationState\": \"string\",\n    \"locationCountry\": null,\n    \"revenueMax\": 0,\n    \"revenueMin\": 0,\n    \"revenueBuckets\": null,\n    \"specialties\": \"string\",\n    \"crmTechOrg\": null,\n    \"marketingAutomationTechOrg\": null,\n    \"abmTechOrg\": null,\n    \"salesAutomationTechOrg\": null,\n    \"analyticsTechOrg\": null,\n    \"cmsTechOrg\": null,\n    \"martechCategoriesOrg\": null,\n    \"conversationIntelligenceTechOrg\": null,\n    \"cloudProviderTechOrg\": null,\n    \"emailHostingTechOrg\": null,\n    \"emailSecurityTechOrg\": null,\n    \"applicationSecurityTechOrg\": null,\n    \"cloudSecurityTechOrg\": null,\n    \"developmentTechOrg\": null,\n    \"eCommercePlatformTechOrg\": null,\n    \"erpTechOrg\": null,\n    \"hasMobileAppOrg\": false,\n    \"hasWebAppOrg\": false,\n    \"hasCisoOrg\": false,\n    \"hasCioOrg\": false,\n    \"locationCountOrg\": 0,\n    \"isLinkedinUrlClaimedOrg\": false,\n    \"marketingRoleCountOrg\": 0,\n    \"salesRoleCountOrg\": 0,\n    \"operationsRoleCountOrg\": 0,\n    \"businessDevelopmentRoleCountOrg\": 0,\n    \"customerSuccessRoleCountOrg\": 0,\n    \"itRoleCountOrg\": 0,\n    \"grcRoleCountOrg\": 0,\n    \"securityRoleCountOrg\": 0,\n    \"devopsRoleCountOrg\": 0,\n    \"networkInfrastructureRoleCountOrg\": 0,\n    \"mobileDevRoleCountOrg\": 0,\n    \"iosDevRoleCountOrg\": 0,\n    \"androidDevRoleCountOrg\": 0,\n    \"engineerRoleCountOrg\": 0,\n    \"qaRoleCountOrg\": 0,\n    \"marketingOpenRolesCountOrg\": 0,\n    \"operationsOpenRolesCountOrg\": 0,\n    \"salesOpenRolesCountOrg\": 0,\n    \"accountExecutiveOpenRolesCountOrg\": 0,\n    \"customerSuccessOpenRolesCountOrg\": 0,\n    \"demandGenerationOpenRolesCountOrg\": 0,\n    \"businessDevelopmentOpenRolesCountOrg\": 0,\n    \"itOpenRolesCountOrg\": 0,\n    \"securityOpenRolesCountOrg\": 0,\n    \"grcOpenRolesCountOrg\": 0,\n    \"devopsOpenRolesCountOrg\": 0,\n    \"networkInfrastructureOpenRolesCountOrg\": 0,\n    \"monthlyOrganicTrafficOrg\": 0,\n    \"monthlyPaidTrafficOrg\": 0,\n    \"totalMonthlyTrafficOrg\": 0,\n    \"monthlyGoogleAdspendOrg\": 0,\n    \"employeeOnLinkedinGrowthRateOrg\": 0,\n    \"isWebsiteForSaleOrg\": false,\n    \"topAppleappstoreUrlOrg\": \"string\",\n    \"topAppstoreRatingOrg\": 0,\n    \"topAppstoreReviewCountOrg\": 0,\n    \"lastAppstoreUpdateOrg\": \"string\",\n    \"appstoreUpdateCountOrg\": 0,\n    \"appstoreAppCategoryOrg\": \"string\",\n    \"topPlaystoreUrlOrg\": \"string\",\n    \"topPlaystoreRatingOrg\": 0,\n    \"topPlaystoreReviewCountOrg\": 0,\n    \"lastPlaystoreUpdateOrg\": \"string\",\n    \"playstoreDownloadCountOrg\": 0,\n    \"playstoreAppCategoryOrg\": \"string\",\n    \"totalReviewsOrg\": 0,\n    \"lastFundingDateOrg\": \"string\",\n    \"lastFundingAmountOrg\": 0,\n    \"leadInvestorsOrg\": \"string\",\n    \"lastFundingTypeOrg\": null,\n    \"fundingRoundNumberOfInvestorsOrg\": 0,\n    \"totalFundingAmountOrg\": 0\n  },\n  \"excludeFilters\": {\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"aboutUs\": null,\n    \"domain\": null,\n    \"jobTitle\": null\n  }\n}"
+      }
+     },
+     "docs": "Get the total count of leads matching your filters. This endpoint is free and does not consume credits."
+    },
+    {
+     "info": {
+      "name": "Enrich contacts with specific fields",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/enrich",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"leads\": [\n    {\n      \"id\": \"string\"\n    }\n  ],\n  \"fields\": [\n    \"string\"\n  ]\n}"
+      }
+     },
+     "docs": "Reveal specific contact fields (email and/or phone) for up to 25 leads.\n\n**Pricing:**\n- Email: 10 credits per lead\n- Phone: 525 credits per lead\n\nPreviously revealed fields are returned from cache at no cost.\n\n**Async:** Returns a `jobId` immediately (< 100ms). Poll `GET /lead-finder/reveal-jobs/:jobId` every 2 seconds until `status` is `completed` or `failed`. Credits are charged inside the worker \u2014 insufficient credits cause the job to fail asynchronously (no synchronous 402)."
+    },
+    {
+     "info": {
+      "name": "Export leads to CSV (async)",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/export",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"filters\": {\n    \"jobLevel\": [\n      \"C-Suite\",\n      \"VP\"\n    ],\n    \"domain\": [\n      \"stripe.com\",\n      \"vercel.com\"\n    ]\n  },\n  \"maxResults\": 500,\n  \"includeEmail\": true,\n  \"includeNames\": true\n}"
+      }
+     },
+     "docs": "Submit an async CSV export job. Returns a `jobId` immediately \u2014 poll `GET /lead-finder/export-jobs/{jobId}` for status. Once the job reaches `completed` status, download the file via `GET /lead-finder/export-jobs/{jobId}/download`.\n\nCredits are estimated upfront and deducted during processing. Refunds are issued for leads where the requested contact info was not found.\n\n**Pricing:**\n- Preview fields only: Free\n- `includeEmail`: 10 credits per lead\n- `includePhone`: 525 credits per lead\n- `includeNames`: 1 credit per lead (full last names)\n- `includeContactInfo`: Shorthand for email + phone (535 credits/lead)"
+    },
+    {
+     "info": {
+      "name": "List export jobs",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/export-jobs",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "20",
+        "docs": "Results per page (default: 20, max: 100)"
+       },
+       {
+        "key": "status",
+        "value": "string",
+        "docs": "Filter by job status"
+       }
+      ]
+     },
+     "docs": "List recent CSV export jobs for your team (last 30 days). Paginated, optionally filtered by status."
+    },
+    {
+     "info": {
+      "name": "Poll export job status",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/export-jobs/{jobId}"
+     },
+     "docs": "Poll the status of a CSV export job. The response shape varies by status:\n\n- **`pending`** \u2014 Job is queued, not yet started.\n- **`processing`** \u2014 Job is actively running. Check `progress` for completion percentage.\n- **`completed`** \u2014 Job finished successfully. Includes `results` with final credit usage. Download the file via `GET /lead-finder/export-jobs/{jobId}/download`.\n- **`failed`** \u2014 Job encountered an error. Includes `error` message and any `creditsRefunded`."
+    },
+    {
+     "info": {
+      "name": "Download export CSV",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/export-jobs/{jobId}/download"
+     },
+     "docs": "Stream the completed CSV file for an export job. Returns the file with `Content-Type: text/csv`.\n\nReturns **409 Conflict** if the job has not yet reached `completed` status or has failed. Poll `GET /lead-finder/export-jobs/{jobId}` first to confirm the job is complete before downloading."
+    },
+    {
+     "info": {
+      "name": "Get filter options",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/filter-options"
+     },
+     "docs": "Returns available values for multi-select filter fields (countries, departments, industries, job functions, etc.). Values are fetched from the database and cached for performance. Free endpoint."
+    },
+    {
+     "info": {
+      "name": "Reveal contact info",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/reveal",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"leads\": [\n    {\n      \"id\": \"enc_abc123def456\"\n    }\n  ],\n  \"fields\": [\n    \"email\"\n  ]\n}"
+      }
+     },
+     "docs": "Reveal contact info for up to 25 leads. Choose which fields to reveal via the optional `fields` parameter:\n\n- `[\"email\"]` \u2014 10 credits per lead\n- `[\"phone\"]` \u2014 525 credits per lead\n- `[\"email\", \"phone\"]` \u2014 535 credits per lead (default if omitted)\n\nPreviously revealed contacts are returned from cache at no cost.\n\n**Async:** Returns a `jobId` immediately (< 100ms). Poll `GET /lead-finder/reveal-jobs/:jobId` every 2 seconds until `status` is `completed` or `failed`. Credits are charged inside the worker \u2014 insufficient credits cause the job to fail asynchronously (no synchronous 402)."
+    },
+    {
+     "info": {
+      "name": "List reveal/enrich jobs",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/reveal-jobs",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number"
+       },
+       {
+        "key": "limit",
+        "value": "20",
+        "docs": "Results per page (max 100)"
+       },
+       {
+        "key": "status",
+        "value": "string",
+        "docs": "Filter by job status"
+       }
+      ]
+     },
+     "docs": "List recent reveal/enrich jobs for the team (last 30 days). Free endpoint \u2014 polling is always free."
+    },
+    {
+     "info": {
+      "name": "Poll reveal/enrich job",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/reveal-jobs/{jobId}"
+     },
+     "docs": "Poll the status of a reveal or enrich job. Call repeatedly until `status` is `\"completed\"` or `\"failed\"`. Polling is always free.\n\n**Recommended interval:** 2 seconds."
+    },
+    {
+     "info": {
+      "name": "List saved searches",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/saved"
+     },
+     "docs": "List all saved searches for the current user. Free endpoint."
+    },
+    {
+     "info": {
+      "name": "Save a search",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/saved",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"name\": \"string\",\n  \"filters\": {\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"middleName\": \"string\",\n    \"city\": \"string\",\n    \"stateName\": null,\n    \"stateCode\": null,\n    \"countryName\": null,\n    \"countryCode\": null,\n    \"continent\": null,\n    \"countryRegion\": null,\n    \"linkedinUrl\": \"string\",\n    \"linkedinHeadline\": \"string\",\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"linkedinIndustry\": null,\n    \"logoUrl\": \"string\",\n    \"emailDomain\": \"string\",\n    \"emailAddress\": \"string\",\n    \"jobTitle\": null,\n    \"jobFunction\": null,\n    \"jobLevel\": null,\n    \"jobDescription\": \"string\",\n    \"jobLocationCity\": \"string\",\n    \"jobLocationState\": \"string\",\n    \"jobLocationCountry\": null,\n    \"jobIsCurrent\": false,\n    \"jobStartDate\": \"string\",\n    \"jobCount\": 0,\n    \"companyName\": null,\n    \"companyNameMode\": \"string\",\n    \"persona\": \"string\",\n    \"languages\": null,\n    \"skills\": null,\n    \"certifications\": \"string\",\n    \"patents\": \"string\",\n    \"publications\": \"string\",\n    \"websites\": \"string\",\n    \"education\": \"string\",\n    \"phone\": \"string\",\n    \"cellphone\": \"string\",\n    \"orgName\": \"string\",\n    \"domain\": null,\n    \"aboutUs\": null,\n    \"companyEntityType\": null,\n    \"companyLegalType\": null,\n    \"employeeCount\": 0,\n    \"employeeCountMax\": 0,\n    \"employeeCountMin\": 0,\n    \"foundedOn\": 0,\n    \"headquartersCity\": \"string\",\n    \"headquartersState\": \"string\",\n    \"headquartersCountry\": null,\n    \"industrySicCode\": null,\n    \"industrySicDescription\": null,\n    \"industryNaicsCode\": null,\n    \"industryNaicsDescription\": null,\n    \"orgLinkedinUrl\": \"string\",\n    \"locationCity\": \"string\",\n    \"locationState\": \"string\",\n    \"locationCountry\": null,\n    \"revenueMax\": 0,\n    \"revenueMin\": 0,\n    \"revenueBuckets\": null,\n    \"specialties\": \"string\",\n    \"crmTechOrg\": null,\n    \"marketingAutomationTechOrg\": null,\n    \"abmTechOrg\": null,\n    \"salesAutomationTechOrg\": null,\n    \"analyticsTechOrg\": null,\n    \"cmsTechOrg\": null,\n    \"martechCategoriesOrg\": null,\n    \"conversationIntelligenceTechOrg\": null,\n    \"cloudProviderTechOrg\": null,\n    \"emailHostingTechOrg\": null,\n    \"emailSecurityTechOrg\": null,\n    \"applicationSecurityTechOrg\": null,\n    \"cloudSecurityTechOrg\": null,\n    \"developmentTechOrg\": null,\n    \"eCommercePlatformTechOrg\": null,\n    \"erpTechOrg\": null,\n    \"hasMobileAppOrg\": false,\n    \"hasWebAppOrg\": false,\n    \"hasCisoOrg\": false,\n    \"hasCioOrg\": false,\n    \"locationCountOrg\": 0,\n    \"isLinkedinUrlClaimedOrg\": false,\n    \"marketingRoleCountOrg\": 0,\n    \"salesRoleCountOrg\": 0,\n    \"operationsRoleCountOrg\": 0,\n    \"businessDevelopmentRoleCountOrg\": 0,\n    \"customerSuccessRoleCountOrg\": 0,\n    \"itRoleCountOrg\": 0,\n    \"grcRoleCountOrg\": 0,\n    \"securityRoleCountOrg\": 0,\n    \"devopsRoleCountOrg\": 0,\n    \"networkInfrastructureRoleCountOrg\": 0,\n    \"mobileDevRoleCountOrg\": 0,\n    \"iosDevRoleCountOrg\": 0,\n    \"androidDevRoleCountOrg\": 0,\n    \"engineerRoleCountOrg\": 0,\n    \"qaRoleCountOrg\": 0,\n    \"marketingOpenRolesCountOrg\": 0,\n    \"operationsOpenRolesCountOrg\": 0,\n    \"salesOpenRolesCountOrg\": 0,\n    \"accountExecutiveOpenRolesCountOrg\": 0,\n    \"customerSuccessOpenRolesCountOrg\": 0,\n    \"demandGenerationOpenRolesCountOrg\": 0,\n    \"businessDevelopmentOpenRolesCountOrg\": 0,\n    \"itOpenRolesCountOrg\": 0,\n    \"securityOpenRolesCountOrg\": 0,\n    \"grcOpenRolesCountOrg\": 0,\n    \"devopsOpenRolesCountOrg\": 0,\n    \"networkInfrastructureOpenRolesCountOrg\": 0,\n    \"monthlyOrganicTrafficOrg\": 0,\n    \"monthlyPaidTrafficOrg\": 0,\n    \"totalMonthlyTrafficOrg\": 0,\n    \"monthlyGoogleAdspendOrg\": 0,\n    \"employeeOnLinkedinGrowthRateOrg\": 0,\n    \"isWebsiteForSaleOrg\": false,\n    \"topAppleappstoreUrlOrg\": \"string\",\n    \"topAppstoreRatingOrg\": 0,\n    \"topAppstoreReviewCountOrg\": 0,\n    \"lastAppstoreUpdateOrg\": \"string\",\n    \"appstoreUpdateCountOrg\": 0,\n    \"appstoreAppCategoryOrg\": \"string\",\n    \"topPlaystoreUrlOrg\": \"string\",\n    \"topPlaystoreRatingOrg\": 0,\n    \"topPlaystoreReviewCountOrg\": 0,\n    \"lastPlaystoreUpdateOrg\": \"string\",\n    \"playstoreDownloadCountOrg\": 0,\n    \"playstoreAppCategoryOrg\": \"string\",\n    \"totalReviewsOrg\": 0,\n    \"lastFundingDateOrg\": \"string\",\n    \"lastFundingAmountOrg\": 0,\n    \"leadInvestorsOrg\": \"string\",\n    \"lastFundingTypeOrg\": null,\n    \"fundingRoundNumberOfInvestorsOrg\": 0,\n    \"totalFundingAmountOrg\": 0\n  }\n}"
+      }
+     },
+     "docs": "Save a search filter combination for reuse. Free endpoint."
+    },
+    {
+     "info": {
+      "name": "Delete a saved search",
+      "type": "http"
+     },
+     "http": {
+      "method": "DELETE",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/saved/{id}"
+     },
+     "docs": "Delete a saved search by ID. Only the owner can delete their own saved searches."
+    },
+    {
+     "info": {
+      "name": "Search leads",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/search",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"filters\": {\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"middleName\": \"string\",\n    \"city\": \"string\",\n    \"stateName\": null,\n    \"stateCode\": null,\n    \"countryName\": null,\n    \"countryCode\": null,\n    \"continent\": null,\n    \"countryRegion\": null,\n    \"linkedinUrl\": \"string\",\n    \"linkedinHeadline\": \"string\",\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"linkedinIndustry\": null,\n    \"logoUrl\": \"string\",\n    \"emailDomain\": \"string\",\n    \"emailAddress\": \"string\",\n    \"jobTitle\": null,\n    \"jobFunction\": null,\n    \"jobLevel\": null,\n    \"jobDescription\": \"string\",\n    \"jobLocationCity\": \"string\",\n    \"jobLocationState\": \"string\",\n    \"jobLocationCountry\": null,\n    \"jobIsCurrent\": false,\n    \"jobStartDate\": \"string\",\n    \"jobCount\": 0,\n    \"companyName\": null,\n    \"companyNameMode\": \"string\",\n    \"persona\": \"string\",\n    \"languages\": null,\n    \"skills\": null,\n    \"certifications\": \"string\",\n    \"patents\": \"string\",\n    \"publications\": \"string\",\n    \"websites\": \"string\",\n    \"education\": \"string\",\n    \"phone\": \"string\",\n    \"cellphone\": \"string\",\n    \"orgName\": \"string\",\n    \"domain\": null,\n    \"aboutUs\": null,\n    \"companyEntityType\": null,\n    \"companyLegalType\": null,\n    \"employeeCount\": 0,\n    \"employeeCountMax\": 0,\n    \"employeeCountMin\": 0,\n    \"foundedOn\": 0,\n    \"headquartersCity\": \"string\",\n    \"headquartersState\": \"string\",\n    \"headquartersCountry\": null,\n    \"industrySicCode\": null,\n    \"industrySicDescription\": null,\n    \"industryNaicsCode\": null,\n    \"industryNaicsDescription\": null,\n    \"orgLinkedinUrl\": \"string\",\n    \"locationCity\": \"string\",\n    \"locationState\": \"string\",\n    \"locationCountry\": null,\n    \"revenueMax\": 0,\n    \"revenueMin\": 0,\n    \"revenueBuckets\": null,\n    \"specialties\": \"string\",\n    \"crmTechOrg\": null,\n    \"marketingAutomationTechOrg\": null,\n    \"abmTechOrg\": null,\n    \"salesAutomationTechOrg\": null,\n    \"analyticsTechOrg\": null,\n    \"cmsTechOrg\": null,\n    \"martechCategoriesOrg\": null,\n    \"conversationIntelligenceTechOrg\": null,\n    \"cloudProviderTechOrg\": null,\n    \"emailHostingTechOrg\": null,\n    \"emailSecurityTechOrg\": null,\n    \"applicationSecurityTechOrg\": null,\n    \"cloudSecurityTechOrg\": null,\n    \"developmentTechOrg\": null,\n    \"eCommercePlatformTechOrg\": null,\n    \"erpTechOrg\": null,\n    \"hasMobileAppOrg\": false,\n    \"hasWebAppOrg\": false,\n    \"hasCisoOrg\": false,\n    \"hasCioOrg\": false,\n    \"locationCountOrg\": 0,\n    \"isLinkedinUrlClaimedOrg\": false,\n    \"marketingRoleCountOrg\": 0,\n    \"salesRoleCountOrg\": 0,\n    \"operationsRoleCountOrg\": 0,\n    \"businessDevelopmentRoleCountOrg\": 0,\n    \"customerSuccessRoleCountOrg\": 0,\n    \"itRoleCountOrg\": 0,\n    \"grcRoleCountOrg\": 0,\n    \"securityRoleCountOrg\": 0,\n    \"devopsRoleCountOrg\": 0,\n    \"networkInfrastructureRoleCountOrg\": 0,\n    \"mobileDevRoleCountOrg\": 0,\n    \"iosDevRoleCountOrg\": 0,\n    \"androidDevRoleCountOrg\": 0,\n    \"engineerRoleCountOrg\": 0,\n    \"qaRoleCountOrg\": 0,\n    \"marketingOpenRolesCountOrg\": 0,\n    \"operationsOpenRolesCountOrg\": 0,\n    \"salesOpenRolesCountOrg\": 0,\n    \"accountExecutiveOpenRolesCountOrg\": 0,\n    \"customerSuccessOpenRolesCountOrg\": 0,\n    \"demandGenerationOpenRolesCountOrg\": 0,\n    \"businessDevelopmentOpenRolesCountOrg\": 0,\n    \"itOpenRolesCountOrg\": 0,\n    \"securityOpenRolesCountOrg\": 0,\n    \"grcOpenRolesCountOrg\": 0,\n    \"devopsOpenRolesCountOrg\": 0,\n    \"networkInfrastructureOpenRolesCountOrg\": 0,\n    \"monthlyOrganicTrafficOrg\": 0,\n    \"monthlyPaidTrafficOrg\": 0,\n    \"totalMonthlyTrafficOrg\": 0,\n    \"monthlyGoogleAdspendOrg\": 0,\n    \"employeeOnLinkedinGrowthRateOrg\": 0,\n    \"isWebsiteForSaleOrg\": false,\n    \"topAppleappstoreUrlOrg\": \"string\",\n    \"topAppstoreRatingOrg\": 0,\n    \"topAppstoreReviewCountOrg\": 0,\n    \"lastAppstoreUpdateOrg\": \"string\",\n    \"appstoreUpdateCountOrg\": 0,\n    \"appstoreAppCategoryOrg\": \"string\",\n    \"topPlaystoreUrlOrg\": \"string\",\n    \"topPlaystoreRatingOrg\": 0,\n    \"topPlaystoreReviewCountOrg\": 0,\n    \"lastPlaystoreUpdateOrg\": \"string\",\n    \"playstoreDownloadCountOrg\": 0,\n    \"playstoreAppCategoryOrg\": \"string\",\n    \"totalReviewsOrg\": 0,\n    \"lastFundingDateOrg\": \"string\",\n    \"lastFundingAmountOrg\": 0,\n    \"leadInvestorsOrg\": \"string\",\n    \"lastFundingTypeOrg\": null,\n    \"fundingRoundNumberOfInvestorsOrg\": 0,\n    \"totalFundingAmountOrg\": 0\n  },\n  \"excludeFilters\": {\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"aboutUs\": null,\n    \"domain\": null,\n    \"jobTitle\": null\n  },\n  \"page\": 1,\n  \"pageSize\": 25\n}"
+      }
+     },
+     "docs": "Search across people, companies, and insights dimensions with comprehensive filters. Returns combined person + org + insights data.\n\n**Free tier:**\n- First 3 pages OR 75 results free per search, whichever comes first (at the default page size of 25 these match; with a larger page size the 75-result cap applies first)\n- 50 free searches per month, where a search = a unique filter combination. Paging through results or re-running the same search does not consume additional free searches.\n\n**Paid tier (page 4+):**\n- 1 credit per result returned\n- Max 40 pages\n\nResults include preview fields only. Use the **Reveal** or **Enrich** endpoints to get email and phone."
+    },
+    {
+     "info": {
+      "name": "Suggest company names",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/suggest",
+      "query": [
+       {
+        "key": "q",
+        "value": "string",
+        "docs": "Search prefix (min 2 characters)"
+       },
+       {
+        "key": "limit",
+        "value": "",
+        "docs": "Max suggestions (1\u201350, default: 20)"
+       }
+      ]
+     },
+     "docs": "Prefix-based company name autocomplete. Returns matching company names for search typeahead. Free endpoint."
+    },
+    {
+     "info": {
+      "name": "Unlock full last names",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/unlock-names",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"leads\": [\n    {\n      \"id\": \"string\"\n    }\n  ]\n}"
+      }
+     },
+     "docs": "Pay 1 credit per lead to unlock full last names. Search results mask last names by default; this endpoint reveals them."
+    }
+   ]
+  }
+ ]
+}

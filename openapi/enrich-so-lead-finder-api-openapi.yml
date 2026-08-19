@@ -1,127 +1,3443 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
-  title: Enrich Account Lead Finder API
-  description: 'Enrich (enrich.so) is a person and company data enrichment API. From one REST interface it resolves professional profiles from an email address (reverse email lookup), finds and verifies professional email addresses, finds phone/mobile numbers, resolves a company and geolocation from an IP address, scrapes LinkedIn company followers, and searches a lead-finder database of people and organizations. All requests use the base URL https://dev.enrich.so/api/v3 and authenticate with an API key passed either in the `x-api-key` header or as `Authorization: Bearer`. Usage is metered against a prepaid credit balance; "not found" results are refunded.
+  title: Enrich Lead Finder API
+  description: 'Search, count, reveal, enrich, unlock and export leads across people and organizations,
+    with saved searches and async reveal/export jobs.
 
-    Grounding note: the single-lookup endpoints in this document (POST /reverse-lookup/lookup, POST /email-finder, POST /email-validation, GET /reverse-lookup/phones, POST /ip-to-company, POST /company-follower, POST /lead-finder/search, POST /lead-finder/reveal) and their credit costs are confirmed from the live Enrich documentation. The batch / progress / results sub-paths are modeled from the documented batch-and-poll pattern (submit -> check progress -> get results) and their exact URL segments should be confirmed against the current docs before code generation. Modeled operations are marked with `x-endpoint-modeled: true`.'
+
+    Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so
+    — every documentation page embeds its own OpenAPI fragment, and this document is the union of the
+    fragments carrying these tags, with only the components they reference.'
   version: '3.0'
   contact:
     name: Enrich
     url: https://www.enrich.so
-  termsOfService: https://www.enrich.so/terms
+  termsOfService: https://www.enrich.so/terms-of-service
 servers:
 - url: https://dev.enrich.so/api/v3
-  description: Enrich API v3
+  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
 security:
-- apiKeyHeader: []
-- bearerAuth: []
+- ApiKeyHeader: []
+- BearerToken: []
 tags:
 - name: Lead Finder
-  description: Search and reveal leads across people and organizations.
 paths:
-  /lead-finder/search:
-    post:
-      operationId: searchLeads
-      tags:
-      - Lead Finder
-      summary: Search leads
-      description: Searches across people, companies, and insights with roughly 135 filter fields spanning person attributes, firmographics, and technology stack. The first 3 pages (or 75 results) per search are free; pages beyond that cost 1 credit per result. Max 40 pages per search.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LeadSearchRequest'
-      responses:
-        '200':
-          description: Matching leads.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LeadSearchResponse'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '429':
-          $ref: '#/components/responses/RateLimited'
   /lead-finder/count:
     post:
-      operationId: countMatchingLeads
+      summary: Count matching leads
+      deprecated: false
+      description: Get the total count of leads matching your filters. This endpoint is free and does
+        not consume credits.
+      operationId: countLeads
       tags:
       - Lead Finder
-      summary: Count matching leads
-      description: Returns the number of leads matching a set of filters without returning records.
-      x-endpoint-modeled: true
+      parameters: []
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LeadCountRequest'
       responses:
         '200':
-          description: Match count.
+          description: Count returned successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LeadCountResponse'
-  /lead-finder/reveal:
+              example:
+                success: true
+                data:
+                  count: 18420
+                  searchType: unified
+                  searchedTotalResult: 18420
+                meta:
+                  requestId: req_664f2b3c9a1e4d0012abcdf0
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id001
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id001
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id001
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id001
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165854-run
+  /lead-finder/enrich:
     post:
-      operationId: revealContactInfo
+      summary: Enrich contacts with specific fields
+      deprecated: false
+      description: 'Reveal specific contact fields (email and/or phone) for up to 25 leads.
+
+
+        **Pricing:**
+
+        - Email: 10 credits per lead
+
+        - Phone: 525 credits per lead
+
+
+        Previously revealed fields are returned from cache at no cost.
+
+
+        **Async:** Returns a `jobId` immediately (< 100ms). Poll `GET /lead-finder/reveal-jobs/:jobId`
+        every 2 seconds until `status` is `completed` or `failed`. Credits are charged inside the worker
+        — insufficient credits cause the job to fail asynchronously (no synchronous 402).'
+      operationId: enrichLeads
       tags:
       - Lead Finder
-      summary: Reveal contact info
-      description: Asynchronously reveals contact information (email and/or phone) for up to 25 leads, returning a job id to poll. 50 credits per lead for email, 525 for phone, 575 for both (the default). Previously revealed contacts return from cache at no cost.
+      parameters: []
       requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadEnrichRequest'
+      responses:
+        '200':
+          description: Enrich job submitted — poll the returned jobId for results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevealJobSubmitResponse'
+              example:
+                success: true
+                data:
+                  jobId: rj_a1b2c3d4e5f6g7h8
+                  status: pending
+                  totalLeads: 3
+                  fields:
+                  - email
+                  message: Enrich job submitted. Poll GET /api/v3/lead-finder/reveal-jobs/rj_a1b2c3d4e5f6g7h8
+                    for results.
+                meta:
+                  requestId: req_664f2b3c9a1e4d0012abcdf3
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id002
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id002
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id002
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id002
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165857-run
+  /lead-finder/export:
+    post:
+      summary: Export leads to CSV (async)
+      deprecated: false
+      description: 'Submit an async CSV export job. Returns a `jobId` immediately — poll `GET /lead-finder/export-jobs/{jobId}`
+        for status. Once the job reaches `completed` status, download the file via `GET /lead-finder/export-jobs/{jobId}/download`.
+
+
+        Credits are estimated upfront and deducted during processing. Refunds are issued for leads where
+        the requested contact info was not found.
+
+
+        **Pricing:**
+
+        - Preview fields only: Free
+
+        - `includeEmail`: 10 credits per lead
+
+        - `includePhone`: 525 credits per lead
+
+        - `includeNames`: 1 credit per lead (full last names)
+
+        - `includeContactInfo`: Shorthand for email + phone (535 credits/lead)'
+      operationId: exportLeads
+      tags:
+      - Lead Finder
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadExportRequest'
+            example:
+              filters:
+                jobLevel:
+                - C-Suite
+                - VP
+                domain:
+                - stripe.com
+                - vercel.com
+              maxResults: 500
+              includeEmail: true
+              includeNames: true
+      responses:
+        '200':
+          description: Export job submitted — poll for status using the returned jobId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncExportResponse'
+              example:
+                success: true
+                data:
+                  jobId: ej_a1b2c3d4e5f6a7b8
+                  status: pending
+                  estimatedRows: 500
+                  estimatedCredits: 25000
+                  message: Export job queued. Poll GET /lead-finder/export-jobs/ej_a1b2c3d4e5f6a7b8 for
+                    status.
+                meta:
+                  requestId: 665d2f8b9c5b2a0015d0bc0f
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id003
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id003
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '402':
+          description: You don't have enough credits for this request
+          content:
+            application/json:
+              schema: *id003
+              example:
+                type: https://dev.enrich.so/errors/insufficient-credits
+                title: Insufficient Credits
+                status: 402
+                detail: 'Not enough credits. Required: 575, available: 100'
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id003
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id003
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165855-run
+  /lead-finder/export-jobs:
+    get:
+      summary: List export jobs
+      deprecated: false
+      description: List recent CSV export jobs for your team (last 30 days). Paginated, optionally filtered
+        by status.
+      operationId: listExportJobs
+      tags:
+      - Lead Finder
+      parameters:
+      - name: page
+        in: query
+        description: 'Page number (default: 1)'
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: limit
+        in: query
+        description: 'Results per page (default: 20, max: 100)'
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      - name: status
+        in: query
+        description: Filter by job status
+        required: false
+        schema:
+          type: string
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+      responses:
+        '200':
+          description: Paginated list of export jobs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadExportJobListResponse'
+              example:
+                success: true
+                data:
+                  jobs:
+                  - jobId: ej_a1b2c3d4e5f6a7b8
+                    status: completed
+                    total: 500
+                    processed: 500
+                    creditsUsed: 24750
+                    creditsRefunded: 250
+                    createdAt: '2025-06-03T14:30:00.000Z'
+                    completedAt: '2025-06-03T14:35:00.000Z'
+                  total: 1
+                  page: 1
+                  limit: 20
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id004
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id004
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id004
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-29249239-run
+  /lead-finder/export-jobs/{jobId}:
+    get:
+      summary: Poll export job status
+      deprecated: false
+      description: 'Poll the status of a CSV export job. The response shape varies by status:
+
+
+        - **`pending`** — Job is queued, not yet started.
+
+        - **`processing`** — Job is actively running. Check `progress` for completion percentage.
+
+        - **`completed`** — Job finished successfully. Includes `results` with final credit usage. Download
+        the file via `GET /lead-finder/export-jobs/{jobId}/download`.
+
+        - **`failed`** — Job encountered an error. Includes `error` message and any `creditsRefunded`.'
+      operationId: getExportJob
+      tags:
+      - Lead Finder
+      parameters:
+      - name: jobId
+        in: path
+        description: 'Export job ID (format: `ej_` followed by 16 hex characters)'
         required: true
+        example: ''
+        schema:
+          type: string
+          pattern: ^ej_[a-f0-9]{16}$
+          examples:
+          - ej_a1b2c3d4e5f6a7b8
+      responses:
+        '200':
+          description: Export job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadExportJobStatusResponse'
+              examples:
+                pending:
+                  summary: Job is pending
+                  value:
+                    success: true
+                    data:
+                      jobId: ej_a1b2c3d4e5f6a7b8
+                      status: pending
+                      progress:
+                        processed: 0
+                        total: 500
+                      createdAt: '2025-06-03T14:30:00.000Z'
+                processing:
+                  summary: Job is in progress
+                  value:
+                    success: true
+                    data:
+                      jobId: ej_a1b2c3d4e5f6a7b8
+                      status: processing
+                      progress:
+                        processed: 250
+                        total: 500
+                      createdAt: '2025-06-03T14:30:00.000Z'
+                completed:
+                  summary: Job completed successfully
+                  value:
+                    success: true
+                    data:
+                      jobId: ej_a1b2c3d4e5f6a7b8
+                      status: completed
+                      progress:
+                        processed: 500
+                        total: 500
+                      results:
+                        totalExported: 500
+                        creditsUsed: 24750
+                        creditsRefunded: 250
+                      createdAt: '2025-06-03T14:30:00.000Z'
+                      completedAt: '2025-06-03T14:35:00.000Z'
+                failed:
+                  summary: Job failed
+                  value:
+                    success: true
+                    data:
+                      jobId: ej_a1b2c3d4e5f6a7b8
+                      status: failed
+                      error: An unexpected error occurred during export.
+                      creditsRefunded: 25000
+                      createdAt: '2025-06-03T14:30:00.000Z'
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id005
+                $ref: '#/components/schemas/ErrorEnvelope'
+          headers: {}
+        '404':
+          description: Export job not found or does not belong to your team
+          content:
+            application/json:
+              schema: *id005
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: Export job not found
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id005
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id005
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-29249240-run
+  /lead-finder/export-jobs/{jobId}/download:
+    get:
+      summary: Download export CSV
+      deprecated: false
+      description: 'Stream the completed CSV file for an export job. Returns the file with `Content-Type:
+        text/csv`.
+
+
+        Returns **409 Conflict** if the job has not yet reached `completed` status or has failed. Poll
+        `GET /lead-finder/export-jobs/{jobId}` first to confirm the job is complete before downloading.'
+      operationId: downloadExportJob
+      tags:
+      - Lead Finder
+      parameters:
+      - name: jobId
+        in: path
+        description: 'Export job ID (format: `ej_` followed by 16 hex characters)'
+        required: true
+        example: ''
+        schema:
+          type: string
+          pattern: ^ej_[a-f0-9]{16}$
+          examples:
+          - ej_a1b2c3d4e5f6a7b8
+      responses:
+        '200':
+          description: CSV file stream
+          content:
+            text/csv:
+              schema:
+                type: string
+              example: 'First Name,Last Name,Job Title,Company Name,Domain,...
+
+                Sarah,Chen,VP of Engineering,Stripe,stripe.com,...'
+          headers:
+            Content-Disposition:
+              required: false
+              description: Suggests a filename for the downloaded file, e.g. `attachment; filename="export-ej_a1b2c3d4e5f6a7b8.csv"`
+              schema:
+                type: string
+            X-Credits-Used:
+              required: false
+              description: Total credits consumed for this export
+              schema:
+                type: string
+            X-Credits-Refunded:
+              required: false
+              description: Credits refunded for leads where contact info was not found
+              schema:
+                type: string
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id006
+                $ref: '#/components/schemas/ErrorEnvelope'
+          headers: {}
+        '404':
+          description: Export job not found or does not belong to your team
+          content:
+            application/json:
+              schema: *id006
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: Export job not found
+          headers: {}
+        '409':
+          description: Job is not yet completed or has failed — cannot download
+          content:
+            application/json:
+              schema: *id006
+              example:
+                type: https://dev.enrich.so/errors/conflict
+                title: Conflict
+                status: 409
+                detail: 'Export job is not yet completed. Current status: processing'
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id006
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id006
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-29249241-run
+  /lead-finder/filter-options:
+    get:
+      summary: Get filter options
+      deprecated: false
+      description: Returns available values for multi-select filter fields (countries, departments, industries,
+        job functions, etc.). Values are fetched from the database and cached for performance. Free endpoint.
+      operationId: getFilterOptions
+      tags:
+      - Lead Finder
+      parameters: []
+      responses:
+        '200':
+          description: Filter options returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadFinderFilterOptionsResponse'
+              example:
+                success: true
+                data:
+                  countryName:
+                  - United States
+                  - United Kingdom
+                  - Germany
+                  - '...'
+                  jobFunction:
+                  - Engineering
+                  - Marketing
+                  - Sales
+                  - '...'
+                  jobLevel:
+                  - C-Suite
+                  - VP
+                  - Director
+                  - Manager
+                  - '...'
+                  industrySicDescription:
+                  - Computer Processing & Data Preparation
+                  - '...'
+                meta:
+                  requestId: req_664f2b3c9a1e4d0012abcdf8
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id007
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id007
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id007
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id007
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165862-run
+  /lead-finder/reveal:
+    post:
+      summary: Reveal contact info
+      deprecated: false
+      description: 'Reveal contact info for up to 25 leads. Choose which fields to reveal via the optional
+        `fields` parameter:
+
+
+        - `["email"]` — 10 credits per lead
+
+        - `["phone"]` — 525 credits per lead
+
+        - `["email", "phone"]` — 535 credits per lead (default if omitted)
+
+
+        Previously revealed contacts are returned from cache at no cost.
+
+
+        **Async:** Returns a `jobId` immediately (< 100ms). Poll `GET /lead-finder/reveal-jobs/:jobId`
+        every 2 seconds until `status` is `completed` or `failed`. Credits are charged inside the worker
+        — insufficient credits cause the job to fail asynchronously (no synchronous 402).'
+      operationId: revealLeads
+      tags:
+      - Lead Finder
+      parameters: []
+      requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LeadRevealRequest'
+            example:
+              leads:
+              - id: enc_abc123def456
+              fields:
+              - email
       responses:
-        '202':
-          description: Reveal job accepted.
+        '200':
+          description: Reveal job submitted — poll the returned jobId for results
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LeadRevealResponse'
+                $ref: '#/components/schemas/RevealJobSubmitResponse'
+              example:
+                success: true
+                data:
+                  jobId: rj_a1b2c3d4e5f6g7h8
+                  status: pending
+                  totalLeads: 1
+                  fields:
+                  - email
+                  message: Reveal job submitted. Poll GET /api/v3/lead-finder/reveal-jobs/rj_a1b2c3d4e5f6g7h8
+                    for results.
+                meta:
+                  requestId: req_664f2b3c9a1e4d0012abcdf2
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id008
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
         '401':
-          $ref: '#/components/responses/Unauthorized'
-        '402':
-          $ref: '#/components/responses/InsufficientCredits'
-components:
-  schemas:
-    LeadSearchRequest:
-      type: object
-      required:
-      - filters
-      properties:
-        filters:
-          type: object
-          description: LeadFinderSearchFilters - person, organization, and technology filters.
-        page:
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id008
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id008
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id008
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165856-run
+  /lead-finder/reveal-jobs:
+    get:
+      summary: List reveal/enrich jobs
+      deprecated: false
+      description: List recent reveal/enrich jobs for the team (last 30 days). Free endpoint — polling
+        is always free.
+      operationId: listRevealJobs
+      tags:
+      - Lead Finder
+      parameters:
+      - name: page
+        in: query
+        description: Page number
+        required: false
+        schema:
           type: integer
           default: 1
-        pageSize:
+          minimum: 1
+      - name: limit
+        in: query
+        description: Results per page (max 100)
+        required: false
+        schema:
           type: integer
+          default: 20
           minimum: 1
           maximum: 100
-          default: 25
-        excludeFilters:
-          type: object
-    LeadCountResponse:
+      - name: status
+        in: query
+        description: Filter by job status
+        required: false
+        schema:
+          type: string
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+      responses:
+        '200':
+          description: Jobs listed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevealJobListResponse'
+              example:
+                success: true
+                data:
+                  jobs:
+                  - jobId: rj_a1b2c3d4e5f6g7h8
+                    status: completed
+                    jobType: reveal
+                    fields:
+                    - email
+                    - phone
+                    total: 5
+                    processed: 5
+                    creditsUsed: 1725
+                    creditsRefunded: 50
+                    createdAt: '2026-03-02T10:00:00.000Z'
+                    completedAt: '2026-03-02T10:00:12.000Z'
+                  total: 42
+                  page: 1
+                  limit: 20
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id009
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id009
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id009
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id009
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-29163792-run
+  /lead-finder/reveal-jobs/{jobId}:
+    get:
+      summary: Poll reveal/enrich job
+      deprecated: false
+      description: 'Poll the status of a reveal or enrich job. Call repeatedly until `status` is `"completed"`
+        or `"failed"`. Polling is always free.
+
+
+        **Recommended interval:** 2 seconds.'
+      operationId: getRevealJob
+      tags:
+      - Lead Finder
+      parameters:
+      - name: jobId
+        in: path
+        description: Reveal/enrich job ID (starts with `rj_`)
+        required: true
+        example: rj_a1b2c3d4e5f6g7h8
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Job status returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevealJobPollResponse'
+              examples:
+                pending:
+                  summary: Job is pending
+                  value:
+                    success: true
+                    data:
+                      jobId: rj_a1b2c3d4e5f6g7h8
+                      status: pending
+                      jobType: reveal
+                      fields:
+                      - email
+                      - phone
+                      progress:
+                        processed: 0
+                        total: 5
+                      createdAt: '2026-03-02T10:00:00.000Z'
+                completed:
+                  summary: Job completed with results
+                  value:
+                    success: true
+                    data:
+                      jobId: rj_a1b2c3d4e5f6g7h8
+                      status: completed
+                      jobType: reveal
+                      fields:
+                      - email
+                      - phone
+                      progress:
+                        processed: 5
+                        total: 5
+                      results:
+                        revealed:
+                        - id: enc_abc123def456
+                          firstName: Jane
+                          lastName: Doe
+                          jobTitle: VP Engineering
+                          companyName: Acme Corp
+                          emailAddress: jane@acme.com
+                          phone: +1-555-000-0000
+                          cellphone: null
+                        alreadyRevealed: 2
+                        newlyRevealed: 3
+                        creditsUsed: 1725
+                        creditsRefunded: 50
+                      createdAt: '2026-03-02T10:00:00.000Z'
+                      completedAt: '2026-03-02T10:00:12.000Z'
+                failed:
+                  summary: Job failed
+                  value:
+                    success: true
+                    data:
+                      jobId: rj_a1b2c3d4e5f6g7h8
+                      status: failed
+                      jobType: reveal
+                      fields:
+                      - email
+                      - phone
+                      error: 'Insufficient credits (balance: 100, required: 2875)'
+                      creditsRefunded: 2875
+                      createdAt: '2026-03-02T10:00:00.000Z'
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id010
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id010
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '404':
+          description: Job not found or belongs to another team
+          content:
+            application/json:
+              schema: *id010
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: Reveal job not found
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id010
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id010
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-29163791-run
+  /lead-finder/saved:
+    get:
+      summary: List saved searches
+      deprecated: false
+      description: List all saved searches for the current user. Free endpoint.
+      operationId: listSavedSearches
+      tags:
+      - Lead Finder
+      parameters: []
+      responses:
+        '200':
+          description: Saved searches listed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedSearchListResponse'
+              example:
+                success: true
+                data:
+                - id: 665e0b2f4a6d8c001abc1234
+                  name: Engineering VPs in Bay Area
+                  filters:
+                    jobFunction:
+                    - Engineering
+                    jobLevel:
+                    - VP
+                    city: San Francisco
+                  createdAt: '2025-06-03T14:00:00.000Z'
+                  updatedAt: '2025-06-03T14:00:00.000Z'
+                meta:
+                  requestId: req_664f2b3c9a1e4d0012abcdf5
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id011
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id011
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id011
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id011
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165859-run
+    post:
+      summary: Save a search
+      deprecated: false
+      description: Save a search filter combination for reuse. Free endpoint.
+      operationId: createSavedSearch
+      tags:
+      - Lead Finder
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedSearchCreateRequest'
+      responses:
+        '200':
+          description: Search saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedSearchResponse'
+              example:
+                success: true
+                data:
+                  id: 665e0b2f4a6d8c001abc1234
+                  name: Engineering VPs in Bay Area
+                  filters:
+                    jobFunction:
+                    - Engineering
+                    jobLevel:
+                    - VP
+                  createdAt: '2025-06-03T14:00:00.000Z'
+                  updatedAt: '2025-06-03T14:00:00.000Z'
+                meta:
+                  requestId: req_664f2b3c9a1e4d0012abcdf6
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id012
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id012
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id012
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id012
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165860-run
+  /lead-finder/saved/{id}:
+    delete:
+      summary: Delete a saved search
+      deprecated: false
+      description: Delete a saved search by ID. Only the owner can delete their own saved searches.
+      operationId: deleteSavedSearch
+      tags:
+      - Lead Finder
+      parameters:
+      - name: id
+        in: path
+        description: Saved search ID
+        required: true
+        example: 665e0b2f4a6d8c001abc1234
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Saved search deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadFinderDeletedResponse'
+              example:
+                success: true
+                data:
+                  deleted: true
+                meta:
+                  requestId: req_664f2b3c9a1e4d0012abcdf7
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id013
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id013
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id013
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id013
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165861-run
+  /lead-finder/search:
+    post:
+      summary: Search leads
+      deprecated: false
+      description: 'Search across people, companies, and insights dimensions with comprehensive filters.
+        Returns combined person + org + insights data.
+
+
+        **Free tier:**
+
+        - First 3 pages OR 75 results free per search, whichever comes first (at the default page size
+        of 25 these match; with a larger page size the 75-result cap applies first)
+
+        - 50 free searches per month, where a search = a unique filter combination. Paging through results
+        or re-running the same search does not consume additional free searches.
+
+
+        **Paid tier (page 4+):**
+
+        - 1 credit per result returned
+
+        - Max 40 pages
+
+
+        Results include preview fields only. Use the **Reveal** or **Enrich** endpoints to get email and
+        phone.'
+      operationId: searchLeads
+      tags:
+      - Lead Finder
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadSearchRequest'
+      responses:
+        '200':
+          description: Search results returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadSearchResponse'
+              example:
+                success: true
+                data:
+                  results:
+                  - id: enc_abc123def456
+                    firstName: Sarah
+                    lastName: C.
+                    logoUrl: https://media.licdn.com/dms/image/stripe-logo.jpg
+                    emailDomain: stripe.com
+                    linkedinUrl: https://linkedin.com/in/sarahc
+                    linkedinHeadline: VP of Engineering at Stripe
+                    jobTitle: VP of Engineering
+                    jobFunction: Engineering
+                    jobLevel: VP
+                    companyName: Stripe
+                    skills: Python, Distributed Systems, Cloud Architecture
+                    city: San Francisco
+                    stateName: California
+                    countryName: United States
+                    domain: stripe.com
+                    orgLinkedinUrl: https://linkedin.com/company/stripe
+                    employeeCount: 8000
+                    industrySicDescription: Computer Processing & Data Preparation
+                    industryNaicsDescription: Data Processing, Hosting, and Related Services
+                    revenue: $1B+
+                    specialties: Payments, Financial Infrastructure
+                    foundedOn: '2010'
+                    headquartersCity: San Francisco
+                    headquartersState: California
+                    headquartersCountry: United States
+                    employeeOnLinkedinGrowthRateOrg: 12
+                    totalMonthlyTrafficOrg: 5000000
+                    totalFundingAmountOrg: 8700000000
+                    lastFundingTypeOrg: Series I
+                    lastFundingDateOrg: '2023-03-15'
+                  pagination:
+                    page: 1
+                    pageSize: 25
+                    totalResults: 1842
+                    totalPages: 74
+                    hasMore: true
+                    searchedTotalResult: 1842
+                meta:
+                  requestId: req_664f2b3c9a1e4d0012abcdef
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id014
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id014
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '402':
+          description: You don't have enough credits for this request
+          content:
+            application/json:
+              schema: *id014
+              example:
+                type: https://dev.enrich.so/errors/insufficient-credits
+                title: Insufficient Credits
+                status: 402
+                detail: 'Not enough credits. Required: 575, available: 100'
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id014
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id014
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165853-run
+  /lead-finder/suggest:
+    get:
+      summary: Suggest company names
+      deprecated: false
+      description: Prefix-based company name autocomplete. Returns matching company names for search typeahead.
+        Free endpoint.
+      operationId: suggestCompanyNames
+      tags:
+      - Lead Finder
+      parameters:
+      - name: q
+        in: query
+        description: Search prefix (min 2 characters)
+        required: true
+        example: Stri
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: 'Max suggestions (1–50, default: 20)'
+        required: false
+        example: 20
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Suggestions returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadFinderSuggestResponse'
+              example:
+                success: true
+                data:
+                  values:
+                  - Stripe
+                  - Stripe Atlas
+                  - StripChat
+                meta:
+                  requestId: req_664f2b3c9a1e4d0012abcdf9
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id015
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id015
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id015
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id015
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165863-run
+  /lead-finder/unlock-names:
+    post:
+      summary: Unlock full last names
+      deprecated: false
+      description: Pay 1 credit per lead to unlock full last names. Search results mask last names by
+        default; this endpoint reveals them.
+      operationId: unlockNames
+      tags:
+      - Lead Finder
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnlockNamesRequest'
+      responses:
+        '200':
+          description: Names unlocked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnlockNamesResponse'
+              example:
+                success: true
+                data:
+                  results:
+                  - id: enc_abc123def456
+                    lastName: Chen
+                  - id: enc_xyz789ghi012
+                    lastName: Johnson
+                meta:
+                  requestId: req_664f2b3c9a1e4d0012abcdf4
+                  creditsUsed: 2
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id016
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body Invalid request
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id016
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '402':
+          description: You don't have enough credits for this request
+          content:
+            application/json:
+              schema: *id016
+              example:
+                type: https://dev.enrich.so/errors/insufficient-credits
+                title: Insufficient Credits
+                status: 402
+                detail: 'Not enough credits. Required: 575, available: 100'
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id016
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id016
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165858-run
+components:
+  schemas:
+    AsyncExportResponse:
       type: object
+      description: Response returned immediately when an async export job is submitted
+      required:
+      - success
+      - data
       properties:
         success:
           type: boolean
-        count:
+          const: true
+        data:
+          type: object
+          required:
+          - jobId
+          - status
+          - estimatedRows
+          - estimatedCredits
+          - creditsReserved
+          - message
+          properties:
+            jobId:
+              type: string
+              description: Export job ID — poll GET /lead-finder/export-jobs/{jobId} for results
+              examples:
+              - ej_a1b2c3d4e5f6a7b8
+            status:
+              type: string
+              enum:
+              - pending
+              description: Always `pending` on submission
+            estimatedRows:
+              type: number
+              description: Estimated number of rows to export
+            estimatedCredits:
+              type: number
+              description: Estimated credits to be consumed
+            creditsReserved:
+              type: number
+              description: Credits reserved upfront for this export job
+            message:
+              type: string
+              description: Human-readable confirmation message
+              examples:
+              - Export job queued. Poll GET /lead-finder/export-jobs/ej_a1b2c3d4e5f6a7b8 for status.
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+              description: Unique request tracking ID
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
           type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
     LeadCountRequest:
       type: object
       required:
       - filters
       properties:
         filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+        excludeFilters:
           type: object
+          additionalProperties: false
+          description: Filters to exclude from count. Only personHeadline, companyHeadline, aboutUs, domain,
+            and jobTitle are supported.
+          properties:
+            personHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Person LinkedIn headline to exclude (keyword/contains match)
+            companyHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company headline to exclude (keyword/contains match)
+            aboutUs:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company overview/about us to exclude (keyword/contains match)
+            domain:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 5000
+              description: Company domain to exclude (exact match)
+            jobTitle:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 25
+              description: Job title to exclude (keyword/contains match)
+    LeadCountResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - count
+          - searchType
+          - isApproximate
+          properties:
+            count:
+              type: integer
+              description: 'Maximum pageable results. For <=10k: exact deduped count. For >10k: approximate
+                count with 25% dedup discount. Capped at 500,000 to prevent excessive pagination. Equals
+                searchedTotalResult when under 500k.'
+            searchType:
+              type: string
+              enum:
+              - people
+              - company
+              - unified
+              description: Type of search performed
+            isApproximate:
+              type: boolean
+              description: True when results exceed 10,000 — count is estimated with a 25% dedup discount
+                instead of running an exact dedup query
+            searchedTotalResult:
+              type: integer
+              description: Total leads matching your search. Same as count when under 500k. When count
+                hits the 500k pagination cap, this field shows the raw total count without any discount
+                or cap applied.
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+    LeadEnrichRequest:
+      type: object
+      required:
+      - leads
+      - fields
+      properties:
+        leads:
+          type: array
+          minItems: 1
+          maxItems: 25
+          items:
+            type: object
+            required:
+            - id
+            properties:
+              id:
+                type: string
+                description: Lead ID from search results
+          description: Leads to enrich (max 25)
+        fields:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum:
+            - email
+            - phone
+          description: Which contact fields to reveal
+    LeadExportJobListResponse:
+      type: object
+      description: Paginated list of export jobs for the team
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - jobs
+          - total
+          - page
+          - limit
+          properties:
+            jobs:
+              type: array
+              items:
+                $ref: '#/components/schemas/LeadExportJobSummary'
+              description: List of export job summaries
+            total:
+              type: number
+              description: Total number of jobs matching the query
+            page:
+              type: number
+              description: Current page number
+            limit:
+              type: number
+              description: Results per page
+    LeadExportJobStatusResponse:
+      type: object
+      description: Export job status response. Single flat object — all fields always present.
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - jobId
+          - name
+          - status
+          - phase
+          - progress
+          - totalRows
+          - processedRows
+          - creditsUsed
+          - creditsRefunded
+          - error
+          - downloadUrl
+          - createdAt
+          - completedAt
+          properties:
+            jobId:
+              type: string
+              description: Export job ID
+              examples:
+              - ej_a1b2c3d4e5f6a7b8
+            name:
+              type: string
+              description: Display name for the export job
+            status:
+              type: string
+              enum:
+              - pending
+              - processing
+              - completed
+              - failed
+              description: Current job status
+            phase:
+              type: string
+              enum:
+              - queued
+              - fetching
+              - enriching
+              - generating
+              - uploading
+              description: Current processing phase
+            progress:
+              type: number
+              description: Progress percentage 0-100
+            totalRows:
+              type: number
+              description: Total rows (actual if available, otherwise estimated)
+            processedRows:
+              type: number
+              description: Rows processed so far
+            creditsUsed:
+              type: number
+              description: Credits consumed
+            creditsRefunded:
+              type: number
+              description: Credits refunded
+            error:
+              type: string
+              description: Error message (null unless failed)
+              nullable: true
+            downloadUrl:
+              type: string
+              description: Pre-signed download URL (only for completed jobs)
+              nullable: true
+            createdAt:
+              type: string
+              format: date-time
+              description: Job creation timestamp (ISO 8601)
+            completedAt:
+              type: string
+              format: date-time
+              description: Job completion timestamp (ISO 8601), null if not yet complete
+              nullable: true
+    LeadExportJobSummary:
+      type: object
+      description: Summary of an export job as returned in the list endpoint
+      required:
+      - jobId
+      - name
+      - status
+      - phase
+      - totalRows
+      - processedRows
+      - progress
+      - creditsUsed
+      - creditsRefunded
+      - createdAt
+      - completedAt
+      - error
+      properties:
+        jobId:
+          type: string
+          description: Export job ID
+          examples:
+          - ej_a1b2c3d4e5f6a7b8
+        name:
+          type: string
+          description: Display name for the export job
+        status:
+          type: string
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          description: Current job status
+        phase:
+          type: string
+          enum:
+          - queued
+          - fetching
+          - enriching
+          - generating
+          - uploading
+          description: Current processing phase
+        totalRows:
+          type: number
+          description: Total rows (actual if available, otherwise estimated)
+        processedRows:
+          type: number
+          description: Rows processed so far
+        progress:
+          type: number
+          description: Progress percentage 0-100
+        creditsUsed:
+          type: number
+          description: Credits consumed
+        creditsRefunded:
+          type: number
+          description: Credits refunded
+        createdAt:
+          type: string
+          format: date-time
+          description: Job creation timestamp (ISO 8601)
+        completedAt:
+          type: string
+          format: date-time
+          description: Job completion timestamp (ISO 8601), null if not yet complete
+          nullable: true
+        error:
+          type: string
+          description: Error message (only for failed jobs)
+          nullable: true
+    LeadExportRequest:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+        excludeFilters:
+          type: object
+          additionalProperties: false
+          description: Filters to exclude from export. Only personHeadline, companyHeadline, aboutUs,
+            domain, and jobTitle are supported.
+          properties:
+            personHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Person LinkedIn headline to exclude (keyword/contains match)
+            companyHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company headline to exclude (keyword/contains match)
+            aboutUs:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company overview/about us to exclude (keyword/contains match)
+            domain:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 5000
+              description: Company domain to exclude (exact match)
+            jobTitle:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 25
+              description: Job title to exclude (keyword/contains match)
+        name:
+          type: string
+          maxLength: 200
+          description: Display name for the export (shown in export history). Auto-generated if omitted.
+        maxResults:
+          type: integer
+          minimum: 1
+          maximum: 100000
+          default: 1000
+          description: Maximum rows to export
+        includeContactInfo:
+          type: boolean
+          default: false
+          description: 'Shorthand: include both email and phone (costs credits per lead)'
+        includeEmail:
+          type: boolean
+          default: false
+          description: Include email addresses (10 credits per lead)
+        includePhone:
+          type: boolean
+          default: false
+          description: Include phone numbers (525 credits per lead)
+        includeNames:
+          type: boolean
+          default: false
+          description: Include full last names (1 credit per lead)
+        leadIds:
+          type: array
+          items:
+            type: string
+          maxItems: 100000
+          description: Export specific leads by encrypted ID (selected rows mode)
+        page:
+          type: integer
+          minimum: 1
+          description: Export a specific page of results (current page mode)
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Page size when exporting a specific page
+    LeadFinderDeletedResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - deleted
+          properties:
+            deleted:
+              type: boolean
+              const: true
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+    LeadFinderFilterOptionsResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          description: Object keyed by filter field name, each containing an array of available values
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          properties: {}
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+    LeadFinderPagination:
+      type: object
+      required:
+      - page
+      - pageSize
+      - totalResults
+      - totalPages
+      - hasMore
+      properties:
+        page:
+          type: integer
+          description: Current page number
+        pageSize:
+          type: integer
+          description: Results per page
+        totalResults:
+          type: integer
+          description: 'Maximum number of results you can paginate through. For <=10k: exact deduped count.
+            For >10k: approximate count with 25% dedup discount. Capped at 500,000 to prevent excessive
+            pagination. Equals searchedTotalResult when under 500k.'
+        totalPages:
+          type: integer
+          description: Total navigable pages based on totalResults (capped at 500,000)
+        hasMore:
+          type: boolean
+          description: Whether more pages exist beyond the current page
+        isApproximate:
+          type: boolean
+          description: True when results exceed 10,000 — count is estimated with a 25% dedup discount
+            instead of running an exact dedup query
+        searchedTotalResult:
+          type: integer
+          description: Total leads matching your search. Same as totalResults when under 500k. When totalResults
+            hits the 500k pagination cap, this field shows the raw total count without any discount or
+            cap applied.
+    LeadFinderSearchFilters:
+      type: object
+      additionalProperties: false
+      description: Comprehensive search filters for unified lead finder. All fields are optional. Supports
+        ~135 filter fields across person, organization, and insights dimensions.
+      properties:
+        firstName:
+          type: string
+          description: First name (exact match)
+        lastName:
+          type: string
+          description: Last name (exact match)
+        middleName:
+          type: string
+          description: Middle name (exact match)
+        city:
+          type: string
+          description: Person city (exact match)
+        stateName:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: State/province name (multi-select)
+        stateCode:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: State/province code (multi-select)
+        countryName:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: Country name (multi-select)
+        countryCode:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: Country code (multi-select)
+        continent:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 7
+          description: Continent (multi-select)
+        countryRegion:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: Country region/area (multi-select)
+        linkedinUrl:
+          type: string
+          description: LinkedIn profile URL (exact match)
+        linkedinHeadline:
+          type: string
+          description: LinkedIn headline (exact match)
+        personHeadline:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Person LinkedIn headline (keyword/contains match, multi-select)
+        companyHeadline:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Company headline (keyword/contains match, multi-select)
+        linkedinIndustry:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: LinkedIn industry (multi-select)
+        logoUrl:
+          type: string
+          description: Person logo URL (exact match)
+        emailDomain:
+          type: string
+          description: Email domain (exact match)
+        emailAddress:
+          type: string
+          description: Email address (exact match)
+        jobTitle:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 25
+          description: Job title (multi-select, exact match)
+        jobFunction:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 26
+          description: Job function (multi-select). E.g. ['Engineering', 'Marketing']
+        jobLevel:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Job level/seniority (multi-select). E.g. ['C-Suite', 'VP', 'Director']
+        jobDescription:
+          type: string
+          description: Job description (exact match)
+        jobLocationCity:
+          type: string
+          description: Job location city (exact match)
+        jobLocationState:
+          type: string
+          description: Job location state (exact match)
+        jobLocationCountry:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: Job location country (multi-select)
+        jobIsCurrent:
+          type: boolean
+          description: Whether job is current position
+        jobStartDate:
+          type: string
+          description: Job start date (exact match)
+        jobCount:
+          type: integer
+          minimum: 0
+          description: Min number of jobs in profile
+        companyName:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 25
+          description: Company name from person record (multi-select, exact match via suggest)
+        companyNameMode:
+          type: string
+          enum:
+          - exact
+          - contains
+          description: 'Company name match mode: exact (IN) or contains (ILIKE)'
+        persona:
+          type: string
+          description: Persona type (exact match)
+        languages:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 25
+          description: Languages (multi-select, matches within compound values)
+        skills:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 25
+          description: Skills (multi-select, exact match)
+        certifications:
+          type: string
+          description: Certifications (exact match)
+        patents:
+          type: string
+          description: Patents (exact match)
+        publications:
+          type: string
+          description: Publications (exact match)
+        websites:
+          type: string
+          description: Websites (exact match)
+        education:
+          type: string
+          description: Education (exact match)
+        phone:
+          type: string
+          description: Phone number (exact match)
+        cellphone:
+          type: string
+          description: Cellphone number (exact match)
+        orgName:
+          type: string
+          description: Organization name (exact match)
+        domain:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 5000
+          description: Company domain (multi-select, max 5000)
+        aboutUs:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Company overview/about us (keyword/contains match, multi-select)
+        companyEntityType:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: Company entity type (multi-select)
+        companyLegalType:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: Company legal type (multi-select)
+        employeeCount:
+          type: integer
+          minimum: 0
+          description: Min employee count
+        employeeCountMax:
+          type: integer
+          minimum: 0
+          description: Max employee count upper bound
+        employeeCountMin:
+          type: integer
+          minimum: 0
+          description: Min employee count lower bound
+        foundedOn:
+          type: number
+          description: Founded year (exact match, e.g. 2020)
+        headquartersCity:
+          type: string
+          description: Headquarters city (exact match)
+        headquartersState:
+          type: string
+          description: Headquarters state (exact match)
+        headquartersCountry:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: Headquarters country (multi-select)
+        industrySicCode:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 50
+          description: SIC industry code (multi-select)
+        industrySicDescription:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 50
+          description: SIC industry description (multi-select)
+        industryNaicsCode:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 50
+          description: NAICS industry code (multi-select)
+        industryNaicsDescription:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 50
+          description: NAICS industry description (multi-select)
+        orgLinkedinUrl:
+          type: string
+          description: Organization LinkedIn URL (exact match)
+        locationCity:
+          type: string
+          description: Organization location city (exact match)
+        locationState:
+          type: string
+          description: Organization location state (exact match)
+        locationCountry:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: Organization location country (multi-select)
+        revenueMax:
+          type: number
+          minimum: 0
+          description: Max revenue upper bound
+        revenueMin:
+          type: number
+          minimum: 0
+          description: Min revenue lower bound
+        revenueBuckets:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 6
+          description: Revenue range buckets (multi-select, e.g. ["<$1M", "$1M to <$10M"])
+        specialties:
+          type: string
+          description: Company specialties (exact match)
+        crmTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: CRM technology (multi-select)
+        marketingAutomationTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Marketing automation technology (multi-select)
+        abmTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: ABM technology (multi-select)
+        salesAutomationTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Sales automation technology (multi-select)
+        analyticsTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Analytics technology (multi-select)
+        cmsTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: CMS technology (multi-select)
+        martechCategoriesOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Martech categories (multi-select, exact match)
+        conversationIntelligenceTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Conversation intelligence technology (multi-select)
+        cloudProviderTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Cloud provider technology (multi-select)
+        emailHostingTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Email hosting technology (multi-select)
+        emailSecurityTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Email security technology (multi-select)
+        applicationSecurityTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Application security technology (multi-select)
+        cloudSecurityTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Cloud security technology (multi-select)
+        developmentTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: Development technology (multi-select)
+        eCommercePlatformTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: E-commerce platform technology (multi-select)
+        erpTechOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 10
+          description: ERP technology (multi-select)
+        hasMobileAppOrg:
+          type: boolean
+          description: Has mobile app
+        hasWebAppOrg:
+          type: boolean
+          description: Has web app
+        hasCisoOrg:
+          type: boolean
+          description: Has CISO
+        hasCioOrg:
+          type: boolean
+          description: Has CIO
+        locationCountOrg:
+          type: integer
+          minimum: 0
+          description: Min location count
+        isLinkedinUrlClaimedOrg:
+          type: boolean
+          description: LinkedIn URL is claimed
+        marketingRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min marketing role count
+        salesRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min sales role count
+        operationsRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min operations role count
+        businessDevelopmentRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min business development role count
+        customerSuccessRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min customer success role count
+        itRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min IT role count
+        grcRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min GRC role count
+        securityRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min security role count
+        devopsRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min DevOps role count
+        networkInfrastructureRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min network infrastructure role count
+        mobileDevRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min mobile dev role count
+        iosDevRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min iOS dev role count
+        androidDevRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min Android dev role count
+        engineerRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min engineer role count
+        qaRoleCountOrg:
+          type: integer
+          minimum: 0
+          description: Min QA role count
+        marketingOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min marketing open roles count
+        operationsOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min operations open roles count
+        salesOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min sales open roles count
+        accountExecutiveOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min account executive open roles count
+        customerSuccessOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min customer success open roles count
+        demandGenerationOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min demand generation open roles count
+        businessDevelopmentOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min business development open roles count
+        itOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min IT open roles count
+        securityOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min security open roles count
+        grcOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min GRC open roles count
+        devopsOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min DevOps open roles count
+        networkInfrastructureOpenRolesCountOrg:
+          type: integer
+          minimum: 0
+          description: Min network infrastructure open roles count
+        monthlyOrganicTrafficOrg:
+          type: number
+          minimum: 0
+          description: Min monthly organic traffic
+        monthlyPaidTrafficOrg:
+          type: number
+          minimum: 0
+          description: Min monthly paid traffic
+        totalMonthlyTrafficOrg:
+          type: number
+          minimum: 0
+          description: Min total monthly traffic
+        monthlyGoogleAdspendOrg:
+          type: number
+          minimum: 0
+          description: Min monthly Google ad spend
+        employeeOnLinkedinGrowthRateOrg:
+          type: number
+          description: Min employee on LinkedIn growth rate
+        isWebsiteForSaleOrg:
+          type: boolean
+          description: Website is for sale
+        topAppleappstoreUrlOrg:
+          type: string
+          description: Top Apple App Store URL (exact match)
+        topAppstoreRatingOrg:
+          type: number
+          minimum: 0
+          description: Min App Store rating
+        topAppstoreReviewCountOrg:
+          type: integer
+          minimum: 0
+          description: Min App Store review count
+        lastAppstoreUpdateOrg:
+          type: string
+          description: Last App Store update date (exact match)
+        appstoreUpdateCountOrg:
+          type: integer
+          minimum: 0
+          description: Min App Store update count
+        appstoreAppCategoryOrg:
+          type: string
+          description: App Store app category (exact match)
+        topPlaystoreUrlOrg:
+          type: string
+          description: Top Play Store URL (exact match)
+        topPlaystoreRatingOrg:
+          type: number
+          minimum: 0
+          description: Min Play Store rating
+        topPlaystoreReviewCountOrg:
+          type: integer
+          minimum: 0
+          description: Min Play Store review count
+        lastPlaystoreUpdateOrg:
+          type: string
+          description: Last Play Store update date (exact match)
+        playstoreDownloadCountOrg:
+          type: integer
+          minimum: 0
+          description: Min Play Store download count
+        playstoreAppCategoryOrg:
+          type: string
+          description: Play Store app category (exact match)
+        totalReviewsOrg:
+          type: integer
+          minimum: 0
+          description: Min total reviews count
+        lastFundingDateOrg:
+          type: string
+          description: Last funding date (exact match)
+        lastFundingAmountOrg:
+          type: number
+          minimum: 0
+          description: Min last funding amount
+        leadInvestorsOrg:
+          type: string
+          description: Lead investors (exact match)
+        lastFundingTypeOrg:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 20
+          description: Last funding type (multi-select). E.g. ['Series A', 'Series B']
+        fundingRoundNumberOfInvestorsOrg:
+          type: integer
+          minimum: 0
+          description: Min funding round number of investors
+        totalFundingAmountOrg:
+          type: number
+          minimum: 0
+          description: Min total funding amount
+    LeadFinderSuggestResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+              description: Matching company names
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
     LeadRevealRequest:
       type: object
       required:
@@ -129,12 +3445,17 @@ components:
       properties:
         leads:
           type: array
+          minItems: 1
           maxItems: 25
           items:
             type: object
+            required:
+            - id
             properties:
               id:
                 type: string
+                description: Lead ID from search results
+          description: Leads to reveal (max 25)
         fields:
           type: array
           items:
@@ -142,73 +3463,645 @@ components:
             enum:
             - email
             - phone
+          minItems: 1
+          description: 'Which contact fields to reveal: ''email'' (10 credits), ''phone'' (525 credits),
+            or both. Defaults to both if omitted.'
+    LeadSearchPreviewResult:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Encrypted lead identifier — use this for reveal/enrich/export
+        firstName:
+          type: string
+          description: First name
+          nullable: true
+        lastName:
+          type: string
+          description: Last name (masked until unlocked)
+          nullable: true
+        logoUrl:
+          type: string
+          description: Company logo URL
+          nullable: true
+        emailDomain:
+          type: string
+          description: Email domain
+          nullable: true
+        linkedinUrl:
+          type: string
+          description: LinkedIn profile URL
+          nullable: true
+        linkedinHeadline:
+          type: string
+          description: LinkedIn headline
+          nullable: true
+        jobTitle:
+          type: string
+          description: Job title
+          nullable: true
+        jobFunction:
+          type: string
+          description: Job function/department
+          nullable: true
+        jobLevel:
+          type: string
+          description: Job level/seniority
+          nullable: true
+        companyName:
+          type: string
+          description: Company name
+          nullable: true
+        skills:
+          type: string
+          description: Skills
+          nullable: true
+        city:
+          type: string
+          description: Person city
+          nullable: true
+        stateName:
+          type: string
+          description: State/province
+          nullable: true
+        countryName:
+          type: string
+          description: Country
+          nullable: true
+        domain:
+          type: string
+          description: Company domain
+          nullable: true
+        orgLinkedinUrl:
+          type: string
+          description: Organization LinkedIn URL
+          nullable: true
+        employeeCount:
+          type: integer
+          description: Employee count
+          nullable: true
+        industrySicDescription:
+          type: string
+          description: SIC industry
+          nullable: true
+        industryNaicsDescription:
+          type: string
+          description: NAICS industry
+          nullable: true
+        revenue:
+          type: string
+          description: Revenue range
+          nullable: true
+        specialties:
+          type: string
+          description: Company specialties
+          nullable: true
+        foundedOn:
+          type: string
+          description: Founded date
+          nullable: true
+        headquartersCity:
+          type: string
+          description: HQ city
+          nullable: true
+        headquartersState:
+          type: string
+          description: HQ state
+          nullable: true
+        headquartersCountry:
+          type: string
+          description: HQ country
+          nullable: true
+        employeeOnLinkedinGrowthRateOrg:
+          type: number
+          description: Employee on LinkedIn growth rate
+          nullable: true
+        totalMonthlyTrafficOrg:
+          type: number
+          description: Total monthly website traffic
+          nullable: true
+        totalFundingAmountOrg:
+          type: number
+          description: Total funding amount
+          nullable: true
+        lastFundingTypeOrg:
+          type: string
+          description: Last funding type
+          nullable: true
+        lastFundingDateOrg:
+          type: string
+          description: Last funding date
+          nullable: true
+        linkedinConnectionsCount:
+          type: number
+          description: LinkedIn connections count
+          nullable: true
+        logoUrlOrg:
+          type: string
+          description: Organization logo URL
+          nullable: true
+        companyHeadline:
+          type: string
+          description: Company headline
+          nullable: true
+    LeadSearchRequest:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+          description: Search filters
+        excludeFilters:
+          type: object
+          additionalProperties: false
+          description: Filters to exclude from results. Only personHeadline, companyHeadline, aboutUs,
+            domain, and jobTitle are supported.
+          properties:
+            personHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Person LinkedIn headline to exclude (keyword/contains match)
+            companyHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company headline to exclude (keyword/contains match)
+            aboutUs:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company overview/about us to exclude (keyword/contains match)
+            domain:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 5000
+              description: Company domain to exclude (exact match)
+            jobTitle:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 25
+              description: Job title to exclude (keyword/contains match)
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+          description: 'Page number (starts at 1). Offset-based cap: (page - 1) × pageSize must be < 500,000.
+            Pages 1–3 are free.'
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+          description: Results per page (1–100)
     LeadSearchResponse:
       type: object
+      required:
+      - success
+      - data
       properties:
         success:
           type: boolean
-        pagination:
+          const: true
+        data:
+          type: object
+          required:
+          - results
+          - pagination
+          properties:
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/LeadSearchPreviewResult'
+              description: Array of search results
+            pagination:
+              $ref: '#/components/schemas/LeadFinderPagination'
+              description: Pagination metadata
+        meta:
           type: object
           properties:
-            page:
-              type: integer
-            pageSize:
-              type: integer
+            requestId:
+              type: string
+              description: Request tracking ID
+    RevealJobListResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - jobs
+          - total
+          - page
+          - limit
+          properties:
+            jobs:
+              type: array
+              items:
+                $ref: '#/components/schemas/RevealJobSummary'
             total:
               type: integer
-        data:
-          type: array
-          items:
-            type: object
-    ErrorEnvelope:
+              description: Total jobs matching the filter
+            page:
+              type: integer
+            limit:
+              type: integer
+    RevealJobPollResponse:
       type: object
+      required:
+      - success
+      - data
       properties:
         success:
           type: boolean
-          example: false
-        error:
-          type: object
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-    LeadRevealResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
+          const: true
         data:
           type: object
+          required:
+          - jobId
+          - status
+          - jobType
+          - fields
+          - createdAt
           properties:
             jobId:
               type: string
-  responses:
-    RateLimited:
-      description: Rate limit exceeded. Includes a Retry-After header.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
-    Unauthorized:
-      description: Missing, invalid, or disabled API key.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
-    InsufficientCredits:
-      description: Not enough credits to complete the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
+              description: Reveal/enrich job ID
+            status:
+              type: string
+              enum:
+              - pending
+              - processing
+              - completed
+              - failed
+              description: '`pending` — queued, `processing` — worker running, `completed` — results ready,
+                `failed` — credits refunded'
+            jobType:
+              type: string
+              enum:
+              - reveal
+              - enrich
+              description: Whether this was a reveal or enrich job
+            fields:
+              type: array
+              items:
+                type: string
+                enum:
+                - email
+                - phone
+              description: Contact fields that were requested
+            progress:
+              type: object
+              description: Present for pending/processing/completed jobs
+              properties:
+                processed:
+                  type: integer
+                  description: Leads processed so far
+                total:
+                  type: integer
+                  description: Total leads in the job
+              nullable: true
+            results:
+              type: object
+              description: Present only when status is `completed`
+              properties:
+                revealed:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RevealedContact'
+                  description: Revealed contacts
+                alreadyRevealed:
+                  type: integer
+                  description: Leads returned from cache (not re-charged)
+                newlyRevealed:
+                  type: integer
+                  description: Leads newly revealed (charged)
+                creditsUsed:
+                  type: number
+                  description: Credits deducted for this job
+                creditsRefunded:
+                  type: number
+                  description: Credits refunded (e.g. for leads with no result)
+                  nullable: true
+              nullable: true
+            error:
+              type: string
+              description: Error message — present only when status is `failed`
+              nullable: true
+            creditsRefunded:
+              type: number
+              description: Credits refunded on failure — present only when status is `failed`
+              nullable: true
+            createdAt:
+              type: string
+              format: date-time
+              description: When the job was created
+            completedAt:
+              type: string
+              format: date-time
+              description: When the job finished — present when status is `completed`
+              nullable: true
+    RevealJobSubmitResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - jobId
+          - status
+          - totalLeads
+          - fields
+          - creditsReserved
+          - message
+          properties:
+            jobId:
+              type: string
+              description: Reveal/enrich job ID (starts with `rj_`)
+              examples:
+              - rj_a1b2c3d4e5f6g7h8
+            status:
+              type: string
+              enum:
+              - pending
+              description: Always `pending` on submit
+            totalLeads:
+              type: integer
+              description: Number of leads submitted
+            fields:
+              type: array
+              items:
+                type: string
+                enum:
+                - email
+                - phone
+              description: Which fields were requested
+            creditsReserved:
+              type: number
+              description: Credits reserved upfront for this reveal/enrich job
+            message:
+              type: string
+              description: Human-readable message with polling URL
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+    RevealJobSummary:
+      type: object
+      required:
+      - jobId
+      - status
+      - jobType
+      - fields
+      - total
+      - processed
+      - creditsUsed
+      - creditsRefunded
+      - createdAt
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+        jobType:
+          type: string
+          enum:
+          - reveal
+          - enrich
+        fields:
+          type: array
+          items:
+            type: string
+            enum:
+            - email
+            - phone
+        total:
+          type: integer
+          description: Total leads in the job
+        processed:
+          type: integer
+          description: Leads processed
+        creditsUsed:
+          type: number
+          description: Credits consumed
+        creditsRefunded:
+          type: number
+          description: Credits refunded
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+    RevealedContact:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Encrypted lead identifier
+        firstName:
+          type: string
+          description: First name
+          nullable: true
+        lastName:
+          type: string
+          description: Last name
+          nullable: true
+        jobTitle:
+          type: string
+          description: Job title
+          nullable: true
+        companyName:
+          type: string
+          description: Company name
+          nullable: true
+        emailAddress:
+          type: string
+          description: Email address (revealed). Only present when email field was requested.
+          nullable: true
+        phone:
+          type: string
+          description: Phone number (revealed). Only present when phone field was requested.
+          nullable: true
+        cellphone:
+          type: string
+          description: Cellphone number (revealed). Only present when phone field was requested.
+          nullable: true
+        linkedinUrl:
+          type: string
+          description: LinkedIn profile URL
+          nullable: true
+        domain:
+          type: string
+          description: Company domain
+          nullable: true
+    SavedSearchCreateRequest:
+      type: object
+      required:
+      - name
+      - filters
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Search name
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+    SavedSearchItem:
+      type: object
+      required:
+      - id
+      - name
+      - filters
+      - createdAt
+      - updatedAt
+      properties:
+        id:
+          type: string
+          description: Saved search ID
+        name:
+          type: string
+          description: Search name
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+          description: Saved search filters
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+    SavedSearchListResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedSearchItem'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+    SavedSearchResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/SavedSearchItem'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+    UnlockNamesRequest:
+      type: object
+      required:
+      - leads
+      properties:
+        leads:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: object
+            required:
+            - id
+            properties:
+              id:
+                type: string
+                description: Encrypted lead ID
+          description: Leads whose last names to unlock (max 100)
+    UnlockNamesResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - results
+          properties:
+            results:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Lead ID
+                  lastName:
+                    type: string
+                    description: Full last name
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsUsed:
+              type: number
   securitySchemes:
-    apiKeyHeader:
+    ApiKeyHeader:
       type: apiKey
       in: header
       name: x-api-key
-      description: API key (prefixed sk_) passed in the x-api-key header.
-    bearerAuth:
+      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
+    BearerToken:
       type: http
       scheme: bearer
-      description: API key passed as Authorization Bearer token.
+      description: 'The same API key sent as an Authorization: Bearer token.'

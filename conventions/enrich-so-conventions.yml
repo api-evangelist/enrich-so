@@ -1,0 +1,211 @@
+generated: '2026-08-14'
+method: searched
+source: >-
+  https://doc.enrich.so/api-reference-1951025m0, https://doc.enrich.so/authentication-1951026m0,
+  https://doc.enrich.so/rate-limits-1951030m0, https://doc.enrich.so/credits-pricing-1951027m0,
+  plus openapi/_original/enrich-so-v3-harvested-openapi.yml
+provider: Enrich
+providerId: enrich-so
+description: >-
+  Cross-cutting runtime semantics for the Enrich API v3 — the rules that hold across all
+  51 operations rather than any single one. Every value here is either quoted from an
+  Enrich documentation page or read from the OpenAPI fragments Enrich publishes on those
+  pages; the auth and error behaviour was additionally confirmed against a live
+  unauthenticated request on 2026-08-14.
+base_url:
+  url: https://dev.enrich.so/api/v3
+  published_at: https://doc.enrich.so/api-reference-1951025m0
+  probed: '2026-08-14'
+  note: >-
+    The production base URL genuinely lives on a host named "dev". This trips automated
+    base-URL checks (it reads as a non-production host) but it is what Enrich documents
+    and what answers: GET https://dev.enrich.so/api/v3/wallets/balance returns 401
+    application/problem+json. Do not "repair" it to api.enrich.so.
+  conflicts:
+  - source: '@enrich.so/sdk README quickstart'
+    value: https://api.enrich.so/v3
+    probed_status: 404
+    note: >-
+      The official TypeScript SDK README configures environment "https://api.enrich.so/v3".
+      That host+prefix returns 404. api.enrich.so serves only the legacy Enrich Labs v1/v2
+      API and its Swagger UI. Worth reporting to Enrich — it means the SDK quickstart, as
+      published, cannot work.
+authentication:
+  style: api-key
+  primary:
+    scheme: apiKey
+    location: header
+    name: x-api-key
+  alternative:
+    scheme: http-bearer
+    header: 'Authorization: Bearer <key>'
+  key_prefix: sk_
+  key_management: https://dash.enrich.so/dashboard/api-keys
+  scope: organization (team), member-level permissions
+  rotation: >-
+    Keys can be rotated from the dashboard without downtime; the old key stays active
+    until explicitly revoked.
+  oauth: >-
+    OAuth 2.0 exists ONLY on the MCP surface (https://mcp.enrich.so), not on the REST API.
+    See scopes/enrich-so-scopes.yml.
+  detail: authentication/enrich-so-authentication.yml
+  inconsistency: >-
+    The authentication page documents keys as sk_prod_..., while the securityScheme
+    descriptions in the published OpenAPI fragments say "sk_live_ (64 characters)". Both
+    are Enrich's own documentation. A consumer cannot tell from the docs which prefix a
+    live key carries.
+response_envelope:
+  success:
+    shape: '{ success: true, data: {...}, meta: {...} }'
+    fields:
+    - success
+    - data
+    - meta
+  error:
+    shape: RFC 9457 Problem Details
+    media_type: application/problem+json
+    detail: errors/enrich-so-problem-types.yml
+  meta:
+    schema: EnrichmentMeta
+    fields:
+    - name: requestId
+      description: Unique ID for the request; quote it in support tickets.
+    - name: creditsUsed
+      description: Credits this request consumed. 0 when a lookup found nothing.
+    - name: creditsRemaining
+      description: Balance after the request.
+    - name: processingTimeMs
+      description: Lookup duration in milliseconds.
+    note: >-
+      meta is the billing receipt. It is the only reliable way to know what a call cost —
+      the HTTP status does not tell you, because a successful-but-empty lookup returns
+      200 with creditsUsed 0.
+request_id_tracing:
+  supported: true
+  mechanism: response-body
+  field: meta.requestId
+  header: null
+  note: >-
+    There is no X-Request-Id response header. The identifier is only in the JSON body, so
+    it cannot be captured by proxy/edge logging — a client must parse every response to
+    keep a trace ID.
+idempotency:
+  request_replay_keys: false
+  header: null
+  note: >-
+    Enrich publishes NO idempotency key mechanism — there is no Idempotency-Key header on
+    any of the 51 operations, and none is documented. A retried POST /email-finder is a
+    second billable lookup.
+  settlement_idempotency: true
+  settlement_note: >-
+    What Enrich does guarantee is idempotent SETTLEMENT of batch billing: "Settlement is
+    idempotent — fetching results multiple times won't charge you again"
+    (https://doc.enrich.so/credits-pricing-1951027m0). That protects the results-fetch
+    step from double-charging. It is NOT request idempotency and it does not make a
+    retried submit safe.
+  consequence: >-
+    Because submit is not idempotent and batch submit RESERVES the full estimated cost
+    upfront, a client that retries a timed-out bulk submit can reserve the cost twice.
+    Poll for the batchId rather than blind-retrying a submit.
+pagination:
+  style: page-number
+  request_params:
+  - name: page
+    default: 1
+    minimum: 1
+  - name: limit
+    default: 100
+    minimum: 1
+    maximum: 1000
+    note: The wallet transactions endpoint defaults limit to 20 rather than 100.
+  response_schema: Pagination
+  response_fields:
+  - page
+  - limit
+  - total
+  - totalPages
+  cursor: false
+  note: Offset/page pagination throughout; no cursor or link-header pagination.
+async_jobs:
+  pattern: submit -> poll -> fetch results
+  applies_to:
+  - Email Validation batch
+  - Email Finder batch
+  - Reverse Email Lookup bulk
+  - Phone Finder bulk
+  - IP to Company batch
+  - Company Followers scrape
+  - Lead Finder reveal jobs
+  - Lead Finder export jobs
+  identifier: batchId / jobId — 24-character hex string
+  statuses:
+  - queued
+  - processing
+  - completed
+  - failed
+  polling_cost: free (status endpoints consume no credits)
+  polling_guidance: every 5-10 seconds, per https://doc.enrich.so/rate-limits-1951030m0
+  max_items:
+    email_validation_batch: 500000
+    email_finder_batch: 500000
+    phone_finder_bulk: 500000
+    ip_to_company_batch: 500000
+    reverse_lookup_bulk: 100000
+  credit_model: reserve-on-submit, settle-on-first-results-fetch, refund the excess
+webhooks:
+  supported: true
+  mechanism: per-request webhookUrl field on batch submit
+  catalog: asyncapi/enrich-so-webhooks.yml
+  note: >-
+    Callbacks fire per result AND once on completion. There is no webhook registration
+    API, no signing secret and no documented signature header — see the webhook catalog.
+rate_limit_signaling:
+  headers:
+  - X-RateLimit-Limit
+  - X-RateLimit-Remaining
+  - X-RateLimit-Reset
+  retry_after: true
+  status: 429
+  standard: >-
+    Legacy X-RateLimit-* naming, not the RFC 9331 / draft-ietf-httpapi-ratelimit-headers
+    RateLimit-Limit/RateLimit-Remaining/RateLimit-Reset form.
+  reset_units: seconds until the window resets (not a UNIX timestamp)
+  detail: rate-limits/enrich-so-rate-limits.yml
+credit_headers:
+  present_on:
+  - Company Followers CSV export
+  headers:
+  - X-Credits-Used
+  - X-Credits-Refunded
+  note: >-
+    Two operations expose credit accounting as response HEADERS rather than in meta —
+    the CSV export endpoints, which return text/csv and therefore have no JSON meta object
+    to carry it. Inconsistent with the rest of the API but necessary.
+versioning:
+  style: uri-path
+  current: /api/v3
+  prior:
+  - version: v1/v2
+    host: https://api.enrich.so
+    spec: openapi/enrich-so-legacy-api-openapi.json
+    note: Still live and still serving a Swagger UI at https://api.enrich.so/docs.
+  detail: lifecycle/enrich-so-lifecycle.yml
+field_expansion:
+  supported: false
+  note: >-
+    No expand / fields / sparse-fieldset parameter on the enrichment endpoints. Lead
+    Finder is the exception: POST /lead-finder/reveal and /lead-finder/enrich take an
+    optional `fields` array selecting email and/or phone, which is a billing control
+    (50 credits email-only, 525 phone-only, 575 both) rather than a response-shaping one.
+metadata:
+  customer_metadata_fields: false
+  note: No customer-supplied metadata/tags can be attached to a request for later reconciliation.
+content_types:
+  request: application/json
+  response:
+  - application/json
+  - application/problem+json
+  - text/csv
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

@@ -1,0 +1,75 @@
+{
+ "opencollection": "1.0.0",
+ "info": {
+  "name": "Enrich Teams API",
+  "version": "3.0",
+  "docs": "https://doc.enrich.so/api-reference-1951025m0"
+ },
+ "request": {
+  "baseUrl": "https://dev.enrich.so/api/v3",
+  "auth": {
+   "type": "apikey",
+   "key": "x-api-key",
+   "value": "{{x-api-key}}",
+   "placement": "header"
+  }
+ },
+ "items": [
+  {
+   "info": {
+    "name": "Teams",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Invite someone to your team",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/teams/{teamId}/invitations",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"email\": \"marco.silva@yourcompany.com\",\n  \"role\": \"member\"\n}"
+      }
+     },
+     "docs": "Sends an email invitation to join your team. You must be an **admin** or\n**owner** to invite people. The invitee can be assigned the role of `admin`\nor `member`."
+    },
+    {
+     "info": {
+      "name": "List pending invitations",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/teams/{teamId}/invitations"
+     },
+     "docs": "See all outstanding invitations for your team. You must be an **admin** or\n**owner**."
+    },
+    {
+     "info": {
+      "name": "Cancel a pending invitation",
+      "type": "http"
+     },
+     "http": {
+      "method": "DELETE",
+      "url": "https://dev.enrich.so/api/v3/teams/{teamId}/invitations/{invitationId}"
+     },
+     "docs": "Withdraws an invitation before the invitee accepts it. You must be an\n**admin** or **owner**."
+    },
+    {
+     "info": {
+      "name": "List team members",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/teams/{teamId}/members"
+     },
+     "docs": "Returns everyone in your team along with their role (owner, admin, or member)."
+    }
+   ]
+  }
+ ]
+}

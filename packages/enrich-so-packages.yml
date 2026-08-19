@@ -1,0 +1,109 @@
+generated: '2026-08-14'
+method: searched
+source: >-
+  npm registry (registry.npmjs.org), Go module proxy (proxy.golang.org), and the
+  Enrich Labs GitHub organization (github.com/maximiseai) — the org that owns the
+  repositories linked from the published npm package metadata.
+provider: Enrich
+providerId: enrich-so
+description: >-
+  First-party client libraries for the Enrich API. Enrich Labs publishes an official
+  TypeScript SDK to npm as @enrich.so/sdk and an official Go SDK as the Go module
+  github.com/maximiseai/enrich-go-sdk, plus an n8n community node package. Both SDKs
+  are MIT licensed and are maintained in the maximiseai GitHub organization, which
+  is the Enrich Labs org (the npm scope @enrich.so and the SDK README both point at
+  https://enrich.so and https://doc.enrich.so).
+registries_searched:
+- registry: npm
+  query: enrich.so, enrichso
+  result: 2 packages found (@enrich.so/sdk, n8n-nodes-enrich-labs)
+- registry: pypi
+  query: enrich-so, enrichso
+  result: none — https://pypi.org/pypi/enrich-so/json returned 404
+- registry: pkg.go.dev / proxy.golang.org
+  query: github.com/maximiseai/enrich-go-sdk
+  result: found, 8 published versions
+- registry: rubygems
+  query: enrich-so
+  result: none
+- registry: crates.io
+  query: enrich-so
+  result: none
+- registry: nuget / maven-central / packagist
+  query: enrich, enrich.so
+  result: none first-party
+packages:
+- name: '@enrich.so/sdk'
+  language: typescript
+  registry: npm
+  official: true
+  url: https://www.npmjs.com/package/@enrich.so/sdk
+  repository: https://github.com/maximiseai/enrich-ts-sdk
+  license: MIT
+  version: 1.2.0
+  published: '2026-03-03'
+  first_published: '2026-02-28'
+  release_count: 5
+  covers:
+  - Email Finder
+  - Email Validation
+  - Phone Finder
+  - Reverse Email Lookup
+  - Lead Finder
+  - People Search
+  - Company Followers
+  - Teams
+  - Wallets
+  note: >-
+    Official TypeScript SDK. Client class EnrichApiClient; API key passed as
+    x-api-key. Ships typed error classes, automatic retries, configurable timeouts,
+    AbortSignal cancellation and multi-runtime support (Node, Deno, Bun, browsers,
+    edge). CAUTION: the README quickstart configures environment
+    "https://api.enrich.so/v3", but that host/prefix returns HTTP 404 on probe
+    (2026-08-14) — the documented and live base URL is https://dev.enrich.so/api/v3.
+- name: github.com/maximiseai/enrich-go-sdk
+  language: go
+  registry: pkg.go.dev
+  official: true
+  url: https://pkg.go.dev/github.com/maximiseai/enrich-go-sdk
+  repository: https://github.com/maximiseai/enrich-go-sdk
+  license: MIT
+  version: v0.2.1
+  published: '2026-03-03'
+  release_count: 8
+  note: >-
+    Official Go SDK, read from the Go module proxy
+    (proxy.golang.org/github.com/maximiseai/enrich-go-sdk/@latest ->
+    v0.2.1, 2026-03-03T17:56:58Z). Module path is the GitHub repo path; there is no
+    separate vanity import path.
+- name: n8n-nodes-enrich-labs
+  language: typescript
+  registry: npm
+  official: true
+  url: https://www.npmjs.com/package/n8n-nodes-enrich-labs
+  repository: https://github.com/maximiseai/n8n-nodes-enrich-labs
+  license: MIT
+  version: 0.1.2
+  published: '2025-07-14'
+  note: >-
+    n8n community nodes for Enrich, published from the same Enrich Labs GitHub org
+    as the SDKs. The linked repository returns 404 on the GitHub API (2026-08-14), so
+    the source is no longer public even though the package remains installable. Last
+    release predates the v3 API SDKs by ~8 months — treat as unmaintained relative to
+    the current API surface.
+gaps:
+- language: python
+  note: >-
+    No first-party Python client is published to PyPI, despite the authentication
+    docs shipping a Python requests example. Python consumers hand-roll HTTP.
+- language: java
+  note: No first-party Java/Kotlin client on Maven Central.
+- language: php
+  note: No first-party PHP client on Packagist.
+- language: ruby
+  note: No first-party Ruby client on RubyGems.
+- language: dotnet
+  note: No first-party .NET client on NuGet.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

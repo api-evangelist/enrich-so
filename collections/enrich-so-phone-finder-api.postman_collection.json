@@ -1,0 +1,571 @@
+{
+ "info": {
+  "_postman_id": "97bf491c-61b2-55db-a6d7-7a865260f070",
+  "name": "Enrich Phone Finder API",
+  "description": {
+   "content": "Find phone and mobile numbers for a person from an email address or profile URL, single or in bulk.\n\nAssembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so \u2014 every documentation page embeds its own OpenAPI fragment, and this document is the union of the fragments carrying these tags, with only the components they reference.",
+   "type": "text/plain"
+  },
+  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+ },
+ "item": [
+  {
+   "id": "4cb94d81-a4dd-5e73-be1c-174ca37a1ded",
+   "name": "Phone Finder",
+   "description": {
+    "content": "",
+    "type": "text/plain"
+   },
+   "item": [
+    {
+     "id": "0db920b8-cffc-538c-8c61-2835fafea7e4",
+     "name": "Find phone numbers",
+     "request": {
+      "name": "Find phone numbers",
+      "description": {
+       "content": "Find phone numbers associated with a person's email address or social\nprofile URL. You must provide at least one of the two.\n\n**Cost:** 500 credits. You are **not** charged if no phone numbers are found.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/reverse-lookup/phones",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "reverse-lookup",
+        "phones"
+       ],
+       "query": [
+        {
+         "key": "email",
+         "value": "string",
+         "description": "The person's email address",
+         "disabled": true
+        },
+        {
+         "key": "linkedin",
+         "value": "string",
+         "description": "The person's profile URL",
+         "disabled": true
+        }
+       ],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "15e8fbf0-a11e-5a33-96ad-4304186fef0c",
+       "name": "Phone numbers returned successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"phones\": [\n      \"+14158009370\",\n      \"+14158009371\"\n    ]\n  },\n  \"meta\": {\n    \"requestId\": \"665c4d2a7b8e3f00149f0a01\",\n    \"creditsUsed\": 500,\n    \"creditsRemaining\": 24500,\n    \"processingTimeMs\": 1340\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "ba54e592-58b7-525c-92e9-fa3bcba9ef93",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"querystring/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "2ce1d25f-7287-5f6b-affa-38757d5ebc4d",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "37c9605e-abfb-5b6c-ab79-481c3b521195",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/insufficient-credits\",\n  \"title\": \"Insufficient Credits\",\n  \"status\": 402,\n  \"detail\": \"Not enough credits. Required: 10, available: 3\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "4ce943fb-2eec-568c-964b-d90e387f93af",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "154c89d6-3d2e-5145-9173-01f3165d01c7",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "dc3057fa-c388-55c3-afd2-b30218b33c06",
+     "name": "Find phone numbers in batch",
+     "request": {
+      "name": "Find phone numbers in batch",
+      "description": {
+       "content": "Submit up to **500 000 items** (email addresses and/or profile URLs) for\nbulk phone lookup. Emails are deduplicated case-insensitively; profile\nURLs are deduplicated as-is.\n\n**Cost:** 10 credits per unique item, reserved upfront. At settlement,\nonly items where phones were actually found are charged \u2014 the rest are\nrefunded.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** for every item as it is processed. See\n   [phoneResult](#tag/Webhooks/operation/webhookPhoneResult) for the payload.\n\n2. **A completion callback** when every item has been processed. See\n   [phoneCompletion](#tag/Webhooks/operation/webhookPhoneCompletion) for the payload.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/reverse-lookup/phones/bulk",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "reverse-lookup",
+        "phones",
+        "bulk"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"emails\": [\n    \"sarah.chen@stripe.com\",\n    \"james.rodriguez@hubspot.com\"\n  ],\n  \"linkedins\": [\n    \"https://www.example.com/in/priyapatel\"\n  ],\n  \"webhookUrl\": \"https://api.yourapp.com/webhooks/enrich\"\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "b2f37434-29ef-5ca9-b6f2-acc10a744fbd",
+       "name": "Bulk job submitted \u2014 credits have been reserved",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665c52bf7b8e3f00149f0a10\",\n    \"status\": \"queued\",\n    \"itemCount\": 3,\n    \"message\": \"Bulk phone lookup job created\",\n    \"originalCount\": 3,\n    \"duplicatesRemoved\": 0\n  },\n  \"meta\": {\n    \"requestId\": \"665c52bf7b8e3f00149f0a0f\",\n    \"creditsReserved\": 1500,\n    \"creditsPerItem\": 500,\n    \"estimatedCredits\": 1500\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "16fcba26-3516-5ee9-b3bd-cb74132b4998",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "26406232-54a7-5cfa-9186-ac82066d1349",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "bfa4f1d2-1ec0-56be-8ca0-aa7ef93630cc",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/insufficient-credits\",\n  \"title\": \"Insufficient Credits\",\n  \"status\": 402,\n  \"detail\": \"Not enough credits. Required: 10, available: 3\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "88915aad-f621-59ce-a1b6-8be7858cf698",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "1de01dc4-d922-55cf-97dd-bb2f710abb78",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "ce27fd96-9a15-5ead-8c7f-24aac91a806b",
+     "name": "Check bulk phone lookup progress",
+     "request": {
+      "name": "Check bulk phone lookup progress",
+      "description": {
+       "content": "Poll this endpoint to track the job. The `progress` field is a percentage\nfrom 0 to 100.\n\n**Cost:** Free.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/reverse-lookup/phones/bulk/{jobId}",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "reverse-lookup",
+        "phones",
+        "bulk",
+        ":jobId"
+       ],
+       "query": [],
+       "variable": [
+        {
+         "key": "jobId",
+         "value": "<jobId>",
+         "description": "The job identifier (24-character hex string) returned when you submitted the job"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "807b4c74-d1dd-51c7-8818-0b758eff7272",
+       "name": "Current job status",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665c52bf7b8e3f00149f0a10\",\n    \"status\": \"processing\",\n    \"totalItems\": 3,\n    \"processedItems\": 2,\n    \"progress\": 66.7\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "88003c43-840c-5adc-ae68-a33defb3d734",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "d0d5a873-6c86-5996-b6c9-c227c7293ea6",
+       "name": "The resource you requested doesn't exist or doesn't belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"No batch found with that ID\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "24fcabaf-5a49-5d41-a7d9-cee53f2118f6",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "3a9a356b-8746-5fb1-b869-021010275c9a",
+     "name": "Get bulk phone lookup results",
+     "request": {
+      "name": "Get bulk phone lookup results",
+      "description": {
+       "content": "Retrieve paginated results. Each item shows the phones found (or an error\nmessage if the lookup failed).\n\n**Credit settlement:** Only items where at least one phone number was found\nare charged. Everything else is refunded.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/reverse-lookup/phones/bulk/{jobId}/results",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "reverse-lookup",
+        "phones",
+        "bulk",
+        ":jobId",
+        "results"
+       ],
+       "query": [
+        {
+         "key": "page",
+         "value": "1",
+         "description": "Page number (default: 1)",
+         "disabled": true
+        },
+        {
+         "key": "limit",
+         "value": "100",
+         "description": "Results per page (default: 100, max: 1 000)",
+         "disabled": true
+        }
+       ],
+       "variable": [
+        {
+         "key": "jobId",
+         "value": "<jobId>",
+         "description": "The job identifier (24-character hex string) returned when you submitted the job"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "aee8eafc-12fa-5e03-838a-d1ea7a1ab596",
+       "name": "Paginated phone lookup results",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665c52bf7b8e3f00149f0a10\",\n    \"status\": \"completed\",\n    \"totalItems\": 3,\n    \"processedItems\": 3,\n    \"successful\": 2,\n    \"failed\": 1,\n    \"results\": [\n      {\n        \"email\": \"sarah.chen@stripe.com\",\n        \"phones\": [\n          \"+14158009370\"\n        ]\n      },\n      {\n        \"email\": \"james.rodriguez@hubspot.com\",\n        \"phones\": [\n          \"+16175551234\",\n          \"+16175551235\"\n        ]\n      },\n      {\n        \"linkedin\": \"https://www.example.com/in/priyapatel\",\n        \"phones\": [],\n        \"error\": \"No phone numbers found for this profile\"\n      }\n    ],\n    \"page\": 1,\n    \"limit\": 100\n  },\n  \"meta\": {\n    \"requestId\": \"665c5aef7b8e3f00149f0a20\",\n    \"creditsUsed\": 1000,\n    \"creditsRefunded\": 500,\n    \"creditsRemaining\": 23500,\n    \"totalItems\": 3,\n    \"processedItems\": 3\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "e697183a-32f7-5e51-b79d-91cf12b6e3bf",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "e4c2c2c3-bd94-598e-b884-70a3dda89378",
+       "name": "The resource you requested doesn't exist or doesn't belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"No batch found with that ID\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "eec48528-4f5f-53d0-a0f6-7c8a14a1d83a",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "variable": [
+  {
+   "key": "baseUrl",
+   "value": "https://dev.enrich.so/api/v3"
+  },
+  {
+   "key": "apiKey",
+   "value": "<your Enrich API key>"
+  }
+ ],
+ "auth": {
+  "type": "apikey",
+  "apikey": [
+   {
+    "key": "key",
+    "value": "x-api-key"
+   },
+   {
+    "key": "value",
+    "value": "{{apiKey}}"
+   },
+   {
+    "key": "in",
+    "value": "header"
+   }
+  ]
+ }
+}

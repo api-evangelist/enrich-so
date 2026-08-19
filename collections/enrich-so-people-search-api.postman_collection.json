@@ -1,0 +1,338 @@
+{
+ "info": {
+  "_postman_id": "3f7d0d71-88a9-572c-be83-282ea50241c7",
+  "name": "Enrich People Search API",
+  "description": {
+   "content": "Find employees at a company and run cascading ICP (ideal customer profile) people searches.\n\nAssembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so \u2014 every documentation page embeds its own OpenAPI fragment, and this document is the union of the fragments carrying these tags, with only the components they reference.",
+   "type": "text/plain"
+  },
+  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+ },
+ "item": [
+  {
+   "id": "14d78431-a053-522f-aa13-2f7b390faf2a",
+   "name": "People Search",
+   "description": {
+    "content": "",
+    "type": "text/plain"
+   },
+   "item": [
+    {
+     "id": "a31435d4-4f7f-5d89-9dcb-af5ddc8f1b9b",
+     "name": "Find employees at a company",
+     "request": {
+      "name": "Find employees at a company",
+      "description": {
+       "content": "Find employees at a specific company by LinkedIn URL. Optionally filter by job level, job function, country, continent, or sales region.\n\n**Credits:** 1 credit per result returned. No charge if 0 results.\n\n**Pagination:** Use `page` and `max_results` to paginate through results.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/people-search/employee-finder",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "people-search",
+        "employee-finder"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"company_linkedin_url\": \"https://www.linkedin.com/company/google/\",\n  \"country\": [\n    \"United States\",\n    \"United Kingdom\"\n  ],\n  \"continent\": [\n    \"North America\"\n  ],\n  \"sales_region\": [\n    \"string\"\n  ],\n  \"job_level\": [\n    \"C-Level\",\n    \"VP\",\n    \"Director\"\n  ],\n  \"job_function\": [\n    \"Engineering\",\n    \"Marketing\"\n  ],\n  \"max_results\": 10,\n  \"page\": 1\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "74be474c-5b4c-56c4-b12f-7c7f95642f2c",
+       "name": "Employees found successfully. Results sorted by lead quality.",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"company_linkedin_url\": \"string\",\n    \"max_results\": 0,\n    \"results_length\": 0,\n    \"page\": 0,\n    \"total_pages\": 0,\n    \"total_results\": 0,\n    \"results\": [\n      {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"full_name\": \"John Doe\",\n        \"headline\": \"Senior Software Engineer at Google\",\n        \"about_me\": \"string\",\n        \"location\": {\n          \"city\": \"San Francisco\",\n          \"state_code\": \"CA\",\n          \"country\": \"United States\",\n          \"country_code\": \"US\",\n          \"continent\": \"North America\"\n        },\n        \"linkedin_url\": \"https://www.linkedin.com/in/johndoe\",\n        \"job_title\": \"Senior Software Engineer\",\n        \"job_level\": \"Senior\",\n        \"job_function\": \"Engineering\",\n        \"job_is_current\": true,\n        \"education\": \"string\",\n        \"skills\": \"string\",\n        \"certifications\": \"string\"\n      }\n    ]\n  },\n  \"meta\": {\n    \"requestId\": \"string\",\n    \"creditsUsed\": 0,\n    \"creditsRemaining\": 0\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "bc8f29db-5f91-55ec-9f65-0567f8413220",
+       "name": "Invalid request \u2014 check that company_linkedin_url is a valid LinkedIn company URL",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "67b3c3f1-ac38-5365-b2ba-c97515d64e3a",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "38998192-a550-5d96-b364-72161303f7b0",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "2b1bc5b9-351c-5b69-9eca-0087e1292053",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "c8cc9d6f-98ca-5437-9f84-55652df2ee26",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "6dbce426-f165-5017-869e-5388b710978b",
+     "name": "Cascading ICP people search",
+     "request": {
+      "name": "Cascading ICP people search",
+      "description": {
+       "content": "Search for people at a specific company using cascading ICP (Ideal Customer Profile) filter levels.\n\n**How it works:**\n1. Provide a company LinkedIn URL to target\n2. Optionally define 1-10 cascade levels, each with independent ICP criteria. If omitted, a default 4-level cascade is used: CEO/Founder \u2192 C-Suite \u2192 VP \u2192 Director.\n3. Levels are processed in order \u2014 results from earlier levels are excluded from later ones\n4. Each candidate is scored against the ICP criteria of their matching cascade level\n5. Results are returned sorted by score descending\n\n**Scoring:** Each candidate gets a normalized 0-100 score based on title match (30pts), job level (20pts), skills overlap (15pts), location match (15pts), current job status (10pts), profile completeness (5pts), tenure (5pts), and optional seniority priority bonus (0-30pts). The score is normalized against only the dimensions specified in the cascade level.\n\n**Credits:** 1 credit per profile returned. No charge if 0 results.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/people-search/waterfall-icp-search",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "people-search",
+        "waterfall-icp-search"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"company_linkedin_url\": \"https://www.linkedin.com/company/google/\",\n  \"cascade\": [\n    {\n      \"include_title\": [\n        \"CTO\",\n        \"VP Engineering\"\n      ],\n      \"exclude_title\": [\n        \"Intern\",\n        \"Associate\"\n      ],\n      \"job_levels\": [\n        \"C-Level\",\n        \"VP\"\n      ],\n      \"job_functions\": [\n        \"Engineering\",\n        \"Technology\"\n      ],\n      \"skills\": [\n        \"Python\",\n        \"Machine Learning\"\n      ],\n      \"location\": [\n        \"US\",\n        \"UK\"\n      ],\n      \"include_headline_search\": false,\n      \"priority_bonus\": 0\n    }\n  ],\n  \"max_results\": 25,\n  \"min_score\": 0\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "78a7c9d4-a34e-50d9-b914-367bf69bb2a4",
+       "name": "Search completed successfully. Results are sorted by ICP score descending.",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"results\": [\n      {\n        \"person\": {\n          \"first_name\": \"John\",\n          \"last_name\": \"Doe\",\n          \"linkedin_url\": \"https://www.linkedin.com/in/johndoe\",\n          \"linkedin_headline\": \"CTO at Google\",\n          \"location\": \"San Francisco, California, United States\",\n          \"email_domain\": \"google.com\"\n        },\n        \"current_position\": {\n          \"title\": \"CTO\",\n          \"company\": \"Google\",\n          \"level\": \"C-Level\",\n          \"function\": \"Engineering\",\n          \"is_current\": true,\n          \"start_date\": \"2020-01-15\"\n        },\n        \"skills\": [\n          \"Python\",\n          \"Machine Learning\",\n          \"Cloud Architecture\"\n        ],\n        \"education\": \"Stanford University\",\n        \"certifications\": null,\n        \"score\": 92,\n        \"ranking\": 1,\n        \"cascade_level\": 0,\n        \"ranking_factors\": {\n          \"title_match\": 30,\n          \"job_level\": 20,\n          \"skills_overlap\": 10,\n          \"location_match\": 15,\n          \"current_job\": 10,\n          \"profile_completeness\": 5,\n          \"experience\": 5,\n          \"priority_bonus\": 0\n        },\n        \"what_matched\": [\n          \"Exact title match: CTO\",\n          \"Exact level: C-Level\",\n          \"Skills: 2/3 matched\",\n          \"Country match: United States\",\n          \"Current position\"\n        ]\n      }\n    ],\n    \"total_found\": 47,\n    \"total_returned\": 10,\n    \"cascade_stats\": [\n      {\n        \"level\": 0,\n        \"candidates_found\": 35,\n        \"candidates_kept\": 8\n      }\n    ]\n  },\n  \"meta\": {\n    \"requestId\": \"1123c535-e925-4224-b5fb-3d579b75b849\",\n    \"creditsUsed\": 10,\n    \"creditsRemaining\": 999990\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "abca8a81-5d2d-5857-8ff5-3da1d9040a69",
+       "name": "Invalid request \u2014 check that company_linkedin_url is a valid LinkedIn company URL, cascade has 1-10 levels, max_results ",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"company_linkedin_url: Must be a LinkedIn company URL (e.g. https://www.linkedin.com/company/google/)\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "0f764f32-2979-5f81-983e-1623f9d051ee",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "854054a1-8d34-5826-a6a3-32aeb6bda376",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "c8dbf62d-794e-5a2c-9e41-283f00b55663",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "31b43af3-5269-5165-9a53-9bb208a80119",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "variable": [
+  {
+   "key": "baseUrl",
+   "value": "https://dev.enrich.so/api/v3"
+  },
+  {
+   "key": "apiKey",
+   "value": "<your Enrich API key>"
+  }
+ ],
+ "auth": {
+  "type": "apikey",
+  "apikey": [
+   {
+    "key": "key",
+    "value": "x-api-key"
+   },
+   {
+    "key": "value",
+    "value": "{{apiKey}}"
+   },
+   {
+    "key": "in",
+    "value": "header"
+   }
+  ]
+ }
+}

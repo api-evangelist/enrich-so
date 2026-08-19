@@ -1,0 +1,567 @@
+{
+ "info": {
+  "_postman_id": "5f98f83c-b186-5b4e-8c4b-d358b5891f20",
+  "name": "Enrich Email Verification API",
+  "description": {
+   "content": "Validate email addresses for deliverability, single or in batches of up to 500,000 emails.\n\nAssembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so \u2014 every documentation page embeds its own OpenAPI fragment, and this document is the union of the fragments carrying these tags, with only the components they reference.",
+   "type": "text/plain"
+  },
+  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+ },
+ "item": [
+  {
+   "id": "2e6d9c98-2119-5df0-b79e-2ef5242ffd00",
+   "name": "Email Validation",
+   "description": {
+    "content": "",
+    "type": "text/plain"
+   },
+   "item": [
+    {
+     "id": "57668791-e300-5cb4-9471-1e24bab44e0d",
+     "name": "Validate a single email",
+     "request": {
+      "name": "Validate a single email",
+      "description": {
+       "content": "Checks whether an email address is deliverable. The response tells you the\nresult (`valid`, `invalid`, or `risky`), the confidence level, the mail\nprovider, and whether the domain is a catch-all.\n\n**Cost:** 1 credit. You are **not** charged if the result is `risky`.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/email-validation",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "email-validation"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"email\": \"sarah.chen@stripe.com\"\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "63e01379-c6ba-5f64-a194-b9edc1c20c0b",
+       "name": "Validation result returned successfully",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"email\": \"sarah.chen@stripe.com\",\n    \"result\": \"valid\",\n    \"message\": \"The mailbox exists and is accepting mail\",\n    \"isCatchAll\": false,\n    \"isFederated\": false,\n    \"hasSEG\": true,\n    \"segProvider\": \"Proofpoint\",\n    \"provider\": \"GOOGLE\",\n    \"confidence\": \"high\"\n  },\n  \"meta\": {\n    \"requestId\": \"664f2b3c9a1e4d0012abcdef\",\n    \"creditsUsed\": 1,\n    \"creditsRemaining\": 24999,\n    \"processingTimeMs\": 387\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "88bf6117-22b8-5e5b-a8ba-4ebce769fd58",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "6261ca37-b576-5b92-848b-49582767ac5c",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "f2e78640-1e74-5c4e-84be-12c1086c1fec",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/insufficient-credits\",\n  \"title\": \"Insufficient Credits\",\n  \"status\": 402,\n  \"detail\": \"Not enough credits. Required: 10, available: 3\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "af0e9235-9a40-5b2e-8544-f7543a6a419e",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "91f311fd-62b7-5a2c-9ec9-8d0e21461eb9",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "b2742d8e-e8b0-547b-8754-a1b52e114a9b",
+     "name": "Validate emails in batch",
+     "request": {
+      "name": "Validate emails in batch",
+      "description": {
+       "content": "Submit up to **500 000 emails** in a single request. We automatically\nremove duplicates (case-insensitive) before processing, so you only pay\nfor unique addresses.\n\n**Cost:** 1 credit per unique email, reserved when you submit. Any unused\ncredits are refunded automatically when you fetch results.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** every time an individual email finishes\n   validation. See [emailValidationResult](#tag/Webhooks/operation/webhookEmailValidationResult)\n   for the exact payload.\n\n2. **A completion callback** once every email in the batch has been\n   processed. See [emailValidationCompletion](#tag/Webhooks/operation/webhookEmailValidationCompletion)\n   for the exact payload.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/email-validation/batch",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "email-validation",
+        "batch"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       },
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "POST",
+      "auth": null,
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"emails\": [\n    \"sarah.chen@stripe.com\",\n    \"james.rodriguez@hubspot.com\",\n    \"priya.patel@notion.so\",\n    \"marco.silva@datadog.com\"\n  ],\n  \"webhookUrl\": \"https://api.yourapp.com/webhooks/enrich\"\n}",
+       "options": {
+        "raw": {
+         "language": "json"
+        }
+       }
+      }
+     },
+     "response": [
+      {
+       "id": "ffe76902-f53a-53a4-8437-9411966ad073",
+       "name": "Batch submitted \u2014 credits have been reserved",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665a1f4e2c3b7800129dce01\",\n    \"status\": \"queued\",\n    \"itemCount\": 4,\n    \"originalCount\": 4,\n    \"duplicatesRemoved\": 0\n  },\n  \"meta\": {\n    \"requestId\": \"665a1f4e2c3b7800129dce00\",\n    \"creditsReserved\": 4,\n    \"creditsPerItem\": 1,\n    \"estimatedCredits\": 4\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "2ca09c30-395e-5555-b450-9d1ec9823d6e",
+       "name": "Something is wrong with the request \u2014 check the `detail` field for specifics",
+       "status": "400",
+       "code": 400,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 400,\n  \"detail\": \"body/email Invalid email\",\n  \"instance\": \"/requests/3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "37274c80-ef29-5669-bd6c-9246ce5f2492",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "cf24316a-10e6-555f-ad3d-45cea82cfb6e",
+       "name": "You don't have enough credits for this request",
+       "status": "402",
+       "code": 402,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/insufficient-credits\",\n  \"title\": \"Insufficient Credits\",\n  \"status\": 402,\n  \"detail\": \"Not enough credits. Required: 10, available: 3\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "105b9583-4b9a-5d78-82d2-72b6f010f2b9",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "865889a0-14f7-53b7-82a3-f2ada2bcc881",
+       "name": "Something went wrong on our end \u2014 try again in a moment",
+       "status": "500",
+       "code": 500,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/internal-error\",\n  \"title\": \"Internal Server Error\",\n  \"status\": 500,\n  \"detail\": \"An unexpected error occurred. Please try again later.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "7d04afe6-e75f-5626-9135-a7c67265e03a",
+     "name": "Check batch validation progress",
+     "request": {
+      "name": "Check batch validation progress",
+      "description": {
+       "content": "Poll this endpoint to see how your batch is doing. The `progress` field\ngives you a percentage, and `status` will be one of `queued`, `processing`,\n`completed`, or `failed`.\n\n**Cost:** Free \u2014 polling never costs credits.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/email-validation/batch/{batchId}",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "email-validation",
+        "batch",
+        ":batchId"
+       ],
+       "query": [],
+       "variable": [
+        {
+         "key": "batchId",
+         "value": "<batchId>",
+         "description": "The batch identifier returned when you submitted the job"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "9f0725f3-345a-55a6-b784-8ef3e8c0e7f0",
+       "name": "Current batch status",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665a1f4e2c3b7800129dce01\",\n    \"status\": \"processing\",\n    \"totalItems\": 4,\n    \"processedItems\": 3,\n    \"progress\": 75\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "d067c363-4a7f-5d3b-8e2f-cca374b323f0",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "13621104-ca4a-5312-a24f-c94f5ff5c76a",
+       "name": "The resource you requested doesn't exist or doesn't belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"No batch found with that ID\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "996ff33e-f973-53df-9e28-893ba211c2f4",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "9abd5f32-a242-5b27-bc28-7afc65b76352",
+     "name": "Get batch validation results",
+     "request": {
+      "name": "Get batch validation results",
+      "description": {
+       "content": "Fetch the results once your batch has finished. Results are paginated \u2014 use\n`page` and `limit` to walk through them.\n\n**Credit settlement:** The first time you call this after the batch reaches\n`completed` or `failed`, we calculate the final cost and refund any excess\ncredits. Subsequent calls return the cached settlement.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/email-validation/batch/{batchId}/results",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "email-validation",
+        "batch",
+        ":batchId",
+        "results"
+       ],
+       "query": [
+        {
+         "key": "page",
+         "value": "1",
+         "description": "Page number (default: 1)",
+         "disabled": true
+        },
+        {
+         "key": "limit",
+         "value": "100",
+         "description": "Results per page (default: 100, max: 1 000)",
+         "disabled": true
+        }
+       ],
+       "variable": [
+        {
+         "key": "batchId",
+         "value": "<batchId>",
+         "description": "The batch identifier returned when you submitted the job"
+        }
+       ]
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "d1171e80-8c81-5cec-9eb4-ab476fd233cd",
+       "name": "Paginated validation results",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchId\": \"665a1f4e2c3b7800129dce01\",\n    \"status\": \"completed\",\n    \"totalItems\": 4,\n    \"processedCount\": 4,\n    \"results\": [\n      {\n        \"email\": \"sarah.chen@stripe.com\",\n        \"result\": \"valid\",\n        \"message\": \"The mailbox exists and is accepting mail\",\n        \"isCatchAll\": false,\n        \"provider\": \"GOOGLE\",\n        \"confidence\": \"high\"\n      },\n      {\n        \"email\": \"james.rodriguez@hubspot.com\",\n        \"result\": \"valid\",\n        \"message\": \"The mailbox exists and is accepting mail\",\n        \"isCatchAll\": false,\n        \"provider\": \"MICROSOFT\",\n        \"confidence\": \"definitive\"\n      },\n      {\n        \"email\": \"priya.patel@notion.so\",\n        \"result\": \"invalid\",\n        \"message\": \"The mailbox does not exist on this server\",\n        \"isCatchAll\": false,\n        \"provider\": \"GOOGLE\",\n        \"confidence\": \"definitive\"\n      },\n      {\n        \"email\": \"marco.silva@datadog.com\",\n        \"result\": \"risky\",\n        \"message\": \"The domain accepts all addresses (catch-all) so delivery cannot be guaranteed\",\n        \"isCatchAll\": true,\n        \"provider\": \"SMTP\",\n        \"confidence\": \"low\"\n      }\n    ]\n  },\n  \"meta\": {\n    \"requestId\": \"665a23bc2c3b7800129dce10\",\n    \"creditsUsed\": 2,\n    \"creditsRefunded\": 2,\n    \"creditsRemaining\": 24997,\n    \"totalItems\": 4,\n    \"processedItems\": 4\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "fae63a8f-0963-5848-845d-38687e0d5e58",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "4d5292fd-8d32-582b-b4d1-407a4e6c9fcc",
+       "name": "The resource you requested doesn't exist or doesn't belong to your organization",
+       "status": "404",
+       "code": 404,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/not-found\",\n  \"title\": \"Not Found\",\n  \"status\": 404,\n  \"detail\": \"No batch found with that ID\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "ba70cfd2-dbbf-552e-85ff-cbacce72c229",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "variable": [
+  {
+   "key": "baseUrl",
+   "value": "https://dev.enrich.so/api/v3"
+  },
+  {
+   "key": "apiKey",
+   "value": "<your Enrich API key>"
+  }
+ ],
+ "auth": {
+  "type": "apikey",
+  "apikey": [
+   {
+    "key": "key",
+    "value": "x-api-key"
+   },
+   {
+    "key": "value",
+    "value": "{{apiKey}}"
+   },
+   {
+    "key": "in",
+    "value": "header"
+   }
+  ]
+ }
+}

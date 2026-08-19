@@ -1,0 +1,41 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for Enrich Account API
+  version: 1.0.0
+extends: enrich-so-account-api-openapi.yml
+x-generated: '2026-08-14'
+x-method: generated
+x-source: openapi/enrich-so-account-api-openapi.yml + API Evangelist enrichment artifacts in this repo
+x-operations: 2
+actions:
+- target: $.info
+  description: 'Record the provenance of this document: assembled from the OpenAPI fragments Enrich publishes
+    on each documentation page, not downloaded as a single spec (Enrich serves no /openapi.json).'
+  update:
+    x-apis-json-source: https://doc.enrich.so
+    x-apis-json-harvest: per-page OpenAPI fragments, collected 2026-08-14
+    x-apis-json-maintainer: API Evangelist — https://apievangelist.com
+- target: $.servers[0]
+  description: Note that the production base URL is served from a host named "dev" — this is what Enrich
+    documents and what answers; it is not a staging host.
+  update:
+    x-production: true
+    x-verified: 2026-08-14 — GET /wallets/balance returned 401 application/problem+json
+- target: $
+  description: Cross-link the runtime semantics that hold across every operation in this document.
+  update:
+    x-conventions: conventions/enrich-so-conventions.yml
+    x-error-catalog: errors/enrich-so-problem-types.yml
+    x-rate-limits: rate-limits/enrich-so-rate-limits.yml
+    x-authentication: authentication/enrich-so-authentication.yml
+    x-plans: plans/enrich-so-plans-pricing.yml
+    x-data-model: data-model/enrich-so-data-model.yml
+    x-webhooks-catalog: asyncapi/enrich-so-webhooks.yml
+- target: $.paths[*][?(@.responses)]
+  description: Every operation in this API is metered against a prepaid credit balance and every response
+    carries meta.creditsUsed / meta.creditsRemaining; the HTTP status alone does not tell a client what
+    it paid.
+  update:
+    x-metered: true
+    x-credit-receipt: meta.creditsUsed / meta.creditsRemaining
+    x-not-idempotent: No Idempotency-Key is supported; a retried write is a second billable call.

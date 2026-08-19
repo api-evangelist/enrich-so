@@ -1,146 +1,898 @@
 {
-  "opencollection": "1.0.0",
-  "info": {
-    "name": "Enrich API",
-    "version": "3.0"
+ "opencollection": "1.0.0",
+ "info": {
+  "name": "Enrich API",
+  "version": "3.0",
+  "docs": "https://doc.enrich.so/api-reference-1951025m0"
+ },
+ "request": {
+  "baseUrl": "https://dev.enrich.so/api/v3",
+  "auth": {
+   "type": "apikey",
+   "key": "x-api-key",
+   "value": "{{x-api-key}}",
+   "placement": "header"
+  }
+ },
+ "items": [
+  {
+   "info": {
+    "name": "Wallets",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Get your credit balance",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/wallets/balance"
+     },
+     "docs": "Returns the current credit balance for your organization."
+    },
+    {
+     "info": {
+      "name": "Get transaction history",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/wallets/transactions",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "50",
+        "docs": "Items per page (default: 50, max: 100)"
+       },
+       {
+        "key": "type",
+        "value": "string",
+        "docs": "Filter by type: `deduction`, `topup`, `adjustment`, or `refund`"
+       }
+      ]
+     },
+     "docs": "Browse your credit transactions \u2014 top-ups, deductions, refunds, and\nadjustments. Use the `type` parameter to filter by transaction type.\nResults are paginated."
+    }
+   ]
   },
-  "request": {
-    "auth": {
-      "type": "apikey",
-      "apikey": {
-        "key": "x-api-key",
-        "value": "{{apiKey}}",
-        "in": "header"
+  {
+   "info": {
+    "name": "Company Followers",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Continue company follower scrape",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/company-follower",
+      "body": {
+       "type": "json",
+       "content": "{}"
+      },
+      "query": [
+       {
+        "key": "batchId",
+        "value": "string",
+        "docs": "The batch id of the PARTIAL scrape you want to continue. Its presence switches this endpoint from 'start a new scrape' to 'continue (fill the gap)'."
+       }
+      ]
+     },
+     "docs": "> **Access required** \u2014 approved accounts only. [Contact us](https://enrich.so) to request access.\n\nContinue an under-delivered **partial** company-follower scrape to fill the gap. Re-runs **only** the filter combinations that under-delivered on the original run and appends the new profiles to the **same batch** (already-collected profiles are kept and de-duplicated within the batch).\n\n**How to call:** POST to this same `/company-follower` endpoint with the original batch id as the `batchId` query parameter and an **empty body**. The presence of `batchId` switches the endpoint from \u201cstart a new scrape\u201d to \u201ccontinue\u201d.\n\n**Eligibility:** only a batch whose status is `partial` and that is **less than 3 days old** can be continued (after 3 days the per-filter diagnostics used to target the gap have expired \u2192 `410 Gone`). A fully `completed` batch, or one already being continued, returns `409 Conflict`. If nothing is recoverable (every filter already delivered, or the remaining gap is unreachable) you get `422`.\n\n**Cost:** credits are reserved only for the recoverable **additional** profiles \u2014 not the whole batch again \u2014 under a separate reservation. On settle you are charged for the profiles the continue actually added and refunded the rest.\n\n**Polling & results:** keep using the **same** `batchId` with the progress and results endpoints; the continue tops up that same batch."
+    },
+    {
+     "info": {
+      "name": "Check daily scraping limit",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/company-follower/limit"
+     },
+     "docs": "Check your team's daily company follower scraping limit and current usage. No credits consumed.\n\n**Possible statuses:**\n- `approved` \u2014 Team has access; `creditsPerProfile`, `dailyLimit`, `dailyUsed`, and `dailyRemaining` are included.\n- `pending` \u2014 Application is under review.\n- `rejected` \u2014 Application was rejected.\n- `revoked` \u2014 Access was revoked.\n- `none` \u2014 No application on file."
+    },
+    {
+     "info": {
+      "name": "Export results as CSV",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/company-follower/{batchId}/export"
+     },
+     "docs": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nDownload scrape results as a CSV file. Batch must be complete. No credits consumed."
+    },
+    {
+     "info": {
+      "name": "Check scrape progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/company-follower/{batchId}/progress"
+     },
+     "docs": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nPoll this endpoint to track the progress of your company follower scrape.\n\n**Cost:** Free \u2014 polling never costs credits."
+    },
+    {
+     "info": {
+      "name": "Get scrape results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/company-follower/{batchId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page, max 500 (default: 100)"
+       }
+      ]
+     },
+     "docs": "> **Access required** This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nReturns paginated follower profiles for a completed batch. Use `page` and `limit` query params to paginate through results.\n\nCredits are charged upfront when you start the scrape. If fewer profiles are found than `max_limit`, unused credits are refunded automatically.\n\nIf you provided a `webhookUrl`, results are already delivered via webhooks and credits are auto-settled. No need to call this endpoint.\n\nOnly call this after the progress endpoint reports `done: true`."
+    },
+    {
+     "info": {
+      "name": "Start count estimation",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/count-estimate",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"companyUrl\": \"https://linkedin.com/company/stripe\",\n  \"departments\": [\n    \"Engineering\",\n    \"Sales\"\n  ]\n}"
       }
+     },
+     "docs": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nStarts an asynchronous count estimation job. Returns the estimated number of followers matching your filters, with optional breakdowns by department and seniority.\n\n**Cost:** 100 credits (fixed). Cached results for the same company + filters within 24 hours are free.\n\n**Results:** Poll the status endpoint to get results. Typically completes within 30\u201360 seconds."
+    },
+    {
+     "info": {
+      "name": "Get estimation status/results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/count-estimate/{batchId}"
+     },
+     "docs": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nCheck the status of a count estimation job and retrieve results when complete.\n\n**Cost:** Free \u2014 polling never costs credits.\n\n**Refunds:** If the job fails within 7 days, the 100 credits are refunded automatically on the next status check."
     }
+   ]
   },
-  "items": [
+  {
+   "info": {
+    "name": "IP to Company",
+    "type": "folder"
+   },
+   "items": [
     {
-      "info": { "name": "Person Enrichment", "type": "folder" },
-      "items": [
-        {
-          "info": { "name": "Look up a professional profile by email", "type": "http" },
-          "http": {
-            "method": "POST",
-            "url": "https://dev.enrich.so/api/v3/reverse-lookup/lookup",
-            "body": { "type": "json", "data": "{\n  \"email\": \"jane@figma.com\"\n}" }
-          },
-          "docs": "Returns a person's professional profile from an email address. 10 credits per successful lookup; not charged when no profile is found."
-        },
-        {
-          "info": { "name": "Look up professional profiles in batch", "type": "http" },
-          "http": {
-            "method": "POST",
-            "url": "https://dev.enrich.so/api/v3/reverse-lookup/batch",
-            "body": { "type": "json", "data": "{\n  \"emails\": [\"jane@figma.com\"]\n}" }
-          },
-          "docs": "Modeled. Submits multiple emails for asynchronous reverse-email-lookup enrichment."
-        }
-      ]
+     "info": {
+      "name": "Resolve company from IP",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/ip-to-company",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"ip\": \"8.8.8.8\"\n}"
+      }
+     },
+     "docs": "Resolves company, organization, and geolocation info from an IP address. Results are cached for 7 days.\n\n**Cost:** 100 credits. You are **not** charged if no domain is found (i.e. `ipDomain` is absent from the response)."
     },
     {
-      "info": { "name": "Email Finder", "type": "folder" },
-      "items": [
-        {
-          "info": { "name": "Find a professional email", "type": "http" },
-          "http": {
-            "method": "POST",
-            "url": "https://dev.enrich.so/api/v3/email-finder",
-            "body": { "type": "json", "data": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"domain\": \"figma.com\"\n}" }
-          },
-          "docs": "Finds a professional email from first name, last name, and company domain. 10 credits per successful find; not charged when found is false."
-        }
-      ]
+     "info": {
+      "name": "Submit batch IP to company lookup",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/ip-to-company/batch",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"ips\": [\n    {\n      \"ip\": \"8.8.8.8\"\n    },\n    {\n      \"ip\": \"1.1.1.1\"\n    },\n    {\n      \"ip\": \"104.16.132.229\"\n    }\n  ]\n}"
+      }
+     },
+     "docs": "Submit up to **500 000 IPs** in a single request for async company lookup. Duplicates are removed automatically before processing.\n\n**Cost:** 100 credits per unique IP, reserved when you submit. Credits are charged based on found domains when you fetch results \u2014 any excess is refunded automatically."
     },
     {
-      "info": { "name": "Email Verification", "type": "folder" },
-      "items": [
-        {
-          "info": { "name": "Validate a single email", "type": "http" },
-          "http": {
-            "method": "POST",
-            "url": "https://dev.enrich.so/api/v3/email-validation",
-            "body": { "type": "json", "data": "{\n  \"email\": \"jane@figma.com\"\n}" }
-          },
-          "docs": "Validates an email for deliverability, returning valid, invalid, or risky. 1 credit per request; not charged when risky."
-        }
-      ]
+     "info": {
+      "name": "Check batch progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/ip-to-company/batch/{batchId}"
+     },
+     "docs": "Poll this endpoint to track your batch. `progress` is a percentage (0\u2013100) and `status` will be `processing`, `completed`, or `failed`.\n\n**Cost:** Free \u2014 polling never costs credits."
     },
     {
-      "info": { "name": "Phone Finder", "type": "folder" },
-      "items": [
-        {
-          "info": { "name": "Find phone numbers", "type": "http" },
-          "http": {
-            "method": "GET",
-            "url": "https://dev.enrich.so/api/v3/reverse-lookup/phones",
-            "params": [
-              { "name": "email", "value": "jane@figma.com", "type": "query", "description": "The person's email address." },
-              { "name": "linkedin", "value": "", "type": "query", "description": "The person's LinkedIn profile URL." }
-            ]
-          },
-          "docs": "Returns phone numbers for a person from an email or LinkedIn URL. 500 credits per successful lookup; not charged when none found."
-        }
+     "info": {
+      "name": "Get batch results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/ip-to-company/batch/{batchId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page (default: 100, max: 1 000)"
+       }
       ]
-    },
-    {
-      "info": { "name": "Company Intelligence", "type": "folder" },
-      "items": [
-        {
-          "info": { "name": "Resolve company from IP", "type": "http" },
-          "http": {
-            "method": "POST",
-            "url": "https://dev.enrich.so/api/v3/ip-to-company",
-            "body": { "type": "json", "data": "{\n  \"ip\": \"8.8.8.8\"\n}" }
-          },
-          "docs": "Resolves company, organization, and geolocation from an IP address. Cached 7 days. 100 credits per request; not charged when no domain found."
-        },
-        {
-          "info": { "name": "Start company follower scrape", "type": "http" },
-          "http": {
-            "method": "POST",
-            "url": "https://dev.enrich.so/api/v3/company-follower",
-            "body": { "type": "json", "data": "{\n  \"companyUrl\": \"https://www.linkedin.com/company/figma\",\n  \"max_limit\": 1000\n}" }
-          },
-          "docs": "Starts an asynchronous scrape of a LinkedIn company's followers. Credits reserved from max_limit and settled when results are fetched."
-        }
-      ]
-    },
-    {
-      "info": { "name": "Lead Finder", "type": "folder" },
-      "items": [
-        {
-          "info": { "name": "Search leads", "type": "http" },
-          "http": {
-            "method": "POST",
-            "url": "https://dev.enrich.so/api/v3/lead-finder/search",
-            "body": { "type": "json", "data": "{\n  \"filters\": {\n    \"jobTitle\": [\"Head of Engineering\"],\n    \"industry\": [\"Software\"]\n  },\n  \"page\": 1,\n  \"pageSize\": 25\n}" }
-          },
-          "docs": "Searches people + organizations + insights across ~135 filters. First 3 pages / 75 results free; then 1 credit per result."
-        },
-        {
-          "info": { "name": "Reveal contact info", "type": "http" },
-          "http": {
-            "method": "POST",
-            "url": "https://dev.enrich.so/api/v3/lead-finder/reveal",
-            "body": { "type": "json", "data": "{\n  \"leads\": [{ \"id\": \"lead_123\" }],\n  \"fields\": [\"email\", \"phone\"]\n}" }
-          },
-          "docs": "Asynchronously reveals email and/or phone for up to 25 leads. 50 credits email, 525 phone, 575 both."
-        }
-      ]
-    },
-    {
-      "info": { "name": "Account", "type": "folder" },
-      "items": [
-        {
-          "info": { "name": "Get your credit balance", "type": "http" },
-          "http": {
-            "method": "GET",
-            "url": "https://dev.enrich.so/api/v3/wallet/balance"
-          },
-          "docs": "Modeled. Returns the current prepaid credit balance for your account."
-        }
-      ]
+     },
+     "docs": "Fetch results once your batch has finished. Results are paginated \u2014 use `page` and `limit` to walk through them.\n\n**Credit settlement:** The first time you call this after the batch reaches `completed` or `failed`, we calculate the final cost (100 credits per IP where a domain was found) and refund any excess. Subsequent calls return the cached settlement \u2014 you are never double-charged."
     }
-  ]
+   ]
+  },
+  {
+   "info": {
+    "name": "Email Finder",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Find a professional email",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/email-finder",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"firstName\": \"Emily\",\n  \"lastName\": \"Zhang\",\n  \"domain\": \"figma.com\"\n}"
+      }
+     },
+     "docs": "Give us a person's first name, last name, and their company domain, and we'll\nfind their professional email address.\n\n**Cost:** 10 credits. You are **not** charged if we can't find an email\n(`found: false`)."
+    },
+    {
+     "info": {
+      "name": "Find emails in batch",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/email-finder/batch",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"leads\": [\n    {\n      \"firstName\": \"Emily\",\n      \"lastName\": \"Zhang\",\n      \"domain\": \"figma.com\"\n    },\n    {\n      \"firstName\": \"David\",\n      \"lastName\": \"Kim\",\n      \"domain\": \"vercel.com\"\n    },\n    {\n      \"firstName\": \"Aisha\",\n      \"lastName\": \"Johnson\",\n      \"domain\": \"cloudflare.com\"\n    }\n  ],\n  \"webhookUrl\": \"https://api.yourapp.com/webhooks/enrich\"\n}"
+      }
+     },
+     "docs": "Submit up to **500 000 leads** in one request. Each lead is a combination\nof first name, last name, and domain. We deduplicate the list\n(case-insensitive) so you are only charged for unique leads.\n\n**Cost:** 10 credits per unique lead, reserved at submission. Unused credits\nare refunded when you fetch results.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** each time a single lead is processed. See\n   [emailFinderResult](#tag/Webhooks/operation/webhookEmailFinderResult) for the payload.\n\n2. **A completion callback** once the entire batch is done. See\n   [emailFinderCompletion](#tag/Webhooks/operation/webhookEmailFinderCompletion) for the payload."
+    },
+    {
+     "info": {
+      "name": "Check batch finder progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/email-finder/batch/{batchId}"
+     },
+     "docs": "Poll this endpoint to track your batch. The `status` moves through\n`queued` \u2192 `processing` \u2192 `completed` (or `failed`).\n\n**Cost:** Free."
+    },
+    {
+     "info": {
+      "name": "Get batch finder results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/email-finder/batch/{batchId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page (default: 100, max: 1 000)"
+       }
+      ]
+     },
+     "docs": "Retrieve the results once the batch has finished. Results are paginated.\n\n**Credit settlement:** On the first call after the batch reaches a terminal\nstatus, we settle the final credit charge. Leads where no email was found\nare not charged, and the difference is refunded."
+    }
+   ]
+  },
+  {
+   "info": {
+    "name": "Email Validation",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Validate a single email",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/email-validation",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"email\": \"sarah.chen@stripe.com\"\n}"
+      }
+     },
+     "docs": "Checks whether an email address is deliverable. The response tells you the\nresult (`valid`, `invalid`, or `risky`), the confidence level, the mail\nprovider, and whether the domain is a catch-all.\n\n**Cost:** 1 credit. You are **not** charged if the result is `risky`."
+    },
+    {
+     "info": {
+      "name": "Validate emails in batch",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/email-validation/batch",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"emails\": [\n    \"sarah.chen@stripe.com\",\n    \"james.rodriguez@hubspot.com\",\n    \"priya.patel@notion.so\",\n    \"marco.silva@datadog.com\"\n  ],\n  \"webhookUrl\": \"https://api.yourapp.com/webhooks/enrich\"\n}"
+      }
+     },
+     "docs": "Submit up to **500 000 emails** in a single request. We automatically\nremove duplicates (case-insensitive) before processing, so you only pay\nfor unique addresses.\n\n**Cost:** 1 credit per unique email, reserved when you submit. Any unused\ncredits are refunded automatically when you fetch results.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** every time an individual email finishes\n   validation. See [emailValidationResult](#tag/Webhooks/operation/webhookEmailValidationResult)\n   for the exact payload.\n\n2. **A completion callback** once every email in the batch has been\n   processed. See [emailValidationCompletion](#tag/Webhooks/operation/webhookEmailValidationCompletion)\n   for the exact payload."
+    },
+    {
+     "info": {
+      "name": "Check batch validation progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/email-validation/batch/{batchId}"
+     },
+     "docs": "Poll this endpoint to see how your batch is doing. The `progress` field\ngives you a percentage, and `status` will be one of `queued`, `processing`,\n`completed`, or `failed`.\n\n**Cost:** Free \u2014 polling never costs credits."
+    },
+    {
+     "info": {
+      "name": "Get batch validation results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/email-validation/batch/{batchId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page (default: 100, max: 1 000)"
+       }
+      ]
+     },
+     "docs": "Fetch the results once your batch has finished. Results are paginated \u2014 use\n`page` and `limit` to walk through them.\n\n**Credit settlement:** The first time you call this after the batch reaches\n`completed` or `failed`, we calculate the final cost and refund any excess\ncredits. Subsequent calls return the cached settlement."
+    }
+   ]
+  },
+  {
+   "info": {
+    "name": "Lead Finder",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Count matching leads",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/count",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"filters\": {\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"middleName\": \"string\",\n    \"city\": \"string\",\n    \"stateName\": null,\n    \"stateCode\": null,\n    \"countryName\": null,\n    \"countryCode\": null,\n    \"continent\": null,\n    \"countryRegion\": null,\n    \"linkedinUrl\": \"string\",\n    \"linkedinHeadline\": \"string\",\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"linkedinIndustry\": null,\n    \"logoUrl\": \"string\",\n    \"emailDomain\": \"string\",\n    \"emailAddress\": \"string\",\n    \"jobTitle\": null,\n    \"jobFunction\": null,\n    \"jobLevel\": null,\n    \"jobDescription\": \"string\",\n    \"jobLocationCity\": \"string\",\n    \"jobLocationState\": \"string\",\n    \"jobLocationCountry\": null,\n    \"jobIsCurrent\": false,\n    \"jobStartDate\": \"string\",\n    \"jobCount\": 0,\n    \"companyName\": null,\n    \"companyNameMode\": \"string\",\n    \"persona\": \"string\",\n    \"languages\": null,\n    \"skills\": null,\n    \"certifications\": \"string\",\n    \"patents\": \"string\",\n    \"publications\": \"string\",\n    \"websites\": \"string\",\n    \"education\": \"string\",\n    \"phone\": \"string\",\n    \"cellphone\": \"string\",\n    \"orgName\": \"string\",\n    \"domain\": null,\n    \"aboutUs\": null,\n    \"companyEntityType\": null,\n    \"companyLegalType\": null,\n    \"employeeCount\": 0,\n    \"employeeCountMax\": 0,\n    \"employeeCountMin\": 0,\n    \"foundedOn\": 0,\n    \"headquartersCity\": \"string\",\n    \"headquartersState\": \"string\",\n    \"headquartersCountry\": null,\n    \"industrySicCode\": null,\n    \"industrySicDescription\": null,\n    \"industryNaicsCode\": null,\n    \"industryNaicsDescription\": null,\n    \"orgLinkedinUrl\": \"string\",\n    \"locationCity\": \"string\",\n    \"locationState\": \"string\",\n    \"locationCountry\": null,\n    \"revenueMax\": 0,\n    \"revenueMin\": 0,\n    \"revenueBuckets\": null,\n    \"specialties\": \"string\",\n    \"crmTechOrg\": null,\n    \"marketingAutomationTechOrg\": null,\n    \"abmTechOrg\": null,\n    \"salesAutomationTechOrg\": null,\n    \"analyticsTechOrg\": null,\n    \"cmsTechOrg\": null,\n    \"martechCategoriesOrg\": null,\n    \"conversationIntelligenceTechOrg\": null,\n    \"cloudProviderTechOrg\": null,\n    \"emailHostingTechOrg\": null,\n    \"emailSecurityTechOrg\": null,\n    \"applicationSecurityTechOrg\": null,\n    \"cloudSecurityTechOrg\": null,\n    \"developmentTechOrg\": null,\n    \"eCommercePlatformTechOrg\": null,\n    \"erpTechOrg\": null,\n    \"hasMobileAppOrg\": false,\n    \"hasWebAppOrg\": false,\n    \"hasCisoOrg\": false,\n    \"hasCioOrg\": false,\n    \"locationCountOrg\": 0,\n    \"isLinkedinUrlClaimedOrg\": false,\n    \"marketingRoleCountOrg\": 0,\n    \"salesRoleCountOrg\": 0,\n    \"operationsRoleCountOrg\": 0,\n    \"businessDevelopmentRoleCountOrg\": 0,\n    \"customerSuccessRoleCountOrg\": 0,\n    \"itRoleCountOrg\": 0,\n    \"grcRoleCountOrg\": 0,\n    \"securityRoleCountOrg\": 0,\n    \"devopsRoleCountOrg\": 0,\n    \"networkInfrastructureRoleCountOrg\": 0,\n    \"mobileDevRoleCountOrg\": 0,\n    \"iosDevRoleCountOrg\": 0,\n    \"androidDevRoleCountOrg\": 0,\n    \"engineerRoleCountOrg\": 0,\n    \"qaRoleCountOrg\": 0,\n    \"marketingOpenRolesCountOrg\": 0,\n    \"operationsOpenRolesCountOrg\": 0,\n    \"salesOpenRolesCountOrg\": 0,\n    \"accountExecutiveOpenRolesCountOrg\": 0,\n    \"customerSuccessOpenRolesCountOrg\": 0,\n    \"demandGenerationOpenRolesCountOrg\": 0,\n    \"businessDevelopmentOpenRolesCountOrg\": 0,\n    \"itOpenRolesCountOrg\": 0,\n    \"securityOpenRolesCountOrg\": 0,\n    \"grcOpenRolesCountOrg\": 0,\n    \"devopsOpenRolesCountOrg\": 0,\n    \"networkInfrastructureOpenRolesCountOrg\": 0,\n    \"monthlyOrganicTrafficOrg\": 0,\n    \"monthlyPaidTrafficOrg\": 0,\n    \"totalMonthlyTrafficOrg\": 0,\n    \"monthlyGoogleAdspendOrg\": 0,\n    \"employeeOnLinkedinGrowthRateOrg\": 0,\n    \"isWebsiteForSaleOrg\": false,\n    \"topAppleappstoreUrlOrg\": \"string\",\n    \"topAppstoreRatingOrg\": 0,\n    \"topAppstoreReviewCountOrg\": 0,\n    \"lastAppstoreUpdateOrg\": \"string\",\n    \"appstoreUpdateCountOrg\": 0,\n    \"appstoreAppCategoryOrg\": \"string\",\n    \"topPlaystoreUrlOrg\": \"string\",\n    \"topPlaystoreRatingOrg\": 0,\n    \"topPlaystoreReviewCountOrg\": 0,\n    \"lastPlaystoreUpdateOrg\": \"string\",\n    \"playstoreDownloadCountOrg\": 0,\n    \"playstoreAppCategoryOrg\": \"string\",\n    \"totalReviewsOrg\": 0,\n    \"lastFundingDateOrg\": \"string\",\n    \"lastFundingAmountOrg\": 0,\n    \"leadInvestorsOrg\": \"string\",\n    \"lastFundingTypeOrg\": null,\n    \"fundingRoundNumberOfInvestorsOrg\": 0,\n    \"totalFundingAmountOrg\": 0\n  },\n  \"excludeFilters\": {\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"aboutUs\": null,\n    \"domain\": null,\n    \"jobTitle\": null\n  }\n}"
+      }
+     },
+     "docs": "Get the total count of leads matching your filters. This endpoint is free and does not consume credits."
+    },
+    {
+     "info": {
+      "name": "Enrich contacts with specific fields",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/enrich",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"leads\": [\n    {\n      \"id\": \"string\"\n    }\n  ],\n  \"fields\": [\n    \"string\"\n  ]\n}"
+      }
+     },
+     "docs": "Reveal specific contact fields (email and/or phone) for up to 25 leads.\n\n**Pricing:**\n- Email: 10 credits per lead\n- Phone: 525 credits per lead\n\nPreviously revealed fields are returned from cache at no cost.\n\n**Async:** Returns a `jobId` immediately (< 100ms). Poll `GET /lead-finder/reveal-jobs/:jobId` every 2 seconds until `status` is `completed` or `failed`. Credits are charged inside the worker \u2014 insufficient credits cause the job to fail asynchronously (no synchronous 402)."
+    },
+    {
+     "info": {
+      "name": "Export leads to CSV (async)",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/export",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"filters\": {\n    \"jobLevel\": [\n      \"C-Suite\",\n      \"VP\"\n    ],\n    \"domain\": [\n      \"stripe.com\",\n      \"vercel.com\"\n    ]\n  },\n  \"maxResults\": 500,\n  \"includeEmail\": true,\n  \"includeNames\": true\n}"
+      }
+     },
+     "docs": "Submit an async CSV export job. Returns a `jobId` immediately \u2014 poll `GET /lead-finder/export-jobs/{jobId}` for status. Once the job reaches `completed` status, download the file via `GET /lead-finder/export-jobs/{jobId}/download`.\n\nCredits are estimated upfront and deducted during processing. Refunds are issued for leads where the requested contact info was not found.\n\n**Pricing:**\n- Preview fields only: Free\n- `includeEmail`: 10 credits per lead\n- `includePhone`: 525 credits per lead\n- `includeNames`: 1 credit per lead (full last names)\n- `includeContactInfo`: Shorthand for email + phone (535 credits/lead)"
+    },
+    {
+     "info": {
+      "name": "List export jobs",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/export-jobs",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "20",
+        "docs": "Results per page (default: 20, max: 100)"
+       },
+       {
+        "key": "status",
+        "value": "string",
+        "docs": "Filter by job status"
+       }
+      ]
+     },
+     "docs": "List recent CSV export jobs for your team (last 30 days). Paginated, optionally filtered by status."
+    },
+    {
+     "info": {
+      "name": "Poll export job status",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/export-jobs/{jobId}"
+     },
+     "docs": "Poll the status of a CSV export job. The response shape varies by status:\n\n- **`pending`** \u2014 Job is queued, not yet started.\n- **`processing`** \u2014 Job is actively running. Check `progress` for completion percentage.\n- **`completed`** \u2014 Job finished successfully. Includes `results` with final credit usage. Download the file via `GET /lead-finder/export-jobs/{jobId}/download`.\n- **`failed`** \u2014 Job encountered an error. Includes `error` message and any `creditsRefunded`."
+    },
+    {
+     "info": {
+      "name": "Download export CSV",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/export-jobs/{jobId}/download"
+     },
+     "docs": "Stream the completed CSV file for an export job. Returns the file with `Content-Type: text/csv`.\n\nReturns **409 Conflict** if the job has not yet reached `completed` status or has failed. Poll `GET /lead-finder/export-jobs/{jobId}` first to confirm the job is complete before downloading."
+    },
+    {
+     "info": {
+      "name": "Get filter options",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/filter-options"
+     },
+     "docs": "Returns available values for multi-select filter fields (countries, departments, industries, job functions, etc.). Values are fetched from the database and cached for performance. Free endpoint."
+    },
+    {
+     "info": {
+      "name": "Reveal contact info",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/reveal",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"leads\": [\n    {\n      \"id\": \"enc_abc123def456\"\n    }\n  ],\n  \"fields\": [\n    \"email\"\n  ]\n}"
+      }
+     },
+     "docs": "Reveal contact info for up to 25 leads. Choose which fields to reveal via the optional `fields` parameter:\n\n- `[\"email\"]` \u2014 10 credits per lead\n- `[\"phone\"]` \u2014 525 credits per lead\n- `[\"email\", \"phone\"]` \u2014 535 credits per lead (default if omitted)\n\nPreviously revealed contacts are returned from cache at no cost.\n\n**Async:** Returns a `jobId` immediately (< 100ms). Poll `GET /lead-finder/reveal-jobs/:jobId` every 2 seconds until `status` is `completed` or `failed`. Credits are charged inside the worker \u2014 insufficient credits cause the job to fail asynchronously (no synchronous 402)."
+    },
+    {
+     "info": {
+      "name": "List reveal/enrich jobs",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/reveal-jobs",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number"
+       },
+       {
+        "key": "limit",
+        "value": "20",
+        "docs": "Results per page (max 100)"
+       },
+       {
+        "key": "status",
+        "value": "string",
+        "docs": "Filter by job status"
+       }
+      ]
+     },
+     "docs": "List recent reveal/enrich jobs for the team (last 30 days). Free endpoint \u2014 polling is always free."
+    },
+    {
+     "info": {
+      "name": "Poll reveal/enrich job",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/reveal-jobs/{jobId}"
+     },
+     "docs": "Poll the status of a reveal or enrich job. Call repeatedly until `status` is `\"completed\"` or `\"failed\"`. Polling is always free.\n\n**Recommended interval:** 2 seconds."
+    },
+    {
+     "info": {
+      "name": "List saved searches",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/saved"
+     },
+     "docs": "List all saved searches for the current user. Free endpoint."
+    },
+    {
+     "info": {
+      "name": "Save a search",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/saved",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"name\": \"string\",\n  \"filters\": {\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"middleName\": \"string\",\n    \"city\": \"string\",\n    \"stateName\": null,\n    \"stateCode\": null,\n    \"countryName\": null,\n    \"countryCode\": null,\n    \"continent\": null,\n    \"countryRegion\": null,\n    \"linkedinUrl\": \"string\",\n    \"linkedinHeadline\": \"string\",\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"linkedinIndustry\": null,\n    \"logoUrl\": \"string\",\n    \"emailDomain\": \"string\",\n    \"emailAddress\": \"string\",\n    \"jobTitle\": null,\n    \"jobFunction\": null,\n    \"jobLevel\": null,\n    \"jobDescription\": \"string\",\n    \"jobLocationCity\": \"string\",\n    \"jobLocationState\": \"string\",\n    \"jobLocationCountry\": null,\n    \"jobIsCurrent\": false,\n    \"jobStartDate\": \"string\",\n    \"jobCount\": 0,\n    \"companyName\": null,\n    \"companyNameMode\": \"string\",\n    \"persona\": \"string\",\n    \"languages\": null,\n    \"skills\": null,\n    \"certifications\": \"string\",\n    \"patents\": \"string\",\n    \"publications\": \"string\",\n    \"websites\": \"string\",\n    \"education\": \"string\",\n    \"phone\": \"string\",\n    \"cellphone\": \"string\",\n    \"orgName\": \"string\",\n    \"domain\": null,\n    \"aboutUs\": null,\n    \"companyEntityType\": null,\n    \"companyLegalType\": null,\n    \"employeeCount\": 0,\n    \"employeeCountMax\": 0,\n    \"employeeCountMin\": 0,\n    \"foundedOn\": 0,\n    \"headquartersCity\": \"string\",\n    \"headquartersState\": \"string\",\n    \"headquartersCountry\": null,\n    \"industrySicCode\": null,\n    \"industrySicDescription\": null,\n    \"industryNaicsCode\": null,\n    \"industryNaicsDescription\": null,\n    \"orgLinkedinUrl\": \"string\",\n    \"locationCity\": \"string\",\n    \"locationState\": \"string\",\n    \"locationCountry\": null,\n    \"revenueMax\": 0,\n    \"revenueMin\": 0,\n    \"revenueBuckets\": null,\n    \"specialties\": \"string\",\n    \"crmTechOrg\": null,\n    \"marketingAutomationTechOrg\": null,\n    \"abmTechOrg\": null,\n    \"salesAutomationTechOrg\": null,\n    \"analyticsTechOrg\": null,\n    \"cmsTechOrg\": null,\n    \"martechCategoriesOrg\": null,\n    \"conversationIntelligenceTechOrg\": null,\n    \"cloudProviderTechOrg\": null,\n    \"emailHostingTechOrg\": null,\n    \"emailSecurityTechOrg\": null,\n    \"applicationSecurityTechOrg\": null,\n    \"cloudSecurityTechOrg\": null,\n    \"developmentTechOrg\": null,\n    \"eCommercePlatformTechOrg\": null,\n    \"erpTechOrg\": null,\n    \"hasMobileAppOrg\": false,\n    \"hasWebAppOrg\": false,\n    \"hasCisoOrg\": false,\n    \"hasCioOrg\": false,\n    \"locationCountOrg\": 0,\n    \"isLinkedinUrlClaimedOrg\": false,\n    \"marketingRoleCountOrg\": 0,\n    \"salesRoleCountOrg\": 0,\n    \"operationsRoleCountOrg\": 0,\n    \"businessDevelopmentRoleCountOrg\": 0,\n    \"customerSuccessRoleCountOrg\": 0,\n    \"itRoleCountOrg\": 0,\n    \"grcRoleCountOrg\": 0,\n    \"securityRoleCountOrg\": 0,\n    \"devopsRoleCountOrg\": 0,\n    \"networkInfrastructureRoleCountOrg\": 0,\n    \"mobileDevRoleCountOrg\": 0,\n    \"iosDevRoleCountOrg\": 0,\n    \"androidDevRoleCountOrg\": 0,\n    \"engineerRoleCountOrg\": 0,\n    \"qaRoleCountOrg\": 0,\n    \"marketingOpenRolesCountOrg\": 0,\n    \"operationsOpenRolesCountOrg\": 0,\n    \"salesOpenRolesCountOrg\": 0,\n    \"accountExecutiveOpenRolesCountOrg\": 0,\n    \"customerSuccessOpenRolesCountOrg\": 0,\n    \"demandGenerationOpenRolesCountOrg\": 0,\n    \"businessDevelopmentOpenRolesCountOrg\": 0,\n    \"itOpenRolesCountOrg\": 0,\n    \"securityOpenRolesCountOrg\": 0,\n    \"grcOpenRolesCountOrg\": 0,\n    \"devopsOpenRolesCountOrg\": 0,\n    \"networkInfrastructureOpenRolesCountOrg\": 0,\n    \"monthlyOrganicTrafficOrg\": 0,\n    \"monthlyPaidTrafficOrg\": 0,\n    \"totalMonthlyTrafficOrg\": 0,\n    \"monthlyGoogleAdspendOrg\": 0,\n    \"employeeOnLinkedinGrowthRateOrg\": 0,\n    \"isWebsiteForSaleOrg\": false,\n    \"topAppleappstoreUrlOrg\": \"string\",\n    \"topAppstoreRatingOrg\": 0,\n    \"topAppstoreReviewCountOrg\": 0,\n    \"lastAppstoreUpdateOrg\": \"string\",\n    \"appstoreUpdateCountOrg\": 0,\n    \"appstoreAppCategoryOrg\": \"string\",\n    \"topPlaystoreUrlOrg\": \"string\",\n    \"topPlaystoreRatingOrg\": 0,\n    \"topPlaystoreReviewCountOrg\": 0,\n    \"lastPlaystoreUpdateOrg\": \"string\",\n    \"playstoreDownloadCountOrg\": 0,\n    \"playstoreAppCategoryOrg\": \"string\",\n    \"totalReviewsOrg\": 0,\n    \"lastFundingDateOrg\": \"string\",\n    \"lastFundingAmountOrg\": 0,\n    \"leadInvestorsOrg\": \"string\",\n    \"lastFundingTypeOrg\": null,\n    \"fundingRoundNumberOfInvestorsOrg\": 0,\n    \"totalFundingAmountOrg\": 0\n  }\n}"
+      }
+     },
+     "docs": "Save a search filter combination for reuse. Free endpoint."
+    },
+    {
+     "info": {
+      "name": "Delete a saved search",
+      "type": "http"
+     },
+     "http": {
+      "method": "DELETE",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/saved/{id}"
+     },
+     "docs": "Delete a saved search by ID. Only the owner can delete their own saved searches."
+    },
+    {
+     "info": {
+      "name": "Search leads",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/search",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"filters\": {\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"middleName\": \"string\",\n    \"city\": \"string\",\n    \"stateName\": null,\n    \"stateCode\": null,\n    \"countryName\": null,\n    \"countryCode\": null,\n    \"continent\": null,\n    \"countryRegion\": null,\n    \"linkedinUrl\": \"string\",\n    \"linkedinHeadline\": \"string\",\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"linkedinIndustry\": null,\n    \"logoUrl\": \"string\",\n    \"emailDomain\": \"string\",\n    \"emailAddress\": \"string\",\n    \"jobTitle\": null,\n    \"jobFunction\": null,\n    \"jobLevel\": null,\n    \"jobDescription\": \"string\",\n    \"jobLocationCity\": \"string\",\n    \"jobLocationState\": \"string\",\n    \"jobLocationCountry\": null,\n    \"jobIsCurrent\": false,\n    \"jobStartDate\": \"string\",\n    \"jobCount\": 0,\n    \"companyName\": null,\n    \"companyNameMode\": \"string\",\n    \"persona\": \"string\",\n    \"languages\": null,\n    \"skills\": null,\n    \"certifications\": \"string\",\n    \"patents\": \"string\",\n    \"publications\": \"string\",\n    \"websites\": \"string\",\n    \"education\": \"string\",\n    \"phone\": \"string\",\n    \"cellphone\": \"string\",\n    \"orgName\": \"string\",\n    \"domain\": null,\n    \"aboutUs\": null,\n    \"companyEntityType\": null,\n    \"companyLegalType\": null,\n    \"employeeCount\": 0,\n    \"employeeCountMax\": 0,\n    \"employeeCountMin\": 0,\n    \"foundedOn\": 0,\n    \"headquartersCity\": \"string\",\n    \"headquartersState\": \"string\",\n    \"headquartersCountry\": null,\n    \"industrySicCode\": null,\n    \"industrySicDescription\": null,\n    \"industryNaicsCode\": null,\n    \"industryNaicsDescription\": null,\n    \"orgLinkedinUrl\": \"string\",\n    \"locationCity\": \"string\",\n    \"locationState\": \"string\",\n    \"locationCountry\": null,\n    \"revenueMax\": 0,\n    \"revenueMin\": 0,\n    \"revenueBuckets\": null,\n    \"specialties\": \"string\",\n    \"crmTechOrg\": null,\n    \"marketingAutomationTechOrg\": null,\n    \"abmTechOrg\": null,\n    \"salesAutomationTechOrg\": null,\n    \"analyticsTechOrg\": null,\n    \"cmsTechOrg\": null,\n    \"martechCategoriesOrg\": null,\n    \"conversationIntelligenceTechOrg\": null,\n    \"cloudProviderTechOrg\": null,\n    \"emailHostingTechOrg\": null,\n    \"emailSecurityTechOrg\": null,\n    \"applicationSecurityTechOrg\": null,\n    \"cloudSecurityTechOrg\": null,\n    \"developmentTechOrg\": null,\n    \"eCommercePlatformTechOrg\": null,\n    \"erpTechOrg\": null,\n    \"hasMobileAppOrg\": false,\n    \"hasWebAppOrg\": false,\n    \"hasCisoOrg\": false,\n    \"hasCioOrg\": false,\n    \"locationCountOrg\": 0,\n    \"isLinkedinUrlClaimedOrg\": false,\n    \"marketingRoleCountOrg\": 0,\n    \"salesRoleCountOrg\": 0,\n    \"operationsRoleCountOrg\": 0,\n    \"businessDevelopmentRoleCountOrg\": 0,\n    \"customerSuccessRoleCountOrg\": 0,\n    \"itRoleCountOrg\": 0,\n    \"grcRoleCountOrg\": 0,\n    \"securityRoleCountOrg\": 0,\n    \"devopsRoleCountOrg\": 0,\n    \"networkInfrastructureRoleCountOrg\": 0,\n    \"mobileDevRoleCountOrg\": 0,\n    \"iosDevRoleCountOrg\": 0,\n    \"androidDevRoleCountOrg\": 0,\n    \"engineerRoleCountOrg\": 0,\n    \"qaRoleCountOrg\": 0,\n    \"marketingOpenRolesCountOrg\": 0,\n    \"operationsOpenRolesCountOrg\": 0,\n    \"salesOpenRolesCountOrg\": 0,\n    \"accountExecutiveOpenRolesCountOrg\": 0,\n    \"customerSuccessOpenRolesCountOrg\": 0,\n    \"demandGenerationOpenRolesCountOrg\": 0,\n    \"businessDevelopmentOpenRolesCountOrg\": 0,\n    \"itOpenRolesCountOrg\": 0,\n    \"securityOpenRolesCountOrg\": 0,\n    \"grcOpenRolesCountOrg\": 0,\n    \"devopsOpenRolesCountOrg\": 0,\n    \"networkInfrastructureOpenRolesCountOrg\": 0,\n    \"monthlyOrganicTrafficOrg\": 0,\n    \"monthlyPaidTrafficOrg\": 0,\n    \"totalMonthlyTrafficOrg\": 0,\n    \"monthlyGoogleAdspendOrg\": 0,\n    \"employeeOnLinkedinGrowthRateOrg\": 0,\n    \"isWebsiteForSaleOrg\": false,\n    \"topAppleappstoreUrlOrg\": \"string\",\n    \"topAppstoreRatingOrg\": 0,\n    \"topAppstoreReviewCountOrg\": 0,\n    \"lastAppstoreUpdateOrg\": \"string\",\n    \"appstoreUpdateCountOrg\": 0,\n    \"appstoreAppCategoryOrg\": \"string\",\n    \"topPlaystoreUrlOrg\": \"string\",\n    \"topPlaystoreRatingOrg\": 0,\n    \"topPlaystoreReviewCountOrg\": 0,\n    \"lastPlaystoreUpdateOrg\": \"string\",\n    \"playstoreDownloadCountOrg\": 0,\n    \"playstoreAppCategoryOrg\": \"string\",\n    \"totalReviewsOrg\": 0,\n    \"lastFundingDateOrg\": \"string\",\n    \"lastFundingAmountOrg\": 0,\n    \"leadInvestorsOrg\": \"string\",\n    \"lastFundingTypeOrg\": null,\n    \"fundingRoundNumberOfInvestorsOrg\": 0,\n    \"totalFundingAmountOrg\": 0\n  },\n  \"excludeFilters\": {\n    \"personHeadline\": null,\n    \"companyHeadline\": null,\n    \"aboutUs\": null,\n    \"domain\": null,\n    \"jobTitle\": null\n  },\n  \"page\": 1,\n  \"pageSize\": 25\n}"
+      }
+     },
+     "docs": "Search across people, companies, and insights dimensions with comprehensive filters. Returns combined person + org + insights data.\n\n**Free tier:**\n- First 3 pages OR 75 results free per search, whichever comes first (at the default page size of 25 these match; with a larger page size the 75-result cap applies first)\n- 50 free searches per month, where a search = a unique filter combination. Paging through results or re-running the same search does not consume additional free searches.\n\n**Paid tier (page 4+):**\n- 1 credit per result returned\n- Max 40 pages\n\nResults include preview fields only. Use the **Reveal** or **Enrich** endpoints to get email and phone."
+    },
+    {
+     "info": {
+      "name": "Suggest company names",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/suggest",
+      "query": [
+       {
+        "key": "q",
+        "value": "string",
+        "docs": "Search prefix (min 2 characters)"
+       },
+       {
+        "key": "limit",
+        "value": "",
+        "docs": "Max suggestions (1\u201350, default: 20)"
+       }
+      ]
+     },
+     "docs": "Prefix-based company name autocomplete. Returns matching company names for search typeahead. Free endpoint."
+    },
+    {
+     "info": {
+      "name": "Unlock full last names",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/lead-finder/unlock-names",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"leads\": [\n    {\n      \"id\": \"string\"\n    }\n  ]\n}"
+      }
+     },
+     "docs": "Pay 1 credit per lead to unlock full last names. Search results mask last names by default; this endpoint reveals them."
+    }
+   ]
+  },
+  {
+   "info": {
+    "name": "People Search",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Find employees at a company",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/people-search/employee-finder",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"company_linkedin_url\": \"https://www.linkedin.com/company/google/\",\n  \"country\": [\n    \"United States\",\n    \"United Kingdom\"\n  ],\n  \"continent\": [\n    \"North America\"\n  ],\n  \"sales_region\": [\n    \"string\"\n  ],\n  \"job_level\": [\n    \"C-Level\",\n    \"VP\",\n    \"Director\"\n  ],\n  \"job_function\": [\n    \"Engineering\",\n    \"Marketing\"\n  ],\n  \"max_results\": 10,\n  \"page\": 1\n}"
+      }
+     },
+     "docs": "Find employees at a specific company by LinkedIn URL. Optionally filter by job level, job function, country, continent, or sales region.\n\n**Credits:** 1 credit per result returned. No charge if 0 results.\n\n**Pagination:** Use `page` and `max_results` to paginate through results."
+    },
+    {
+     "info": {
+      "name": "Cascading ICP people search",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/people-search/waterfall-icp-search",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"company_linkedin_url\": \"https://www.linkedin.com/company/google/\",\n  \"cascade\": [\n    {\n      \"include_title\": [\n        \"CTO\",\n        \"VP Engineering\"\n      ],\n      \"exclude_title\": [\n        \"Intern\",\n        \"Associate\"\n      ],\n      \"job_levels\": [\n        \"C-Level\",\n        \"VP\"\n      ],\n      \"job_functions\": [\n        \"Engineering\",\n        \"Technology\"\n      ],\n      \"skills\": [\n        \"Python\",\n        \"Machine Learning\"\n      ],\n      \"location\": [\n        \"US\",\n        \"UK\"\n      ],\n      \"include_headline_search\": false,\n      \"priority_bonus\": 0\n    }\n  ],\n  \"max_results\": 25,\n  \"min_score\": 0\n}"
+      }
+     },
+     "docs": "Search for people at a specific company using cascading ICP (Ideal Customer Profile) filter levels.\n\n**How it works:**\n1. Provide a company LinkedIn URL to target\n2. Optionally define 1-10 cascade levels, each with independent ICP criteria. If omitted, a default 4-level cascade is used: CEO/Founder \u2192 C-Suite \u2192 VP \u2192 Director.\n3. Levels are processed in order \u2014 results from earlier levels are excluded from later ones\n4. Each candidate is scored against the ICP criteria of their matching cascade level\n5. Results are returned sorted by score descending\n\n**Scoring:** Each candidate gets a normalized 0-100 score based on title match (30pts), job level (20pts), skills overlap (15pts), location match (15pts), current job status (10pts), profile completeness (5pts), tenure (5pts), and optional seniority priority bonus (0-30pts). The score is normalized against only the dimensions specified in the cascade level.\n\n**Credits:** 1 credit per profile returned. No charge if 0 results."
+    }
+   ]
+  },
+  {
+   "info": {
+    "name": "Reverse Email Lookup",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Look up professional profiles in batch",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/bulk-lookup",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"emails\": [\n    \"emily.zhang@figma.com\",\n    \"david.kim@vercel.com\",\n    \"aisha.johnson@cloudflare.com\"\n  ],\n  \"webhookUrl\": \"https://api.yourapp.com/webhooks/enrich\"\n}"
+      }
+     },
+     "docs": "Submit up to **100 000 emails** and get back professional profile data for each\none. Duplicate emails are removed (case-insensitive) before processing.\n\n**Cost:** 10 credits per unique email, reserved upfront. Credits for emails\nwhere no profile was found are refunded.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** for every email as it is processed. See\n   [reverseLookupResult](#tag/Webhooks/operation/webhookReverseLookupResult) for the payload.\n\n2. **A completion callback** when the entire batch finishes. See\n   [reverseLookupCompletion](#tag/Webhooks/operation/webhookReverseLookupCompletion) for the payload."
+    },
+    {
+     "info": {
+      "name": "Check bulk lookup progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/bulk-lookup/{batchId}"
+     },
+     "docs": "Poll this endpoint to track the batch.\n\n**Cost:** Free."
+    },
+    {
+     "info": {
+      "name": "Get bulk lookup results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/bulk-lookup/{batchId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page (default: 100, max: 1 000)"
+       }
+      ]
+     },
+     "docs": "Retrieve paginated professional profile results. Each result contains the full\nprofile data, or the result is omitted if no profile was found for that email.\n\n**Credit settlement:** Emails with no matching profile are not charged.\nThe difference between reserved and actual credits is refunded."
+    },
+    {
+     "info": {
+      "name": "Look up a professional profile by email",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/lookup",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"email\": \"emily.zhang@figma.com\"\n}"
+      }
+     },
+     "docs": "Pass an email address and get back the person's professional profile \u2014 including\ntheir name, headline, current company, job history, education, and skills.\n\n**Cost:** 10 credits. You are **not** charged if no profile is found."
+    }
+   ]
+  },
+  {
+   "info": {
+    "name": "Phone Finder",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Find phone numbers",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/phones",
+      "query": [
+       {
+        "key": "email",
+        "value": "string",
+        "docs": "The person's email address"
+       },
+       {
+        "key": "linkedin",
+        "value": "string",
+        "docs": "The person's profile URL"
+       }
+      ]
+     },
+     "docs": "Find phone numbers associated with a person's email address or social\nprofile URL. You must provide at least one of the two.\n\n**Cost:** 500 credits. You are **not** charged if no phone numbers are found."
+    },
+    {
+     "info": {
+      "name": "Find phone numbers in batch",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/phones/bulk",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"emails\": [\n    \"sarah.chen@stripe.com\",\n    \"james.rodriguez@hubspot.com\"\n  ],\n  \"linkedins\": [\n    \"https://www.example.com/in/priyapatel\"\n  ],\n  \"webhookUrl\": \"https://api.yourapp.com/webhooks/enrich\"\n}"
+      }
+     },
+     "docs": "Submit up to **500 000 items** (email addresses and/or profile URLs) for\nbulk phone lookup. Emails are deduplicated case-insensitively; profile\nURLs are deduplicated as-is.\n\n**Cost:** 10 credits per unique item, reserved upfront. At settlement,\nonly items where phones were actually found are charged \u2014 the rest are\nrefunded.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** for every item as it is processed. See\n   [phoneResult](#tag/Webhooks/operation/webhookPhoneResult) for the payload.\n\n2. **A completion callback** when every item has been processed. See\n   [phoneCompletion](#tag/Webhooks/operation/webhookPhoneCompletion) for the payload."
+    },
+    {
+     "info": {
+      "name": "Check bulk phone lookup progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/phones/bulk/{jobId}"
+     },
+     "docs": "Poll this endpoint to track the job. The `progress` field is a percentage\nfrom 0 to 100.\n\n**Cost:** Free."
+    },
+    {
+     "info": {
+      "name": "Get bulk phone lookup results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/reverse-lookup/phones/bulk/{jobId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page (default: 100, max: 1 000)"
+       }
+      ]
+     },
+     "docs": "Retrieve paginated results. Each item shows the phones found (or an error\nmessage if the lookup failed).\n\n**Credit settlement:** Only items where at least one phone number was found\nare charged. Everything else is refunded."
+    }
+   ]
+  },
+  {
+   "info": {
+    "name": "Teams",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Invite someone to your team",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/teams/{teamId}/invitations",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"email\": \"marco.silva@yourcompany.com\",\n  \"role\": \"member\"\n}"
+      }
+     },
+     "docs": "Sends an email invitation to join your team. You must be an **admin** or\n**owner** to invite people. The invitee can be assigned the role of `admin`\nor `member`."
+    },
+    {
+     "info": {
+      "name": "List pending invitations",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/teams/{teamId}/invitations"
+     },
+     "docs": "See all outstanding invitations for your team. You must be an **admin** or\n**owner**."
+    },
+    {
+     "info": {
+      "name": "Cancel a pending invitation",
+      "type": "http"
+     },
+     "http": {
+      "method": "DELETE",
+      "url": "https://dev.enrich.so/api/v3/teams/{teamId}/invitations/{invitationId}"
+     },
+     "docs": "Withdraws an invitation before the invitee accepts it. You must be an\n**admin** or **owner**."
+    },
+    {
+     "info": {
+      "name": "List team members",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/teams/{teamId}/members"
+     },
+     "docs": "Returns everyone in your team along with their role (owner, admin, or member)."
+    }
+   ]
+  }
+ ]
 }

@@ -1,0 +1,203 @@
+{
+ "opencollection": "1.0.0",
+ "info": {
+  "name": "Enrich Company Intelligence API",
+  "version": "3.0",
+  "docs": "https://doc.enrich.so/api-reference-1951025m0"
+ },
+ "request": {
+  "baseUrl": "https://dev.enrich.so/api/v3",
+  "auth": {
+   "type": "apikey",
+   "key": "x-api-key",
+   "value": "{{x-api-key}}",
+   "placement": "header"
+  }
+ },
+ "items": [
+  {
+   "info": {
+    "name": "Company Followers",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Continue company follower scrape",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/company-follower",
+      "body": {
+       "type": "json",
+       "content": "{}"
+      },
+      "query": [
+       {
+        "key": "batchId",
+        "value": "string",
+        "docs": "The batch id of the PARTIAL scrape you want to continue. Its presence switches this endpoint from 'start a new scrape' to 'continue (fill the gap)'."
+       }
+      ]
+     },
+     "docs": "> **Access required** \u2014 approved accounts only. [Contact us](https://enrich.so) to request access.\n\nContinue an under-delivered **partial** company-follower scrape to fill the gap. Re-runs **only** the filter combinations that under-delivered on the original run and appends the new profiles to the **same batch** (already-collected profiles are kept and de-duplicated within the batch).\n\n**How to call:** POST to this same `/company-follower` endpoint with the original batch id as the `batchId` query parameter and an **empty body**. The presence of `batchId` switches the endpoint from \u201cstart a new scrape\u201d to \u201ccontinue\u201d.\n\n**Eligibility:** only a batch whose status is `partial` and that is **less than 3 days old** can be continued (after 3 days the per-filter diagnostics used to target the gap have expired \u2192 `410 Gone`). A fully `completed` batch, or one already being continued, returns `409 Conflict`. If nothing is recoverable (every filter already delivered, or the remaining gap is unreachable) you get `422`.\n\n**Cost:** credits are reserved only for the recoverable **additional** profiles \u2014 not the whole batch again \u2014 under a separate reservation. On settle you are charged for the profiles the continue actually added and refunded the rest.\n\n**Polling & results:** keep using the **same** `batchId` with the progress and results endpoints; the continue tops up that same batch."
+    },
+    {
+     "info": {
+      "name": "Check daily scraping limit",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/company-follower/limit"
+     },
+     "docs": "Check your team's daily company follower scraping limit and current usage. No credits consumed.\n\n**Possible statuses:**\n- `approved` \u2014 Team has access; `creditsPerProfile`, `dailyLimit`, `dailyUsed`, and `dailyRemaining` are included.\n- `pending` \u2014 Application is under review.\n- `rejected` \u2014 Application was rejected.\n- `revoked` \u2014 Access was revoked.\n- `none` \u2014 No application on file."
+    },
+    {
+     "info": {
+      "name": "Export results as CSV",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/company-follower/{batchId}/export"
+     },
+     "docs": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nDownload scrape results as a CSV file. Batch must be complete. No credits consumed."
+    },
+    {
+     "info": {
+      "name": "Check scrape progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/company-follower/{batchId}/progress"
+     },
+     "docs": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nPoll this endpoint to track the progress of your company follower scrape.\n\n**Cost:** Free \u2014 polling never costs credits."
+    },
+    {
+     "info": {
+      "name": "Get scrape results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/company-follower/{batchId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page, max 500 (default: 100)"
+       }
+      ]
+     },
+     "docs": "> **Access required** This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nReturns paginated follower profiles for a completed batch. Use `page` and `limit` query params to paginate through results.\n\nCredits are charged upfront when you start the scrape. If fewer profiles are found than `max_limit`, unused credits are refunded automatically.\n\nIf you provided a `webhookUrl`, results are already delivered via webhooks and credits are auto-settled. No need to call this endpoint.\n\nOnly call this after the progress endpoint reports `done: true`."
+    },
+    {
+     "info": {
+      "name": "Start count estimation",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/count-estimate",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"companyUrl\": \"https://linkedin.com/company/stripe\",\n  \"departments\": [\n    \"Engineering\",\n    \"Sales\"\n  ]\n}"
+      }
+     },
+     "docs": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nStarts an asynchronous count estimation job. Returns the estimated number of followers matching your filters, with optional breakdowns by department and seniority.\n\n**Cost:** 100 credits (fixed). Cached results for the same company + filters within 24 hours are free.\n\n**Results:** Poll the status endpoint to get results. Typically completes within 30\u201360 seconds."
+    },
+    {
+     "info": {
+      "name": "Get estimation status/results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/count-estimate/{batchId}"
+     },
+     "docs": "> **Access required** \u2014 This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.\n\nCheck the status of a count estimation job and retrieve results when complete.\n\n**Cost:** Free \u2014 polling never costs credits.\n\n**Refunds:** If the job fails within 7 days, the 100 credits are refunded automatically on the next status check."
+    }
+   ]
+  },
+  {
+   "info": {
+    "name": "IP to Company",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Resolve company from IP",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/ip-to-company",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"ip\": \"8.8.8.8\"\n}"
+      }
+     },
+     "docs": "Resolves company, organization, and geolocation info from an IP address. Results are cached for 7 days.\n\n**Cost:** 100 credits. You are **not** charged if no domain is found (i.e. `ipDomain` is absent from the response)."
+    },
+    {
+     "info": {
+      "name": "Submit batch IP to company lookup",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/ip-to-company/batch",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"ips\": [\n    {\n      \"ip\": \"8.8.8.8\"\n    },\n    {\n      \"ip\": \"1.1.1.1\"\n    },\n    {\n      \"ip\": \"104.16.132.229\"\n    }\n  ]\n}"
+      }
+     },
+     "docs": "Submit up to **500 000 IPs** in a single request for async company lookup. Duplicates are removed automatically before processing.\n\n**Cost:** 100 credits per unique IP, reserved when you submit. Credits are charged based on found domains when you fetch results \u2014 any excess is refunded automatically."
+    },
+    {
+     "info": {
+      "name": "Check batch progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/ip-to-company/batch/{batchId}"
+     },
+     "docs": "Poll this endpoint to track your batch. `progress` is a percentage (0\u2013100) and `status` will be `processing`, `completed`, or `failed`.\n\n**Cost:** Free \u2014 polling never costs credits."
+    },
+    {
+     "info": {
+      "name": "Get batch results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/ip-to-company/batch/{batchId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page (default: 100, max: 1 000)"
+       }
+      ]
+     },
+     "docs": "Fetch results once your batch has finished. Results are paginated \u2014 use `page` and `limit` to walk through them.\n\n**Credit settlement:** The first time you call this after the batch reaches `completed` or `failed`, we calculate the final cost (100 credits per IP where a domain was found) and refund any excess. Subsequent calls return the cached settlement \u2014 you are never double-charged."
+    }
+   ]
+  }
+ ]
+}

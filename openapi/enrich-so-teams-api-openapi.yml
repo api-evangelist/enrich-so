@@ -1,0 +1,613 @@
+openapi: 3.1.0
+info:
+  title: Enrich Teams API
+  description: 'List team members and manage pending team invitations for the organization behind the
+    API key.
+
+
+    Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so
+    — every documentation page embeds its own OpenAPI fragment, and this document is the union of the
+    fragments carrying these tags, with only the components they reference.'
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms-of-service
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+security:
+- ApiKeyHeader: []
+- BearerToken: []
+tags:
+- name: Teams
+paths:
+  /teams/{teamId}/invitations:
+    post:
+      summary: Invite someone to your team
+      deprecated: false
+      description: 'Sends an email invitation to join your team. You must be an **admin** or
+
+        **owner** to invite people. The invitee can be assigned the role of `admin`
+
+        or `member`.
+
+        '
+      operationId: inviteTeamMember
+      tags:
+      - Teams
+      parameters:
+      - name: teamId
+        in: path
+        description: Your team identifier
+        required: true
+        example: 665e0b2f4a6d8c001abc1234
+        schema:
+          type: string
+          minLength: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteBody'
+            example:
+              email: marco.silva@yourcompany.com
+              role: member
+      responses:
+        '200':
+          description: Invitation sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationResponse'
+              example:
+                success: true
+                data:
+                  id: 665e2e7f4a6d8c001abc5001
+                  email: marco.silva@yourcompany.com
+                  role: member
+                  status: pending
+                  expiresAt: '2025-07-03T15:00:00.000Z'
+                  createdAt: '2025-06-03T15:00:00.000Z'
+          headers: {}
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id001
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body/email Invalid email
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id001
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id001
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483210-run
+    get:
+      summary: List pending invitations
+      deprecated: false
+      description: 'See all outstanding invitations for your team. You must be an **admin** or
+
+        **owner**.
+
+        '
+      operationId: listTeamInvitations
+      tags:
+      - Teams
+      parameters:
+      - name: teamId
+        in: path
+        description: Your team identifier
+        required: true
+        example: 665e0b2f4a6d8c001abc1234
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: List of pending invitations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationListResponse'
+              example:
+                success: true
+                data:
+                - id: 665e2e7f4a6d8c001abc5001
+                  email: marco.silva@yourcompany.com
+                  role: member
+                  status: pending
+                  expiresAt: '2025-07-03T15:00:00.000Z'
+                  createdAt: '2025-06-03T15:00:00.000Z'
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id002
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '404':
+          description: The resource you requested doesn't exist or doesn't belong to your organization
+          content:
+            application/json:
+              schema: *id002
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: No batch found with that ID
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id002
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483211-run
+  /teams/{teamId}/invitations/{invitationId}:
+    delete:
+      summary: Cancel a pending invitation
+      deprecated: false
+      description: 'Withdraws an invitation before the invitee accepts it. You must be an
+
+        **admin** or **owner**.
+
+        '
+      operationId: cancelInvitation
+      tags:
+      - Teams
+      parameters:
+      - name: teamId
+        in: path
+        description: Your team identifier
+        required: true
+        example: 665e0b2f4a6d8c001abc1234
+        schema:
+          type: string
+          minLength: 1
+      - name: invitationId
+        in: path
+        description: The invitation identifier
+        required: true
+        example: 665e2e7f4a6d8c001abc5001
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: Invitation cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessOperationResponse'
+              example:
+                success: true
+                data:
+                  success: true
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id003
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '404':
+          description: The resource you requested doesn't exist or doesn't belong to your organization
+          content:
+            application/json:
+              schema: *id003
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: No batch found with that ID
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id003
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483212-run
+  /teams/{teamId}/members:
+    get:
+      summary: List team members
+      deprecated: false
+      description: 'Returns everyone in your team along with their role (owner, admin, or member).
+
+        '
+      operationId: listTeamMembers
+      tags:
+      - Teams
+      parameters:
+      - name: teamId
+        in: path
+        description: Your team identifier
+        required: true
+        example: 665e0b2f4a6d8c001abc1234
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: List of team members
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMemberListResponse'
+              example:
+                success: true
+                data:
+                - id: 665e2a104a6d8c001abc4001
+                  userId: 665e2a104a6d8c001abc4101
+                  email: sarah.chen@yourcompany.com
+                  name: Sarah Chen
+                  role: owner
+                  createdAt: '2025-01-15T09:00:00.000Z'
+                - id: 665e2a104a6d8c001abc4002
+                  userId: 665e2a104a6d8c001abc4102
+                  email: james.rodriguez@yourcompany.com
+                  name: James Rodriguez
+                  role: admin
+                  createdAt: '2025-02-20T14:30:00.000Z'
+                - id: 665e2a104a6d8c001abc4003
+                  userId: 665e2a104a6d8c001abc4103
+                  email: priya.patel@yourcompany.com
+                  name: Priya Patel
+                  role: member
+                  createdAt: '2025-03-10T11:00:00.000Z'
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id004
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '404':
+          description: The resource you requested doesn't exist or doesn't belong to your organization
+          content:
+            application/json:
+              schema: *id004
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: No batch found with that ID
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id004
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483209-run
+components:
+  schemas:
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+    Invitation:
+      type: object
+      required:
+      - id
+      - email
+      - role
+      - status
+      - expiresAt
+      - createdAt
+      properties:
+        id:
+          type: string
+          examples:
+          - 665e2e7f4a6d8c001abc5001
+        email:
+          type: string
+          format: email
+          description: Who was invited
+          examples:
+          - marco.silva@yourcompany.com
+        role:
+          type: string
+          enum:
+          - admin
+          - member
+          description: The role they'll have when they accept
+          examples:
+          - member
+        status:
+          type: string
+          const: pending
+          description: Invitation status (always `pending` for outstanding invitations)
+        expiresAt:
+          type: string
+          format: date-time
+          description: When the invitation expires
+          examples:
+          - '2025-07-03T15:00:00.000Z'
+        createdAt:
+          type: string
+          format: date-time
+          description: When the invitation was sent
+          examples:
+          - '2025-06-03T15:00:00.000Z'
+    InvitationListResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invitation'
+    InvitationResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/Invitation'
+    InviteBody:
+      type: object
+      required:
+      - email
+      - role
+      properties:
+        email:
+          type: string
+          format: email
+          description: The email address of the person you want to invite
+          examples:
+          - marco.silva@yourcompany.com
+        role:
+          type: string
+          enum:
+          - admin
+          - member
+          description: The role to assign them
+          examples:
+          - member
+    SuccessOperationResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - success
+          properties:
+            success:
+              type: boolean
+    TeamMember:
+      type: object
+      required:
+      - id
+      - userId
+      - email
+      - name
+      - role
+      - createdAt
+      properties:
+        id:
+          type: string
+          description: Membership ID
+          examples:
+          - 665e2a104a6d8c001abc4001
+        userId:
+          type: string
+          description: User ID
+          examples:
+          - 665e2a104a6d8c001abc4101
+        email:
+          type: string
+          format: email
+          description: The member's email address
+          examples:
+          - sarah.chen@yourcompany.com
+        name:
+          type: string
+          description: The member's display name
+          examples:
+          - Sarah Chen
+          nullable: true
+        role:
+          type: string
+          enum:
+          - owner
+          - admin
+          - member
+          description: 'Their role in the team:
+
+            - `owner` — full control, cannot be removed
+
+            - `admin` — can manage members and keys
+
+            - `member` — can use the API
+
+            '
+          examples:
+          - admin
+        createdAt:
+          type: string
+          format: date-time
+          description: When they joined the team
+          examples:
+          - '2025-01-15T09:00:00.000Z'
+    TeamMemberListResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
+  securitySchemes:
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
+    BearerToken:
+      type: http
+      scheme: bearer
+      description: 'The same API key sent as an Authorization: Bearer token.'

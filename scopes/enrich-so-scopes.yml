@@ -1,0 +1,61 @@
+generated: '2026-08-14'
+method: probed
+source: https://mcp.enrich.so/.well-known/oauth-authorization-server
+provider: Enrich
+providerId: enrich-so
+description: >-
+  Enrich exposes OAuth 2.0 on exactly one surface — its remote MCP server at
+  mcp.enrich.so — and that server advertises a single scope. The REST API v3 has no OAuth
+  at all: it authenticates with a static organization-scoped API key (sk_ prefix) passed
+  in x-api-key or as a Bearer token, with no scope, permission or capability model of any
+  kind. derive-oauth-scopes.py found 0 oauth2 securitySchemes in the OpenAPI, which is
+  correct rather than a miss; the scope below was read off the live authorization-server
+  metadata instead.
+authorization_servers:
+- issuer: https://mcp.enrich.so/
+  metadata_url: https://mcp.enrich.so/.well-known/oauth-authorization-server
+  metadata_file: well-known/enrich-so-mcp-oauth-authorization-server.json
+  probed: '2026-08-14'
+  http_status: 200
+  authorization_endpoint: https://mcp.enrich.so/authorize
+  token_endpoint: https://mcp.enrich.so/token
+  revocation_endpoint: https://mcp.enrich.so/revoke
+  registration_endpoint: https://mcp.enrich.so/register
+  grant_types:
+  - authorization_code
+  - refresh_token
+  pkce: S256
+  applies_to: MCP (https://mcp.enrich.so/mcp)
+scopes:
+- name: mcp:tools
+  server: https://mcp.enrich.so/
+  description: >-
+    The only scope Enrich advertises. Grants an MCP client access to the server's tools.
+    Enrich publishes no description for it and no finer-grained scopes.
+  documented: false
+  granularity: coarse
+analysis:
+  scope_count: 1
+  read_write_split: false
+  per_product_scopes: false
+  note: >-
+    One scope for everything is all-or-nothing consent. A user authorizing an agent
+    against Enrich's MCP server cannot grant email validation (1 credit per call) without
+    also granting phone lookup (500 credits per call) and lead reveal (up to 575 credits
+    per lead). Given the API is metered against a prepaid balance, coarse scope
+    granularity is a direct financial exposure, not just a privacy one.
+rest_api:
+  oauth: false
+  scopes: false
+  permission_model: >-
+    API keys are scoped to an organization and carry "member-level permissions"
+    (https://doc.enrich.so/authentication-1951026m0). Enrich does not publish what those
+    permissions are, does not offer per-key scoping, and the Teams endpoints note that
+    invitation management requires an admin or owner role — so a role model exists inside
+    the product but is not expressible on an API key.
+  recommendation: >-
+    Issue a separate key per workload so credit consumption maps to a cost centre; that
+    is the only isolation mechanism available.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

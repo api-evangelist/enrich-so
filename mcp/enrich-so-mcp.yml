@@ -1,0 +1,78 @@
+generated: '2026-08-14'
+method: probed
+source: https://mcp.enrich.so/mcp
+provider: Enrich
+providerId: enrich-so
+status: published
+description: >-
+  Enrich operates a first-party REMOTE MCP server at https://mcp.enrich.so/mcp. It is a
+  Streamable-HTTP MCP endpoint (Express, CORS-open, mcp-session-id exposed) that an MCP
+  client can POST to directly — no local install, no npx package. It is authenticated:
+  an anonymous POST of a JSON-RPC initialize returns HTTP 401
+  {"error":"Authentication required. Pass API key via Bearer/x-api-key or use OAuth."},
+  and a POST without a session returns HTTP 400 {"error":"Invalid or missing session ID"}.
+  The server also publishes RFC 8414 OAuth Authorization Server Metadata at
+  https://mcp.enrich.so/.well-known/oauth-authorization-server, with dynamic client
+  registration, PKCE (S256), refresh tokens and a single scope, mcp:tools.
+deployment:
+  mode: remote
+  endpoint: https://mcp.enrich.so/mcp
+  auth: oauth
+  verified: probed
+  note: >-
+    mode is remote and only remote — there is no npx/pipx package, no stdio config
+    snippet, and no repository for a local server anywhere in the Enrich GitHub
+    organization (github.com/maximiseai ships enrich-ts-sdk, enrich-go-sdk and a DigitalOcean
+    deploy repo, no MCP server). auth is recorded as oauth because the endpoint publishes
+    full OAuth 2.0 authorization-server metadata, but the 401 body states an Enrich API
+    key may be passed instead via Authorization: Bearer or x-api-key, so an API key is
+    an accepted alternative credential.
+endpoints:
+- url: https://mcp.enrich.so/mcp
+  transport: streamable-http
+  methods:
+  - POST
+  - GET
+  - DELETE
+  probed: '2026-08-14'
+  anonymous_status: 401
+  anonymous_body: 'Authentication required. Pass API key via Bearer/x-api-key or use OAuth.'
+oauth:
+  metadata_url: https://mcp.enrich.so/.well-known/oauth-authorization-server
+  metadata_file: well-known/enrich-so-mcp-oauth-authorization-server.json
+  issuer: https://mcp.enrich.so/
+  authorization_endpoint: https://mcp.enrich.so/authorize
+  token_endpoint: https://mcp.enrich.so/token
+  revocation_endpoint: https://mcp.enrich.so/revoke
+  registration_endpoint: https://mcp.enrich.so/register
+  dynamic_client_registration: true
+  pkce: S256
+  grant_types:
+  - authorization_code
+  - refresh_token
+  scopes:
+  - mcp:tools
+tools:
+  enumerated: false
+  reason: >-
+    tools/list is auth-gated. An anonymous JSON-RPC POST of initialize (protocolVersion
+    2025-06-18) returns HTTP 401, so the live tool list and the inputSchema of each tool
+    cannot be read without an Enrich API key or a completed OAuth authorization-code
+    flow. Enrich publishes no tool list in its documentation and no tool list in its
+    llms.txt, so there is no unauthenticated fallback either. The tool names and schemas
+    in this repo are therefore UNKNOWN, not empty — see mcp/enrich-so-tool-crosswalk.yml
+    for the REST surface an authenticated introspection should be reconciled against.
+  next_step: >-
+    Re-run tools/list with an Enrich API key in the Authorization: Bearer header, then
+    bind each returned tool to its backing operationId in the crosswalk.
+discovery:
+  documented_in_provider_docs: false
+  note: >-
+    The MCP server is NOT mentioned anywhere in the Enrich documentation site
+    (doc.enrich.so), its llms.txt, or its sitemap.xml (probed 2026-08-14). It was found
+    by probing the mcp.<domain> host convention. A real agent surface that no agent can
+    discover from the provider's own docs is a discoverability gap worth reporting back
+    to Enrich.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

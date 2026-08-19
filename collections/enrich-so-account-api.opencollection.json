@@ -1,0 +1,66 @@
+{
+ "opencollection": "1.0.0",
+ "info": {
+  "name": "Enrich Account API",
+  "version": "3.0",
+  "docs": "https://doc.enrich.so/api-reference-1951025m0"
+ },
+ "request": {
+  "baseUrl": "https://dev.enrich.so/api/v3",
+  "auth": {
+   "type": "apikey",
+   "key": "x-api-key",
+   "value": "{{x-api-key}}",
+   "placement": "header"
+  }
+ },
+ "items": [
+  {
+   "info": {
+    "name": "Wallets",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Get your credit balance",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/wallets/balance"
+     },
+     "docs": "Returns the current credit balance for your organization."
+    },
+    {
+     "info": {
+      "name": "Get transaction history",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/wallets/transactions",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "50",
+        "docs": "Items per page (default: 50, max: 100)"
+       },
+       {
+        "key": "type",
+        "value": "string",
+        "docs": "Filter by type: `deduction`, `topup`, `adjustment`, or `refund`"
+       }
+      ]
+     },
+     "docs": "Browse your credit transactions \u2014 top-ups, deductions, refunds, and\nadjustments. Use the `type` parameter to filter by transaction type.\nResults are paginated."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,176 @@
+generated: '2026-08-14'
+method: searched
+source: https://doc.enrich.so/api-reference-1951025m0
+derived_from: openapi/_original/enrich-so-v3-harvested-openapi.yml
+provider: Enrich
+providerId: enrich-so
+format: rfc9457
+description: >-
+  Enrich returns RFC 9457 Problem Details on every error. This is not a claim read off a
+  marketing page: an unauthenticated GET of https://dev.enrich.so/api/v3/wallets/balance
+  on 2026-08-14 returned HTTP 401 with Content-Type application/problem+json and the body
+  {"type":"https://dev.enrich.so/errors/unauthorized","title":"Unauthorized","status":401,
+  "detail":"This endpoint requires API key authentication..."}. Every problem type is a
+  dereferenceable-looking URI under https://dev.enrich.so/errors/. The catalog below
+  merges the error table Enrich publishes in its API reference with the response examples
+  carried by all 51 harvested operations.
+envelope:
+  media_type: application/problem+json
+  schema: ErrorEnvelope
+  required:
+  - type
+  - title
+  - status
+  optional:
+  - detail
+  - instance
+  type_prefix: https://dev.enrich.so/errors/
+  note: >-
+    The 402 insufficient-credits problem extends the RFC 9457 envelope with three
+    non-standard members — currentBalance, required and shortfall — which is legal under
+    RFC 9457 (problem types may define extension members) and is the single most useful
+    error extension in this API, because it tells a client exactly how many credits to
+    top up.
+  inconsistency: >-
+    The authentication documentation page shows 401/403/429 bodies in a legacy
+    {"error": "..."} shape rather than the RFC 9457 shape, and the 429 example in the
+    rate-limits page uses {"statusCode","error","message","retryAfter"}. The live API
+    returns application/problem+json. Treat the problem+json shape as authoritative and
+    the flat {"error"} examples as stale documentation.
+problem_types:
+- type: https://dev.enrich.so/errors/validation-error
+  status: 400
+  title: Validation Error
+  occurrences: 29
+  detail_example: body/email Invalid email
+  remediation: >-
+    Fix the named field. detail is field-scoped ("body/<field> <reason>"), so it can be
+    surfaced straight to a form. Retrying the same body will fail identically.
+  retryable: false
+- type: https://dev.enrich.so/errors/unauthorized
+  status: 401
+  title: Unauthorized
+  occurrences: 51
+  detail_example: The API key provided is invalid or has been revoked
+  remediation: >-
+    Supply a valid key via the x-api-key header or Authorization: Bearer. Also returned
+    when the key is disabled in the dashboard. Rotate or re-enable the key at
+    https://dash.enrich.so/dashboard/api-keys.
+  retryable: false
+  on_every_operation: true
+- type: https://dev.enrich.so/errors/insufficient-credits
+  status: 402
+  title: Insufficient Credits
+  occurrences: 17
+  detail_example: This operation requires 100 credits, but your balance is 50 credits.
+  extensions:
+  - currentBalance
+  - required
+  - shortfall
+  remediation: >-
+    Top up credits or downgrade the request size. For batch endpoints the FULL estimated
+    cost (itemCount * creditCostPerItem) is reserved on submit, so a batch can 402 even
+    when a single lookup would succeed. Read shortfall to size the top-up exactly.
+  retryable: true
+  retry_condition: after the balance is topped up
+- type: https://dev.enrich.so/errors/forbidden
+  status: 403
+  title: Forbidden
+  occurrences: 0
+  documented_in: https://doc.enrich.so/api-reference-1951025m0
+  detail_example: Your account has been suspended. API access is disabled.
+  remediation: >-
+    Account suspended, organization no longer exists, or the endpoint is restricted to
+    approved accounts. The Company Followers endpoints are gated this way — the docs mark
+    them "Access required — available to approved accounts only". Contact Enrich.
+  retryable: false
+  note: >-
+    Listed in the published error table but carried by no operation's response set in the
+    harvested spec — an OpenAPI completeness gap, not an absence of the error.
+- type: https://dev.enrich.so/errors/not-found
+  status: 404
+  title: Not Found
+  occurrences: 21
+  detail_example: No batch found with that ID
+  remediation: >-
+    Check the batchId/jobId. Job identifiers are 24-character hex strings scoped to the
+    calling organization — a valid ID belonging to another organization also 404s.
+  retryable: false
+- type: https://dev.enrich.so/errors/conflict
+  status: 409
+  title: Conflict
+  occurrences: 3
+  remediation: >-
+    The resource is in a state that rejects the operation — for example cancelling an
+    invitation that was already accepted, or acting on a job that already reached a
+    terminal status.
+  retryable: false
+- status: 410
+  title: Gone
+  occurrences: 1
+  remediation: >-
+    Returned by the Lead Finder CSV download when the export file has expired. Re-submit
+    the export job.
+  retryable: false
+  note: No problem type URI is published for this status.
+- status: 422
+  title: Unprocessable Entity
+  occurrences: 1
+  remediation: Request was syntactically valid but semantically rejected.
+  retryable: false
+  note: No problem type URI is published for this status.
+- type: https://dev.enrich.so/errors/rate-limit-exceeded
+  status: 429
+  title: Too Many Requests
+  occurrences: 51
+  detail_example: Rate limit exceeded. Please retry after 30 seconds.
+  response_headers:
+  - Retry-After
+  - X-RateLimit-Limit
+  - X-RateLimit-Remaining
+  - X-RateLimit-Reset
+  remediation: >-
+    Honour Retry-After (seconds), then back off exponentially with jitter. Pace against
+    X-RateLimit-Remaining rather than waiting for the 429. See
+    rate-limits/enrich-so-rate-limits.yml for the per-plan burst and sustained numbers
+    and the tighter enrichment/bulk overrides.
+  retryable: true
+  on_every_operation: true
+- type: https://dev.enrich.so/errors/internal-error
+  status: 500
+  title: Internal Server Error
+  occurrences: 30
+  remediation: Retry with backoff. Quote meta.requestId from the last successful response when contacting support.
+  retryable: true
+- type: https://dev.enrich.so/errors/upstream-failure
+  status: 502
+  title: Upstream Failure
+  occurrences: 0
+  documented_in: https://doc.enrich.so/api-reference-1951025m0
+  remediation: A data provider Enrich depends on failed. Retry with backoff.
+  retryable: true
+- type: https://dev.enrich.so/errors/service-unavailable
+  status: 503
+  title: Service Unavailable
+  occurrences: 1
+  remediation: Retry with backoff.
+  retryable: true
+- type: https://dev.enrich.so/errors/timeout
+  status: 504
+  title: Timeout
+  occurrences: 0
+  documented_in: https://doc.enrich.so/api-reference-1951025m0
+  remediation: >-
+    The lookup exceeded the server deadline. Retry; prefer the batch endpoint for
+    large volumes rather than many single calls.
+  retryable: true
+billing_semantics:
+  note: >-
+    Errors are not neutral in this API — they interact with billing. A single lookup that
+    finds nothing returns 200 with data.found=false and creditsUsed 0 (refunded), NOT a
+    404. A 402 means nothing was charged. A batch that partially fails settles only the
+    successfully processed items and refunds the reserved excess. So a client must read
+    meta.creditsUsed, not the status code, to know what it paid.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

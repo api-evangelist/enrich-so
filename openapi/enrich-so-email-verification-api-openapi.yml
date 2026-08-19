@@ -1,93 +1,513 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
-  title: Enrich Account Email Verification API
-  description: 'Enrich (enrich.so) is a person and company data enrichment API. From one REST interface it resolves professional profiles from an email address (reverse email lookup), finds and verifies professional email addresses, finds phone/mobile numbers, resolves a company and geolocation from an IP address, scrapes LinkedIn company followers, and searches a lead-finder database of people and organizations. All requests use the base URL https://dev.enrich.so/api/v3 and authenticate with an API key passed either in the `x-api-key` header or as `Authorization: Bearer`. Usage is metered against a prepaid credit balance; "not found" results are refunded.
+  title: Enrich Email Verification API
+  description: 'Validate email addresses for deliverability, single or in batches of up to 500,000 emails.
 
-    Grounding note: the single-lookup endpoints in this document (POST /reverse-lookup/lookup, POST /email-finder, POST /email-validation, GET /reverse-lookup/phones, POST /ip-to-company, POST /company-follower, POST /lead-finder/search, POST /lead-finder/reveal) and their credit costs are confirmed from the live Enrich documentation. The batch / progress / results sub-paths are modeled from the documented batch-and-poll pattern (submit -> check progress -> get results) and their exact URL segments should be confirmed against the current docs before code generation. Modeled operations are marked with `x-endpoint-modeled: true`.'
+
+    Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so
+    — every documentation page embeds its own OpenAPI fragment, and this document is the union of the
+    fragments carrying these tags, with only the components they reference.'
   version: '3.0'
   contact:
     name: Enrich
     url: https://www.enrich.so
-  termsOfService: https://www.enrich.so/terms
+  termsOfService: https://www.enrich.so/terms-of-service
 servers:
 - url: https://dev.enrich.so/api/v3
-  description: Enrich API v3
+  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
 security:
-- apiKeyHeader: []
-- bearerAuth: []
+- ApiKeyHeader: []
+- BearerToken: []
 tags:
-- name: Email Verification
-  description: Validate email addresses for deliverability.
+- name: Email Validation
 paths:
   /email-validation:
     post:
+      summary: Validate a single email
+      deprecated: false
+      description: 'Checks whether an email address is deliverable. The response tells you the
+
+        result (`valid`, `invalid`, or `risky`), the confidence level, the mail
+
+        provider, and whether the domain is a catch-all.
+
+
+        **Cost:** 1 credit. You are **not** charged if the result is `risky`.
+
+        '
       operationId: validateEmail
       tags:
-      - Email Verification
-      summary: Validate a single email
-      description: Checks whether an email is deliverable, returning valid, invalid, or risky along with confidence, mail provider, and catch-all status. 1 credit per request; not charged when the result is risky.
+      - Email Validation
+      parameters: []
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/EmailValidationRequest'
+            example:
+              email: sarah.chen@stripe.com
       responses:
         '200':
-          description: Validation result.
+          description: Validation result returned successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmailValidationResponse'
+              example:
+                success: true
+                data:
+                  email: sarah.chen@stripe.com
+                  result: valid
+                  message: The mailbox exists and is accepting mail
+                  isCatchAll: false
+                  isFederated: false
+                  hasSEG: true
+                  segProvider: Proofpoint
+                  provider: GOOGLE
+                  confidence: high
+                meta:
+                  requestId: 664f2b3c9a1e4d0012abcdef
+                  creditsUsed: 1
+                  creditsRemaining: 24999
+                  processingTimeMs: 387
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id001
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body/email Invalid email
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id001
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
         '402':
-          $ref: '#/components/responses/InsufficientCredits'
+          description: You don't have enough credits for this request
+          content:
+            application/json:
+              schema: *id001
+              example:
+                type: https://dev.enrich.so/errors/insufficient-credits
+                title: Insufficient Credits
+                status: 402
+                detail: 'Not enough credits. Required: 10, available: 3'
+          headers: {}
         '429':
-          $ref: '#/components/responses/RateLimited'
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id001
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id001
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483191-run
   /email-validation/batch:
     post:
-      operationId: validateEmailsBatch
-      tags:
-      - Email Verification
       summary: Validate emails in batch
-      description: Submits up to 500,000 emails for asynchronous validation.
-      x-endpoint-modeled: true
+      deprecated: false
+      description: "Submit up to **500 000 emails** in a single request. We automatically\nremove duplicates\
+        \ (case-insensitive) before processing, so you only pay\nfor unique addresses.\n\n**Cost:** 1\
+        \ credit per unique email, reserved when you submit. Any unused\ncredits are refunded automatically\
+        \ when you fetch results.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server\
+        \ will receive:\n\n1. **A per-result callback** every time an individual email finishes\n   validation.\
+        \ See [emailValidationResult](#tag/Webhooks/operation/webhookEmailValidationResult)\n   for the\
+        \ exact payload.\n\n2. **A completion callback** once every email in the batch has been\n   processed.\
+        \ See [emailValidationCompletion](#tag/Webhooks/operation/webhookEmailValidationCompletion)\n\
+        \   for the exact payload.\n"
+      operationId: batchValidateEmails
+      tags:
+      - Email Validation
+      parameters: []
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/BatchEmailValidationRequest'
+            example:
+              emails:
+              - sarah.chen@stripe.com
+              - james.rodriguez@hubspot.com
+              - priya.patel@notion.so
+              - marco.silva@datadog.com
+              webhookUrl: https://api.yourapp.com/webhooks/enrich
       responses:
-        '202':
-          description: Batch accepted.
+        '200':
+          description: Batch submitted — credits have been reserved
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchSubmitResponse'
+              example:
+                success: true
+                data:
+                  batchId: 665a1f4e2c3b7800129dce01
+                  status: queued
+                  itemCount: 4
+                  originalCount: 4
+                  duplicatesRemoved: 0
+                meta:
+                  requestId: 665a1f4e2c3b7800129dce00
+                  creditsReserved: 4
+                  creditsPerItem: 1
+                  estimatedCredits: 4
+          headers: {}
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id002
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body/email Invalid email
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id002
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '402':
+          description: You don't have enough credits for this request
+          content:
+            application/json:
+              schema: *id002
+              example:
+                type: https://dev.enrich.so/errors/insufficient-credits
+                title: Insufficient Credits
+                status: 402
+                detail: 'Not enough credits. Required: 10, available: 3'
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id002
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id002
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483192-run
+  /email-validation/batch/{batchId}:
+    get:
+      summary: Check batch validation progress
+      deprecated: false
+      description: 'Poll this endpoint to see how your batch is doing. The `progress` field
+
+        gives you a percentage, and `status` will be one of `queued`, `processing`,
+
+        `completed`, or `failed`.
+
+
+        **Cost:** Free — polling never costs credits.
+
+        '
+      operationId: getEmailValidationBatchStatus
+      tags:
+      - Email Validation
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch identifier returned when you submitted the job
+        required: true
+        example: 665a1f4e2c3b7800129dce01
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: Current batch status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchStatusResponse'
+              example:
+                success: true
+                data:
+                  batchId: 665a1f4e2c3b7800129dce01
+                  status: processing
+                  totalItems: 4
+                  processedItems: 3
+                  progress: 75
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id003
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '404':
+          description: The resource you requested doesn't exist or doesn't belong to your organization
+          content:
+            application/json:
+              schema: *id003
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: No batch found with that ID
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id003
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483193-run
+  /email-validation/batch/{batchId}/results:
+    get:
+      summary: Get batch validation results
+      deprecated: false
+      description: 'Fetch the results once your batch has finished. Results are paginated — use
+
+        `page` and `limit` to walk through them.
+
+
+        **Credit settlement:** The first time you call this after the batch reaches
+
+        `completed` or `failed`, we calculate the final cost and refund any excess
+
+        credits. Subsequent calls return the cached settlement.
+
+        '
+      operationId: getEmailValidationBatchResults
+      tags:
+      - Email Validation
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch identifier returned when you submitted the job
+        required: true
+        example: 665a1f4e2c3b7800129dce01
+        schema:
+          type: string
+          minLength: 1
+      - name: page
+        in: query
+        description: 'Page number (default: 1)'
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: limit
+        in: query
+        description: 'Results per page (default: 100, max: 1 000)'
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      responses:
+        '200':
+          description: Paginated validation results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailValidationBatchResultsResponse'
+              example:
+                success: true
+                data:
+                  batchId: 665a1f4e2c3b7800129dce01
+                  status: completed
+                  totalItems: 4
+                  processedCount: 4
+                  results:
+                  - email: sarah.chen@stripe.com
+                    result: valid
+                    message: The mailbox exists and is accepting mail
+                    isCatchAll: false
+                    provider: GOOGLE
+                    confidence: high
+                  - email: james.rodriguez@hubspot.com
+                    result: valid
+                    message: The mailbox exists and is accepting mail
+                    isCatchAll: false
+                    provider: MICROSOFT
+                    confidence: definitive
+                  - email: priya.patel@notion.so
+                    result: invalid
+                    message: The mailbox does not exist on this server
+                    isCatchAll: false
+                    provider: GOOGLE
+                    confidence: definitive
+                  - email: marco.silva@datadog.com
+                    result: risky
+                    message: The domain accepts all addresses (catch-all) so delivery cannot be guaranteed
+                    isCatchAll: true
+                    provider: SMTP
+                    confidence: low
+                meta:
+                  requestId: 665a23bc2c3b7800129dce10
+                  creditsUsed: 2
+                  creditsRefunded: 2
+                  creditsRemaining: 24997
+                  totalItems: 4
+                  processedItems: 4
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id004
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '404':
+          description: The resource you requested doesn't exist or doesn't belong to your organization
+          content:
+            application/json:
+              schema: *id004
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: No batch found with that ID
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id004
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483194-run
 components:
   schemas:
-    EmailValidationRequest:
-      type: object
-      required:
-      - email
-      properties:
-        email:
-          type: string
-          format: email
-          minLength: 1
-          maxLength: 254
-    EnrichmentMeta:
-      type: object
-      description: Metadata returned with every response, including remaining credit balance.
-      properties:
-        creditsCharged:
-          type: integer
-        creditsRemaining:
-          type: integer
-        cached:
-          type: boolean
     BatchEmailValidationRequest:
       type: object
       required:
@@ -95,82 +515,421 @@ components:
       properties:
         emails:
           type: array
+          minItems: 1
+          maxItems: 500000
           items:
             type: string
-            format: email
-    BatchSubmitResponse:
+            minLength: 1
+          description: A list of email addresses to validate (up to 500 000)
+          examples:
+          - - sarah.chen@stripe.com
+            - james.rodriguez@hubspot.com
+        webhookUrl:
+          type: string
+          format: uri
+          description: 'A URL on your server where we should send webhook callbacks.
+
+            You''ll receive one POST per result, plus one final completion POST.
+
+            '
+          examples:
+          - https://api.yourapp.com/webhooks/enrich
+    BatchResultsMeta:
       type: object
+      description: Metadata returned when you fetch batch results (includes credit settlement)
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request
+          examples:
+          - 665a23bc2c3b7800129dce10
+        creditsUsed:
+          type: number
+          minimum: 0
+          description: Actual credits charged after settlement
+          examples:
+          - 80
+        creditsRefunded:
+          type: number
+          minimum: 0
+          description: Credits refunded (difference between reserved and actual cost)
+          examples:
+          - 20
+        creditsRemaining:
+          type: number
+          minimum: 0
+          description: Your remaining credit balance after settlement
+          examples:
+          - 24920
+        totalItems:
+          type: integer
+          minimum: 0
+          description: Total items in the batch
+          examples:
+          - 10
+        processedItems:
+          type: integer
+          minimum: 0
+          description: Items that were processed
+          examples:
+          - 10
+    BatchStatusData:
+      type: object
+      description: Progress information for a batch job
+      required:
+      - batchId
+      - status
+      properties:
+        batchId:
+          type: string
+          description: The batch identifier
+          examples:
+          - 665a1f4e2c3b7800129dce01
+        status:
+          type: string
+          description: 'Current status: `queued`, `processing`, `completed`, or `failed`'
+          examples:
+          - processing
+        totalItems:
+          type: integer
+          minimum: 0
+          description: Total items in the batch
+          examples:
+          - 100
+        processedItems:
+          type: integer
+          minimum: 0
+          description: Items processed so far
+          examples:
+          - 50
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Completion percentage (0–100)
+          examples:
+          - 50
+    BatchStatusResponse:
+      type: object
+      required:
+      - success
+      - data
       properties:
         success:
           type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/BatchStatusData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+              description: Request tracking ID
+    BatchSubmitData:
+      type: object
+      description: Returned when you submit any batch job
+      required:
+      - batchId
+      - status
+      - itemCount
+      properties:
+        batchId:
+          type: string
+          description: The unique identifier for this batch — use it to poll status and fetch results
+          examples:
+          - 665a1f4e2c3b7800129dce01
+        status:
+          type: string
+          description: The initial status (usually `queued`)
+          examples:
+          - queued
+        itemCount:
+          type: integer
+          minimum: 0
+          description: Number of unique items in the batch (after deduplication)
+          examples:
+          - 100
+        originalCount:
+          type: integer
+          minimum: 0
+          description: How many items you submitted before deduplication
+          examples:
+          - 110
+        duplicatesRemoved:
+          type: integer
+          minimum: 0
+          description: How many duplicate items were removed
+          examples:
+          - 10
+    BatchSubmitMeta:
+      type: object
+      description: Metadata returned when you submit a batch job
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request
+          examples:
+          - 665a1f4e2c3b7800129dce00
+        creditsReserved:
+          type: number
+          minimum: 0
+          description: Total credits reserved for the batch
+          examples:
+          - 100
+        creditsPerItem:
+          type: number
+          minimum: 0
+          description: Cost per item
+          examples:
+          - 10
+        estimatedCredits:
+          type: number
+          minimum: 0
+          description: Estimated total cost (same as creditsReserved)
+          examples:
+          - 100
+    BatchSubmitResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/BatchSubmitData'
+        meta:
+          $ref: '#/components/schemas/BatchSubmitMeta'
+    EmailValidationBatchResultsResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
         data:
           type: object
+          required:
+          - batchId
+          - status
           properties:
             batchId:
               type: string
+              description: The batch identifier
+              examples:
+              - 665a1f4e2c3b7800129dce01
             status:
               type: string
-    ErrorEnvelope:
+              description: Final batch status
+              examples:
+              - completed
+            totalItems:
+              type: integer
+              minimum: 0
+              description: Total emails in the batch
+              examples:
+              - 4
+            processedCount:
+              type: integer
+              minimum: 0
+              description: Emails that were processed
+              examples:
+              - 4
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/EmailValidationResult'
+              description: The validation results
+        meta:
+          $ref: '#/components/schemas/BatchResultsMeta'
+    EmailValidationRequest:
       type: object
+      required:
+      - email
       properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: object
-          properties:
-            code:
-              type: string
-            message:
-              type: string
+        email:
+          type: string
+          minLength: 1
+          maxLength: 254
+          description: The email address you want to validate
+          examples:
+          - sarah.chen@stripe.com
     EmailValidationResponse:
       type: object
+      required:
+      - success
+      - data
       properties:
         success:
           type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/EmailValidationResult'
         meta:
           $ref: '#/components/schemas/EnrichmentMeta'
-        data:
-          type: object
-          properties:
-            status:
-              type: string
-              enum:
-              - valid
-              - invalid
-              - risky
-            confidence:
-              type: number
-            mailProvider:
-              type: string
-            catchAll:
-              type: boolean
-  responses:
-    RateLimited:
-      description: Rate limit exceeded. Includes a Retry-After header.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
-    Unauthorized:
-      description: Missing, invalid, or disabled API key.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
-    InsufficientCredits:
-      description: Not enough credits to complete the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
+    EmailValidationResult:
+      type: object
+      description: The result of validating a single email address
+      required:
+      - email
+      - result
+      - message
+      - isCatchAll
+      - confidence
+      properties:
+        email:
+          type: string
+          description: The email address that was validated
+          examples:
+          - sarah.chen@stripe.com
+        result:
+          type: string
+          enum:
+          - valid
+          - invalid
+          - risky
+          description: 'The validation verdict:
+
+            - `valid` — the mailbox exists and accepts mail
+
+            - `invalid` — the mailbox does not exist
+
+            - `risky` — we can''t confirm delivery (e.g. catch-all domain)
+
+            '
+          examples:
+          - valid
+        message:
+          type: string
+          description: A human-readable explanation of the result
+          examples:
+          - The mailbox exists and is accepting mail
+        isCatchAll:
+          type: boolean
+          description: Whether the domain accepts mail to any address (catch-all)
+          examples:
+          - false
+        isFederated:
+          type: boolean
+          description: Whether the email uses SSO or federated authentication
+          examples:
+          - false
+        hasSEG:
+          type: boolean
+          description: Whether the domain uses a Secure Email Gateway
+          examples:
+          - true
+        segProvider:
+          type: string
+          description: The name of the Secure Email Gateway provider
+          examples:
+          - Proofpoint
+        provider:
+          type: string
+          enum:
+          - GOOGLE
+          - MICROSOFT
+          - SMTP
+          description: The email service provider
+          examples:
+          - GOOGLE
+        confidence:
+          type: string
+          enum:
+          - definitive
+          - high
+          - medium
+          - low
+          - temporary
+          - none
+          description: 'How confident we are in the result:
+
+            - `definitive` — verified with certainty
+
+            - `high` — very likely correct
+
+            - `medium` — reasonably confident
+
+            - `low` — uncertain (often a catch-all domain)
+
+            - `temporary` — the server returned a temporary error
+
+            - `none` — no confidence data available
+
+            '
+          examples:
+          - high
+    EnrichmentMeta:
+      type: object
+      description: Metadata included with every enrichment response
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request — useful for support tickets
+          examples:
+          - 664f2b3c9a1e4d0012abcdef
+        creditsUsed:
+          type: number
+          minimum: 0
+          description: How many credits this request consumed
+          examples:
+          - 10
+        creditsRemaining:
+          type: number
+          minimum: 0
+          description: Your remaining credit balance after this request
+          examples:
+          - 24990
+        processingTimeMs:
+          type: number
+          description: How long the lookup took, in milliseconds
+          examples:
+          - 420
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
   securitySchemes:
-    apiKeyHeader:
+    ApiKeyHeader:
       type: apiKey
       in: header
       name: x-api-key
-      description: API key (prefixed sk_) passed in the x-api-key header.
-    bearerAuth:
+      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
+    BearerToken:
       type: http
       scheme: bearer
-      description: API key passed as Authorization Bearer token.
+      description: 'The same API key sent as an Authorization: Bearer token.'

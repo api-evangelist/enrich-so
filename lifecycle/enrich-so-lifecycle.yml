@@ -1,0 +1,91 @@
+generated: '2026-08-14'
+method: searched
+source: >-
+  https://doc.enrich.so/api-reference-1951025m0, https://doc.enrich.so/sitemap.xml,
+  https://status.enrich.so/ (HTTP 200, probed 2026-08-14), https://api.enrich.so/ and
+  https://api.enrich.so/docs
+provider: Enrich
+providerId: enrich-so
+description: >-
+  Versioning, deprecation and operational-transparency posture for the Enrich API. Enrich
+  versions in the URI path and runs a public status page, but publishes no deprecation
+  policy, no Sunset/Deprecation headers, no SLA and no changelog — while continuing to
+  serve a prior major version with no announced end of life.
+versioning:
+  style: uri-path
+  current:
+    version: v3
+    base_url: https://dev.enrich.so/api/v3
+    spec: openapi/_original/enrich-so-v3-harvested-openapi.yml
+    operations: 51
+  prior:
+  - version: v1/v2
+    base_url: https://api.enrich.so
+    spec: openapi/enrich-so-legacy-api-openapi.json
+    still_serving: true
+    probed: '2026-08-14'
+    evidence: >-
+      GET https://api.enrich.so/ returns 200
+      {"message":"Welcome to the Enrich API","version":"2.0.0","docs":"https://docs.enrich.so"}
+      and https://api.enrich.so/docs still serves a Swagger UI carrying an OpenAPI 3.0.0
+      document titled "Enrich Labs API" with GET /v1/api/auth and GET /v2/api/person.
+    deprecation_notice: none published
+    sunset_date: null
+  header_versioning: false
+  breaking_change_policy: not published
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  evidence: >-
+    No operation in the 51-operation v3 surface carries deprecated:true, no Sunset or
+    Deprecation response header is declared anywhere, and the documentation sitemap
+    (https://doc.enrich.so/sitemap.xml, probed 2026-08-14) contains no versioning,
+    deprecation, migration or changelog page. NO Deprecation pointer is emitted in
+    apis.yml because there is no policy to point at.
+  gap: >-
+    The legacy v1/v2 API is the concrete cost of this. It is live, documented by its own
+    Swagger UI, and its root response still advertises a docs host — https://docs.enrich.so
+    — that does not resolve at all (DNS failure, probed 2026-08-14; the real docs host is
+    doc.enrich.so, singular). A consumer on v1/v2 has no announced migration date and a
+    broken pointer to the migration target.
+status_page:
+  url: https://status.enrich.so
+  probed: '2026-08-14'
+  http_status: 200
+  title: Enrich status page
+  machine_readable_feed: false
+  feed_note: >-
+    No summary.json, no /api/v2/status.json (401), no RSS and no Atom feed — the status
+    page is human-readable only, so uptime cannot be monitored programmatically.
+  subscribe: not published
+sla:
+  published: false
+  uptime_commitment: null
+  support_response_targets: null
+  note: >-
+    No SLA, uptime commitment or support-response target is published on any reachable
+    Enrich surface. Enterprise plans are described as carrying "negotiated terms", which
+    implies an SLA exists contractually but not publicly.
+support:
+  request_identifier: meta.requestId on every successful response
+  channels:
+  - type: docs
+    url: https://doc.enrich.so/introduction-1951028m0
+  - type: dashboard
+    url: https://dash.enrich.so/dashboard/api-keys
+gated_endpoints:
+- product: Company Followers
+  operations: 7
+  gate: >-
+    "Access required — This endpoint is available to approved accounts only. Contact us
+    to request access." (published on all seven Company Followers documentation pages and
+    repeated in llms.txt)
+  note: >-
+    Documented and specified, but not callable on a self-serve account. An agent reading
+    the spec cannot tell this from the OpenAPI alone — the gate exists only in the prose.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

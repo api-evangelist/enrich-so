@@ -1,0 +1,84 @@
+generated: '2026-08-14'
+method: searched
+source: https://github.com/maximiseai/enrich-ts-sdk/blob/main/CHANGELOG.md
+provider: Enrich
+providerId: enrich-so
+description: >-
+  Enrich publishes NO API changelog. There is no changelog, release-notes, what's-new or
+  versioning page anywhere in the documentation sitemap (https://doc.enrich.so/sitemap.xml,
+  probed 2026-08-14 — 183 pages, none of them a changelog), no changelog in llms.txt, and
+  the marketing site is unreadable to any non-browser client (429, Vercel Security
+  Checkpoint). The only dated, first-party record of change Enrich publishes is the
+  release history of its official TypeScript SDK. That is what is captured here, and it is
+  recorded as an SDK changelog, not an API changelog — it tracks when client support for
+  a capability shipped, which lags the API itself by an unknown amount.
+api_changelog:
+  published: false
+  probed:
+  - url: https://doc.enrich.so/sitemap.xml
+    status: 200
+    finding: no changelog/release-notes/whats-new page among 183 documentation URLs
+  - url: https://www.enrich.so/changelog
+    status: 429
+    finding: Vercel Security Checkpoint bot challenge; unmeasurable
+  consequence: >-
+    A consumer has no way to learn that an endpoint changed. Combined with the absent
+    deprecation policy (lifecycle/enrich-so-lifecycle.yml), change on this API is
+    undiscoverable until something breaks.
+sdk_changelog:
+  scope: '@enrich.so/sdk (official TypeScript SDK)'
+  repository: https://github.com/maximiseai/enrich-ts-sdk
+  scheme: semver
+  release_automation: semantic-release (conventional commits)
+  current_version: 1.2.0
+  current_version_date: '2026-03-03'
+  entries:
+  - version: 1.2.0
+    date: '2026-03-03'
+    breaking: false
+    additions:
+    - Async export job endpoints and types for Lead Finder
+    highlights: >-
+      Adds client coverage for POST /lead-finder/export and the export-jobs
+      list/poll/download triad.
+  - version: 1.1.0
+    date: '2026-03-03'
+    breaking: false
+    additions:
+    - Reveal jobs endpoints and types
+    highlights: >-
+      Adds client coverage for the asynchronous Lead Finder reveal/enrich job surface
+      (/lead-finder/reveal-jobs).
+  - version: 1.0.2
+    date: '2026-03-02'
+    breaking: false
+    fixes:
+    - Updated filter options type and batchId field references
+  - version: 1.0.1
+    date: '2026-02-28'
+    breaking: false
+    fixes:
+    - Normalized repository URL
+  - version: 1.0.0
+    date: '2026-02-28'
+    breaking: false
+    fixes:
+    - Corrected method names and parameters
+    highlights: >-
+      First stable release. Covers Email Finder, Email Validation, Phone Finder, Reverse
+      Email Lookup, Lead Finder, People Search, Company Followers, Teams and Wallets, with
+      retries, timeouts, AbortSignal cancellation, typed error classes, multi-runtime
+      support and sensitive-data redaction in logs.
+  - version: 0.1.0
+    date: '2026-02-28'
+    breaking: false
+    highlights: Initial release of the Enrich API TypeScript SDK.
+  observation: >-
+    The whole published SDK history spans four days (2026-02-28 to 2026-03-03) and nothing
+    has shipped since. The Go SDK's latest tag, v0.2.1, is dated the same day
+    (2026-03-03). Five months of silence across both official clients, with no API
+    changelog to read against it, means a consumer cannot distinguish "the API has not
+    changed" from "the clients have stopped tracking it".
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

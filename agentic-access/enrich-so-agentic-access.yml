@@ -1,54 +1,170 @@
-generated: '2026-07-15'
+generated: '2026-08-14'
 method: generated
-source: openapi/enrich-so-openapi.yml
+source: openapi/enrich-so-account-api-openapi.yml, openapi/enrich-so-company-intelligence-api-openapi.yml,
+  openapi/enrich-so-email-finder-api-openapi.yml, openapi/enrich-so-email-verification-api-openapi.yml,
+  openapi/enrich-so-lead-finder-api-openapi.yml, openapi/enrich-so-legacy-api-openapi.json,
+  openapi/enrich-so-people-search-api-openapi.yml, openapi/enrich-so-person-enrichment-api-openapi.yml,
+  openapi/enrich-so-phone-finder-api-openapi.yml, openapi/enrich-so-teams-api-openapi.yml
 description: Recommended x-agentic-access execution contracts, classified heuristically from
   the OpenAPI. A governance starting point for exposing this API to AI agents — review and bind
   audience per deployment. See research/curity/agentic-governance/.
 summary:
-  operations: 17
+  operations: 53
   by_action_class:
-    acting: 12
-    connected: 5
+    connected: 30
+    acting: 23
   by_consequence:
-    write: 12
-    read: 5
+    read: 30
+    write: 23
   human_in_the_loop_required: 0
 operations:
-- path: /reverse-lookup/lookup
-  method: post
-  operationId: lookupProfileByEmail
-  x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
-    token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
-- path: /reverse-lookup/batch
-  method: post
-  operationId: lookupProfilesBatch
-  x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
-    token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
-- path: /reverse-lookup/batch/{batchId}
+- path: /wallets/balance
   method: get
-  operationId: getBulkLookupResults
+  operationId: getWalletBalance
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /wallets/transactions
+  method: get
+  operationId: getWalletTransactions
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /company-follower
+  method: post
+  operationId: continueCompanyFollowerScrape
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /company-follower/limit
+  method: get
+  operationId: checkCompanyFollowerLimit
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /company-follower/{batchId}/export
+  method: get
+  operationId: exportCompanyFollowerCsv
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /company-follower/{batchId}/progress
+  method: get
+  operationId: getCompanyFollowerProgress
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /company-follower/{batchId}/results
+  method: get
+  operationId: getCompanyFollowerResults
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /count-estimate
+  method: post
+  operationId: startCountEstimate
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /count-estimate/{batchId}
+  method: get
+  operationId: getCountEstimateStatus
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /ip-to-company
+  method: post
+  operationId: ipToCompany
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /ip-to-company/batch
+  method: post
+  operationId: batchIpToCompany
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /ip-to-company/batch/{batchId}
+  method: get
+  operationId: getIpToCompanyBatchStatus
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /ip-to-company/batch/{batchId}/results
+  method: get
+  operationId: getIpToCompanyBatchResults
   x-agentic-access:
     action-class: connected
     consequence: read
@@ -58,7 +174,7 @@ operations:
     audit: none
 - path: /email-finder
   method: post
-  operationId: findProfessionalEmail
+  operationId: findEmail
   x-agentic-access:
     action-class: acting
     consequence: write
@@ -74,7 +190,7 @@ operations:
     audit: required
 - path: /email-finder/batch
   method: post
-  operationId: findEmailsBatch
+  operationId: batchFindEmails
   x-agentic-access:
     action-class: acting
     consequence: write
@@ -88,6 +204,26 @@ operations:
       - abnormal
       - high-value
     audit: required
+- path: /email-finder/batch/{batchId}
+  method: get
+  operationId: getEmailFinderBatchStatus
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /email-finder/batch/{batchId}/results
+  method: get
+  operationId: getEmailFinderBatchResults
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
 - path: /email-validation
   method: post
   operationId: validateEmail
@@ -106,7 +242,7 @@ operations:
     audit: required
 - path: /email-validation/batch
   method: post
-  operationId: validateEmailsBatch
+  operationId: batchValidateEmails
   x-agentic-access:
     action-class: acting
     consequence: write
@@ -120,9 +256,9 @@ operations:
       - abnormal
       - high-value
     audit: required
-- path: /reverse-lookup/phones
+- path: /email-validation/batch/{batchId}
   method: get
-  operationId: findPhoneNumbers
+  operationId: getEmailValidationBatchStatus
   x-agentic-access:
     action-class: connected
     consequence: read
@@ -130,57 +266,9 @@ operations:
     token:
       max-ttl: 3600
     audit: none
-- path: /reverse-lookup/phones/batch
-  method: post
-  operationId: findPhoneNumbersBatch
-  x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
-    token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
-- path: /ip-to-company
-  method: post
-  operationId: resolveCompanyFromIp
-  x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
-    token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
-- path: /company-follower
-  method: post
-  operationId: startCompanyFollowerScrape
-  x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
-    token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
-- path: /company-follower/{batchId}
+- path: /email-validation/batch/{batchId}/results
   method: get
-  operationId: getCompanyFollowerResults
+  operationId: getEmailValidationBatchResults
   x-agentic-access:
     action-class: connected
     consequence: read
@@ -188,6 +276,172 @@ operations:
     token:
       max-ttl: 3600
     audit: none
+- path: /lead-finder/count
+  method: post
+  operationId: countLeads
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /lead-finder/enrich
+  method: post
+  operationId: enrichLeads
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /lead-finder/export
+  method: post
+  operationId: exportLeads
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /lead-finder/export-jobs
+  method: get
+  operationId: listExportJobs
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /lead-finder/export-jobs/{jobId}
+  method: get
+  operationId: getExportJob
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /lead-finder/export-jobs/{jobId}/download
+  method: get
+  operationId: downloadExportJob
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /lead-finder/filter-options
+  method: get
+  operationId: getFilterOptions
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /lead-finder/reveal
+  method: post
+  operationId: revealLeads
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /lead-finder/reveal-jobs
+  method: get
+  operationId: listRevealJobs
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /lead-finder/reveal-jobs/{jobId}
+  method: get
+  operationId: getRevealJob
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /lead-finder/saved
+  method: get
+  operationId: listSavedSearches
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /lead-finder/saved
+  method: post
+  operationId: createSavedSearch
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /lead-finder/saved/{id}
+  method: delete
+  operationId: deleteSavedSearch
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
 - path: /lead-finder/search
   method: post
   operationId: searchLeads
@@ -204,41 +458,9 @@ operations:
       - abnormal
       - high-value
     audit: required
-- path: /lead-finder/count
-  method: post
-  operationId: countMatchingLeads
-  x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
-    token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
-- path: /lead-finder/reveal
-  method: post
-  operationId: revealContactInfo
-  x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
-    token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
-- path: /wallet/balance
+- path: /lead-finder/suggest
   method: get
-  operationId: getCreditBalance
+  operationId: suggestCompanyNames
   x-agentic-access:
     action-class: connected
     consequence: read
@@ -246,9 +468,215 @@ operations:
     token:
       max-ttl: 3600
     audit: none
-- path: /wallet/transactions
+- path: /lead-finder/unlock-names
+  method: post
+  operationId: unlockNames
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/api/auth
   method: get
-  operationId: getTransactionHistory
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /v2/api/person
+  method: get
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /people-search/employee-finder
+  method: post
+  operationId: employeeFinder
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /people-search/waterfall-icp-search
+  method: post
+  operationId: waterfallIcpSearch
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /reverse-lookup/bulk-lookup
+  method: post
+  operationId: bulkReverseLookup
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /reverse-lookup/bulk-lookup/{batchId}
+  method: get
+  operationId: getBulkLookupStatus
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /reverse-lookup/bulk-lookup/{batchId}/results
+  method: get
+  operationId: getBulkLookupResults
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /reverse-lookup/lookup
+  method: post
+  operationId: reverseLookup
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /reverse-lookup/phones
+  method: get
+  operationId: phoneLookup
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /reverse-lookup/phones/bulk
+  method: post
+  operationId: createPhoneBulkJob
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /reverse-lookup/phones/bulk/{jobId}
+  method: get
+  operationId: getPhoneBulkJobStatus
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /reverse-lookup/phones/bulk/{jobId}/results
+  method: get
+  operationId: getPhoneBulkJobResults
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /teams/{teamId}/invitations
+  method: post
+  operationId: inviteTeamMember
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /teams/{teamId}/invitations
+  method: get
+  operationId: listTeamInvitations
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /teams/{teamId}/invitations/{invitationId}
+  method: delete
+  operationId: cancelInvitation
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /teams/{teamId}/members
+  method: get
+  operationId: listTeamMembers
   x-agentic-access:
     action-class: connected
     consequence: read

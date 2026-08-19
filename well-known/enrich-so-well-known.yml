@@ -1,0 +1,186 @@
+generated: '2026-08-14'
+method: probed
+source: >-
+  Live unauthenticated GET of every /.well-known/ path listed below against every host
+  Enrich operates: the marketing site (www.enrich.so, enrich.so), the API host
+  (dev.enrich.so), the legacy API host (api.enrich.so), the documentation host
+  (doc.enrich.so), the dashboard (dash.enrich.so) and the MCP host (mcp.enrich.so).
+provider: Enrich
+providerId: enrich-so
+description: >-
+  Enrich serves exactly one real /.well-known/ document: the OAuth 2.0 Authorization
+  Server Metadata (RFC 8414) for its remote MCP server at mcp.enrich.so. It advertises
+  authorization-code + PKCE (S256), refresh tokens, dynamic client registration, a
+  revocation endpoint, and a single scope, mcp:tools. No security.txt, no
+  openid-configuration, no api-catalog, no ai-plugin.json and no A2A agent card is
+  served on any Enrich host.
+summary:
+  hosts_probed: 6
+  paths_probed_per_host: 8
+  real_documents_found: 1
+  security_txt: false
+  agent_card: false
+probes:
+- host: mcp.enrich.so
+  results:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    content_type: application/json
+    document: true
+    file: well-known/enrich-so-mcp-oauth-authorization-server.json
+    note: >-
+      Real RFC 8414 metadata. issuer https://mcp.enrich.so/, authorization_endpoint
+      /authorize, token_endpoint /token, revocation_endpoint /revoke,
+      registration_endpoint /register (dynamic client registration), PKCE S256 required,
+      grant types authorization_code + refresh_token, scopes_supported [mcp:tools].
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    document: false
+  - path: /.well-known/agent-card.json
+    status: 404
+    document: false
+  - path: /.well-known/agent.json
+    status: 404
+    document: false
+  - path: /.well-known/security.txt
+    status: 404
+    document: false
+  - path: /.well-known/openid-configuration
+    status: 404
+    document: false
+- host: dev.enrich.so
+  note: API host. Returns a JSON 404 envelope for every /.well-known/ path.
+  results:
+  - path: /.well-known/security.txt
+    status: 404
+    document: false
+  - path: /.well-known/openid-configuration
+    status: 404
+    document: false
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    document: false
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    document: false
+  - path: /.well-known/api-catalog
+    status: 404
+    document: false
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    document: false
+  - path: /.well-known/agent-card.json
+    status: 404
+    document: false
+  - path: /.well-known/agent.json
+    status: 404
+    document: false
+- host: api.enrich.so
+  note: Legacy API host. Returns {"code":404,"message":"Not found"} for every path.
+  results:
+  - path: /.well-known/security.txt
+    status: 404
+    document: false
+  - path: /.well-known/openid-configuration
+    status: 404
+    document: false
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    document: false
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    document: false
+  - path: /.well-known/api-catalog
+    status: 404
+    document: false
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    document: false
+  - path: /.well-known/agent-card.json
+    status: 404
+    document: false
+  - path: /.well-known/agent.json
+    status: 404
+    document: false
+- host: doc.enrich.so
+  note: >-
+    Apidog-hosted documentation. Returns HTTP 404 with a full HTML SPA shell for every
+    /.well-known/ path — status is a real 404, and the body is not a document.
+  results:
+  - path: /.well-known/security.txt
+    status: 404
+    document: false
+  - path: /.well-known/openid-configuration
+    status: 404
+    document: false
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    document: false
+  - path: /.well-known/api-catalog
+    status: 404
+    document: false
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    document: false
+  - path: /.well-known/agent-card.json
+    status: 404
+    document: false
+  - path: /.well-known/agent.json
+    status: 404
+    document: false
+- host: dash.enrich.so
+  note: Dashboard SPA. Real 404 status with an HTML shell body for every path.
+  results:
+  - path: /.well-known/security.txt
+    status: 404
+    document: false
+  - path: /.well-known/openid-configuration
+    status: 404
+    document: false
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    document: false
+  - path: /.well-known/api-catalog
+    status: 404
+    document: false
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    document: false
+  - path: /.well-known/agent-card.json
+    status: 404
+    document: false
+  - path: /.well-known/agent.json
+    status: 404
+    document: false
+- host: www.enrich.so
+  note: >-
+    NOT MEASURABLE. Every request from every non-browser client returns HTTP 429 with a
+    "Vercel Security Checkpoint" HTML interstitial — including /robots.txt and
+    /sitemap.xml. This is a bot challenge on the marketing site, not a 404, so the
+    presence or absence of a /.well-known/ document on www.enrich.so is unknown rather
+    than negative.
+  results:
+  - path: /.well-known/security.txt
+    status: 429
+    document: false
+  - path: /.well-known/openid-configuration
+    status: 429
+    document: false
+  - path: /.well-known/oauth-authorization-server
+    status: 429
+    document: false
+  - path: /.well-known/api-catalog
+    status: 429
+    document: false
+  - path: /.well-known/ai-plugin.json
+    status: 429
+    document: false
+  - path: /.well-known/agent-card.json
+    status: 429
+    document: false
+  - path: /.well-known/agent.json
+    status: 429
+    document: false
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

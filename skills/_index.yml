@@ -1,0 +1,82 @@
+generated: '2026-08-14'
+method: generated
+source: openapi/_original/enrich-so-v3-harvested-openapi.yml
+provider: Enrich
+providerId: enrich-so
+description: >-
+  Packaged Agent Skills for the Enrich API v3. Each one covers a marquee flow and is
+  grounded in real operationIds read out of the OpenAPI fragments Enrich publishes on its
+  own documentation pages — no operation named in these skills is invented. Every skill
+  carries the credit cost of each call, because Enrich meters a prepaid balance and the
+  price difference between two adjacent endpoints in the same product can be 50x.
+provider_published_skills:
+  found: false
+  probed:
+  - https://doc.enrich.so/llms.txt
+  - https://doc.enrich.so/sitemap.xml
+  note: >-
+    Enrich publishes no AGENTS.md and no skills of its own. It does publish an llms.txt
+    (saved verbatim at llms/enrich-so-llms.txt) and a .md twin of every documentation
+    page, which is why these skills could be grounded so precisely.
+skills:
+- name: enrich-a-person-from-an-email
+  file: skills/enrich-a-person-from-an-email.md
+  api: Enrich Person Enrichment API
+  operations:
+  - reverseLookup
+  - phoneLookup
+  - getWalletBalance
+  summary: >-
+    Resolve a professional profile from one email address, and gate the 500-credit phone
+    lookup behind an explicit decision.
+- name: run-a-bulk-enrichment-job
+  file: skills/run-a-bulk-enrichment-job.md
+  api: Enrich Email Verification API
+  operations:
+  - batchValidateEmails
+  - getEmailValidationBatchStatus
+  - getEmailValidationBatchResults
+  - bulkReverseLookup
+  - getBulkLookupStatus
+  - getBulkLookupResults
+  - getWalletBalance
+  summary: >-
+    The submit/poll/results shape shared by all six bulk products, the reserve-and-settle
+    credit model, and the non-idempotent-submit retry trap.
+- name: find-and-verify-a-work-email
+  file: skills/find-and-verify-a-work-email.md
+  api: Enrich Email Finder API
+  operations:
+  - findEmail
+  - validateEmail
+  - batchFindEmails
+  - batchValidateEmails
+  summary: >-
+    Find an address from name + domain, then verify deliverability for a tenth of the
+    cost; read catchAll and disposable before sending.
+- name: build-a-lead-list-without-overspending
+  file: skills/build-a-lead-list-without-overspending.md
+  api: Enrich Lead Finder API
+  operations:
+  - countLeads
+  - searchLeads
+  - revealLeads
+  - getRevealJob
+  - unlockNames
+  - createSavedSearch
+  - exportLeads
+  - getExportJob
+  - downloadExportJob
+  summary: >-
+    Count and preview for free, then reveal with an explicit fields array — the difference
+    between 50 and 575 credits per lead.
+cross_references:
+  conventions: conventions/enrich-so-conventions.yml
+  errors: errors/enrich-so-problem-types.yml
+  rate_limits: rate-limits/enrich-so-rate-limits.yml
+  plans: plans/enrich-so-plans-pricing.yml
+  webhooks: asyncapi/enrich-so-webhooks.yml
+  data_model: data-model/enrich-so-data-model.yml
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

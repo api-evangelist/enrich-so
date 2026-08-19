@@ -1,0 +1,91 @@
+{
+ "opencollection": "1.0.0",
+ "info": {
+  "name": "Enrich Email Finder API",
+  "version": "3.0",
+  "docs": "https://doc.enrich.so/api-reference-1951025m0"
+ },
+ "request": {
+  "baseUrl": "https://dev.enrich.so/api/v3",
+  "auth": {
+   "type": "apikey",
+   "key": "x-api-key",
+   "value": "{{x-api-key}}",
+   "placement": "header"
+  }
+ },
+ "items": [
+  {
+   "info": {
+    "name": "Email Finder",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Find a professional email",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/email-finder",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"firstName\": \"Emily\",\n  \"lastName\": \"Zhang\",\n  \"domain\": \"figma.com\"\n}"
+      }
+     },
+     "docs": "Give us a person's first name, last name, and their company domain, and we'll\nfind their professional email address.\n\n**Cost:** 10 credits. You are **not** charged if we can't find an email\n(`found: false`)."
+    },
+    {
+     "info": {
+      "name": "Find emails in batch",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/email-finder/batch",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"leads\": [\n    {\n      \"firstName\": \"Emily\",\n      \"lastName\": \"Zhang\",\n      \"domain\": \"figma.com\"\n    },\n    {\n      \"firstName\": \"David\",\n      \"lastName\": \"Kim\",\n      \"domain\": \"vercel.com\"\n    },\n    {\n      \"firstName\": \"Aisha\",\n      \"lastName\": \"Johnson\",\n      \"domain\": \"cloudflare.com\"\n    }\n  ],\n  \"webhookUrl\": \"https://api.yourapp.com/webhooks/enrich\"\n}"
+      }
+     },
+     "docs": "Submit up to **500 000 leads** in one request. Each lead is a combination\nof first name, last name, and domain. We deduplicate the list\n(case-insensitive) so you are only charged for unique leads.\n\n**Cost:** 10 credits per unique lead, reserved at submission. Unused credits\nare refunded when you fetch results.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** each time a single lead is processed. See\n   [emailFinderResult](#tag/Webhooks/operation/webhookEmailFinderResult) for the payload.\n\n2. **A completion callback** once the entire batch is done. See\n   [emailFinderCompletion](#tag/Webhooks/operation/webhookEmailFinderCompletion) for the payload."
+    },
+    {
+     "info": {
+      "name": "Check batch finder progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/email-finder/batch/{batchId}"
+     },
+     "docs": "Poll this endpoint to track your batch. The `status` moves through\n`queued` \u2192 `processing` \u2192 `completed` (or `failed`).\n\n**Cost:** Free."
+    },
+    {
+     "info": {
+      "name": "Get batch finder results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/email-finder/batch/{batchId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page (default: 100, max: 1 000)"
+       }
+      ]
+     },
+     "docs": "Retrieve the results once the batch has finished. Results are paginated.\n\n**Credit settlement:** On the first call after the batch reaches a terminal\nstatus, we settle the final credit charge. Leads where no email was found\nare not charged, and the difference is refunded."
+    }
+   ]
+  }
+ ]
+}

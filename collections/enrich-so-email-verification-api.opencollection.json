@@ -1,0 +1,91 @@
+{
+ "opencollection": "1.0.0",
+ "info": {
+  "name": "Enrich Email Verification API",
+  "version": "3.0",
+  "docs": "https://doc.enrich.so/api-reference-1951025m0"
+ },
+ "request": {
+  "baseUrl": "https://dev.enrich.so/api/v3",
+  "auth": {
+   "type": "apikey",
+   "key": "x-api-key",
+   "value": "{{x-api-key}}",
+   "placement": "header"
+  }
+ },
+ "items": [
+  {
+   "info": {
+    "name": "Email Validation",
+    "type": "folder"
+   },
+   "items": [
+    {
+     "info": {
+      "name": "Validate a single email",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/email-validation",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"email\": \"sarah.chen@stripe.com\"\n}"
+      }
+     },
+     "docs": "Checks whether an email address is deliverable. The response tells you the\nresult (`valid`, `invalid`, or `risky`), the confidence level, the mail\nprovider, and whether the domain is a catch-all.\n\n**Cost:** 1 credit. You are **not** charged if the result is `risky`."
+    },
+    {
+     "info": {
+      "name": "Validate emails in batch",
+      "type": "http"
+     },
+     "http": {
+      "method": "POST",
+      "url": "https://dev.enrich.so/api/v3/email-validation/batch",
+      "body": {
+       "type": "json",
+       "content": "{\n  \"emails\": [\n    \"sarah.chen@stripe.com\",\n    \"james.rodriguez@hubspot.com\",\n    \"priya.patel@notion.so\",\n    \"marco.silva@datadog.com\"\n  ],\n  \"webhookUrl\": \"https://api.yourapp.com/webhooks/enrich\"\n}"
+      }
+     },
+     "docs": "Submit up to **500 000 emails** in a single request. We automatically\nremove duplicates (case-insensitive) before processing, so you only pay\nfor unique addresses.\n\n**Cost:** 1 credit per unique email, reserved when you submit. Any unused\ncredits are refunded automatically when you fetch results.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** every time an individual email finishes\n   validation. See [emailValidationResult](#tag/Webhooks/operation/webhookEmailValidationResult)\n   for the exact payload.\n\n2. **A completion callback** once every email in the batch has been\n   processed. See [emailValidationCompletion](#tag/Webhooks/operation/webhookEmailValidationCompletion)\n   for the exact payload."
+    },
+    {
+     "info": {
+      "name": "Check batch validation progress",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/email-validation/batch/{batchId}"
+     },
+     "docs": "Poll this endpoint to see how your batch is doing. The `progress` field\ngives you a percentage, and `status` will be one of `queued`, `processing`,\n`completed`, or `failed`.\n\n**Cost:** Free \u2014 polling never costs credits."
+    },
+    {
+     "info": {
+      "name": "Get batch validation results",
+      "type": "http"
+     },
+     "http": {
+      "method": "GET",
+      "url": "https://dev.enrich.so/api/v3/email-validation/batch/{batchId}/results",
+      "query": [
+       {
+        "key": "page",
+        "value": "1",
+        "docs": "Page number (default: 1)"
+       },
+       {
+        "key": "limit",
+        "value": "100",
+        "docs": "Results per page (default: 100, max: 1 000)"
+       }
+      ]
+     },
+     "docs": "Fetch the results once your batch has finished. Results are paginated \u2014 use\n`page` and `limit` to walk through them.\n\n**Credit settlement:** The first time you call this after the batch reaches\n`completed` or `failed`, we calculate the final cost and refund any excess\ncredits. Subsequent calls return the cached settlement."
+    }
+   ]
+  }
+ ]
+}

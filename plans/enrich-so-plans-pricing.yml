@@ -1,11 +1,15 @@
+generated: '2026-08-14'
+method: searched
+source: https://doc.enrich.so/credits-pricing-1951027m0
 specification: API Commons Plans
 specificationVersion: '0.1'
 schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
 provider: Enrich
 providerId: enrich-so
 created: '2026-07-11'
-modified: '2026-07-11'
-reconciled: false
+modified: '2026-08-14'
+reconciled: true
+plan_count: 5
 tags:
 - Data Enrichment
 - Contact Discovery
@@ -22,12 +26,19 @@ description: >-
   captured from the Enrich credits and pricing documentation and should be reconciled
   against the live pricing page, which controls.
 notes: >-
-  Per-endpoint credit costs are confirmed from the live Enrich endpoint documentation:
-  email validation 1 credit, email finder 10, reverse email lookup (person) 10, IP to
-  company 100, phone finder 500, lead reveal 50 (email) / 525 (phone) / 575 (both), and
-  lead search first 3 pages or 75 results free then 1 credit per result. Monthly plan
-  names, prices, and credit allotments are taken from the docs credits-pricing page and
-  are marked reconciled:false pending confirmation on www.enrich.so/pricing.
+  RECONCILED 2026-08-14 against the Enrich credits and pricing documentation at
+  https://doc.enrich.so/credits-pricing-1951027m0 and against the per-endpoint credit costs
+  published inside the OpenAPI fragments on each endpoint page. The three paid credit packs
+  (Growth 100,000 credits $49/mo, Scale 500,000 credits $149/mo, Pro 2,500,000 credits
+  $499/mo) and the 100 free signup credits are confirmed verbatim from that page, which also
+  publishes the effective cost per credit ($0.00049, $0.000298, $0.0002). CORRECTION: an
+  earlier round recorded lead reveal at 50/525/575 credits; the current published contract
+  says 10 credits email-only, 525 phone-only, 535 both, and the earlier figures have been
+  replaced. NOTE ON THE ENTERPRISE TIER: Enrich's own pricing page could not be read —
+  https://www.enrich.so/pricing returns HTTP 429 behind a Vercel Security Checkpoint bot
+  challenge for every non-browser client (probed 2026-08-14) — so the Enterprise tier below
+  is carried from the rate-limits documentation, which names an Enterprise plan and its
+  limits, rather than from a price list.
 sources:
 - https://doc.enrich.so/credits-pricing-1951027m0
 - https://www.enrich.so/pricing
@@ -136,19 +147,58 @@ perEndpointCredits:
   note: Not charged when found is false.
 - endpoint: POST /reverse-lookup/lookup
   credits: 10
-  note: Person enrichment; not charged when no profile is found.
+  note: Person enrichment; not charged when no profile is found. Results cached 7 days.
 - endpoint: POST /ip-to-company
   credits: 100
-  note: Not charged when no domain is found; results cached 7 days.
+  note: Not charged when no ipDomain is returned; results cached 7 days.
 - endpoint: GET /reverse-lookup/phones
   credits: 500
   note: Not charged when no numbers are found.
+- endpoint: POST /lead-finder/count
+  credits: 0
+  note: Free. Use it to size an audience before spending anything.
 - endpoint: POST /lead-finder/search
   credits: 0
-  note: First 3 pages or 75 results free per search, then 1 credit per result; 50 free unique searches monthly.
+  note: >-
+    First 3 pages OR 75 results free per search, whichever comes first, plus 50 free
+    unique searches per month. From page 4, 1 credit per result returned, max 40 pages.
 - endpoint: POST /lead-finder/reveal
-  credits: 575
-  note: 50 credits email-only, 525 phone-only, 575 both (default); cached reveals are free.
+  credits: 535
+  note: >-
+    10 credits with fields ["email"], 525 with ["phone"], 535 for both (the default when
+    fields is omitted). Cached reveals are free. Charged asynchronously inside the worker —
+    an insufficient balance fails the job rather than returning a synchronous 402.
+- endpoint: POST /lead-finder/unlock-names
+  credits: 1
+  note: 1 credit per lead to unmask last names, up to 100 leads per call.
+- endpoint: POST /count-estimate
+  credits: 100
+  note: Company Followers audience count estimation. Approved accounts only.
+- endpoint: POST /company-follower
+  credits: variable
+  note: >-
+    Credits reserved upfront from max_limit and settled per profile found; excess refunded.
+    Approved accounts only.
+- endpoint: GET /wallets/balance
+  credits: 0
+- endpoint: GET /wallets/transactions
+  credits: 0
+- endpoint: batch/bulk status and results polling
+  credits: 0
+  note: Polling any job status endpoint is always free.
+- endpoint: Teams, saved searches, filter options, company-name suggest
+  credits: 0
+  note: Free endpoints.
+bulk_credit_model:
+  scheme: reserve-and-settle
+  reserve: itemCount * creditCostPerItem, deducted at submit
+  settle: >-
+    On the first results fetch after the job reaches a terminal status. Only successfully
+    processed items are charged; the reserved excess is refunded.
+  idempotent_settlement: true
+  note: >-
+    Settlement is idempotent — fetching results repeatedly does not charge again. Request
+    submission is NOT idempotent; there is no Idempotency-Key header.
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com

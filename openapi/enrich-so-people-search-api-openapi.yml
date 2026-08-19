@@ -1,0 +1,918 @@
+openapi: 3.1.0
+info:
+  title: Enrich People Search API
+  description: 'Find employees at a company and run cascading ICP (ideal customer profile) people searches.
+
+
+    Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so
+    — every documentation page embeds its own OpenAPI fragment, and this document is the union of the
+    fragments carrying these tags, with only the components they reference.'
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms-of-service
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+security:
+- ApiKeyHeader: []
+- BearerToken: []
+tags:
+- name: People Search
+paths:
+  /people-search/employee-finder:
+    post:
+      summary: Find employees at a company
+      deprecated: false
+      description: 'Find employees at a specific company by LinkedIn URL. Optionally filter by job level,
+        job function, country, continent, or sales region.
+
+
+        **Credits:** 1 credit per result returned. No charge if 0 results.
+
+
+        **Pagination:** Use `page` and `max_results` to paginate through results.'
+      operationId: employeeFinder
+      tags:
+      - People Search
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - company_linkedin_url
+              properties:
+                company_linkedin_url:
+                  type: string
+                  format: uri
+                  description: LinkedIn company profile URL (required). Must be a valid LinkedIn company
+                    URL.
+                  examples:
+                  - https://www.linkedin.com/company/google/
+                country:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 50
+                  description: Country names to filter (e.g. "India", "United States", "Germany")
+                  examples:
+                  - - United States
+                    - United Kingdom
+                continent:
+                  type: array
+                  items:
+                    type: string
+                  description: Continent filter
+                  examples:
+                  - - North America
+                sales_region:
+                  type: array
+                  items:
+                    type: string
+                  description: Sales region filter
+                job_level:
+                  type: array
+                  items:
+                    type: string
+                  description: Job level/seniority filter
+                  examples:
+                  - - C-Level
+                    - VP
+                    - Director
+                job_function:
+                  type: array
+                  items:
+                    type: string
+                  description: Job function/department filter
+                  examples:
+                  - - Engineering
+                    - Marketing
+                max_results:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 10
+                  description: Results per page (1-100, default 10)
+                page:
+                  type: integer
+                  minimum: 1
+                  default: 1
+                  description: Page number (starts at 1)
+      responses:
+        '200':
+          description: Employees found successfully. Results sorted by lead quality.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - success
+                - data
+                properties:
+                  success:
+                    type: boolean
+                    examples:
+                    - true
+                  data:
+                    type: object
+                    required:
+                    - company_linkedin_url
+                    - max_results
+                    - results_length
+                    - page
+                    - total_pages
+                    - total_results
+                    - results
+                    properties:
+                      company_linkedin_url:
+                        type: string
+                        description: The company LinkedIn URL that was searched
+                      max_results:
+                        type: integer
+                        description: Max results per page
+                      results_length:
+                        type: integer
+                        description: Number of results in this page
+                      page:
+                        type: integer
+                        description: Current page number
+                      total_pages:
+                        type: integer
+                        description: Total pages available
+                      total_results:
+                        type: integer
+                        description: Total results matching filters
+                      results:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            first_name:
+                              type: string
+                              examples:
+                              - John
+                              nullable: true
+                            last_name:
+                              type: string
+                              examples:
+                              - Doe
+                              nullable: true
+                            full_name:
+                              type: string
+                              examples:
+                              - John Doe
+                              nullable: true
+                            headline:
+                              type: string
+                              examples:
+                              - Senior Software Engineer at Google
+                              nullable: true
+                            about_me:
+                              type: string
+                              nullable: true
+                            location:
+                              type: object
+                              properties:
+                                city:
+                                  type: string
+                                  examples:
+                                  - San Francisco
+                                  nullable: true
+                                state_code:
+                                  type: string
+                                  examples:
+                                  - CA
+                                  nullable: true
+                                country:
+                                  type: string
+                                  examples:
+                                  - United States
+                                  nullable: true
+                                country_code:
+                                  type: string
+                                  examples:
+                                  - US
+                                  nullable: true
+                                continent:
+                                  type: string
+                                  examples:
+                                  - North America
+                                  nullable: true
+                            linkedin_url:
+                              type: string
+                              examples:
+                              - https://www.linkedin.com/in/johndoe
+                              nullable: true
+                            job_title:
+                              type: string
+                              examples:
+                              - Senior Software Engineer
+                              nullable: true
+                            job_level:
+                              type: string
+                              examples:
+                              - Senior
+                              nullable: true
+                            job_function:
+                              type: string
+                              examples:
+                              - Engineering
+                              nullable: true
+                            job_is_current:
+                              type: boolean
+                              examples:
+                              - true
+                            education:
+                              type: string
+                              nullable: true
+                            skills:
+                              type: string
+                              nullable: true
+                            certifications:
+                              type: string
+                              nullable: true
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        format: uuid
+                      creditsUsed:
+                        type: integer
+                        description: Credits charged (1 per result returned, 0 if no results)
+                      creditsRemaining:
+                        type: integer
+                        description: Remaining credit balance
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              schema:
+                type: string
+        '400':
+          description: Invalid request — check that company_linkedin_url is a valid LinkedIn company URL
+          content:
+            application/json:
+              schema: &id001
+                $ref: '#/components/schemas/ErrorEnvelope'
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id001
+          headers: {}
+        '402':
+          description: You don't have enough credits for this request
+          content:
+            application/json:
+              schema: *id001
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id001
+          headers:
+            Retry-After:
+              required: false
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id001
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28537860-run
+  /people-search/waterfall-icp-search:
+    post:
+      summary: Cascading ICP people search
+      deprecated: false
+      description: 'Search for people at a specific company using cascading ICP (Ideal Customer Profile)
+        filter levels.
+
+
+        **How it works:**
+
+        1. Provide a company LinkedIn URL to target
+
+        2. Optionally define 1-10 cascade levels, each with independent ICP criteria. If omitted, a default
+        4-level cascade is used: CEO/Founder → C-Suite → VP → Director.
+
+        3. Levels are processed in order — results from earlier levels are excluded from later ones
+
+        4. Each candidate is scored against the ICP criteria of their matching cascade level
+
+        5. Results are returned sorted by score descending
+
+
+        **Scoring:** Each candidate gets a normalized 0-100 score based on title match (30pts), job level
+        (20pts), skills overlap (15pts), location match (15pts), current job status (10pts), profile completeness
+        (5pts), tenure (5pts), and optional seniority priority bonus (0-30pts). The score is normalized
+        against only the dimensions specified in the cascade level.
+
+
+        **Credits:** 1 credit per profile returned. No charge if 0 results.'
+      operationId: waterfallIcpSearch
+      tags:
+      - People Search
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - company_linkedin_url
+              properties:
+                company_linkedin_url:
+                  type: string
+                  format: uri
+                  description: Company LinkedIn URL to search employees for. Must be a valid LinkedIn
+                    company URL.
+                  examples:
+                  - https://www.linkedin.com/company/google/
+                cascade:
+                  type: array
+                  minItems: 1
+                  maxItems: 10
+                  description: 'Cascading ICP filter levels, processed in order. Results from earlier
+                    levels are excluded from later ones (deduplication by RBID_PER). If omitted, uses
+                    a default 4-level cascade: CEO/Founder → C-Suite → VP → Director.'
+                  items:
+                    type: object
+                    properties:
+                      include_title:
+                        type: array
+                        items:
+                          type: string
+                          minLength: 1
+                        description: Job titles to include (case-insensitive exact match or headline search)
+                        examples:
+                        - - CTO
+                          - VP Engineering
+                      exclude_title:
+                        type: array
+                        items:
+                          type: string
+                          minLength: 1
+                        description: Job titles to exclude (case-insensitive)
+                        examples:
+                        - - Intern
+                          - Associate
+                      job_levels:
+                        type: array
+                        items:
+                          type: string
+                          minLength: 1
+                        description: Job seniority levels to filter (e.g. Owner, Founder, C-Level, Partner,
+                          VP, Director, Manager, Senior, Staff, Entry, Intern)
+                        examples:
+                        - - C-Level
+                          - VP
+                      job_functions:
+                        type: array
+                        items:
+                          type: string
+                          minLength: 1
+                        description: Job function areas to filter (e.g. Engineering, Marketing, Sales,
+                          Technology)
+                        examples:
+                        - - Engineering
+                          - Technology
+                      skills:
+                        type: array
+                        items:
+                          type: string
+                          minLength: 1
+                        description: Skills to match against candidate profiles (fuzzy substring matching)
+                        examples:
+                        - - Python
+                          - Machine Learning
+                      location:
+                        type: array
+                        items:
+                          type: string
+                          minLength: 1
+                        description: 'Location codes: ISO 3166-1 alpha-2 country codes (US, UK, DE, etc.),
+                          continent codes (NORTH_AMERICA, EUROPE, ASIA, etc.), or "WORLD" for any location'
+                        examples:
+                        - - US
+                          - UK
+                      include_headline_search:
+                        type: boolean
+                        default: false
+                        description: When true, also search LinkedIn headline for include_title terms
+                          (in addition to job title)
+                      priority_bonus:
+                        type: integer
+                        minimum: 0
+                        maximum: 30
+                        default: 0
+                        description: Seniority priority bonus (0-30). Higher = ranked above other cascade
+                          levels at equal match quality
+                max_results:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 25
+                  description: Maximum total results to return across all cascade levels
+                min_score:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+                  default: 0
+                  description: Minimum ICP score threshold (0-100). Candidates scoring below this are
+                    filtered out.
+      responses:
+        '200':
+          description: Search completed successfully. Results are sorted by ICP score descending.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - success
+                - data
+                - meta
+                properties:
+                  success:
+                    type: boolean
+                    examples:
+                    - true
+                  data:
+                    type: object
+                    required:
+                    - results
+                    - total_found
+                    - total_returned
+                    - cascade_stats
+                    properties:
+                      results:
+                        type: array
+                        description: Ranked list of matching candidates sorted by ICP score descending
+                        items:
+                          type: object
+                          required:
+                          - person
+                          - current_position
+                          - skills
+                          - education
+                          - certifications
+                          - score
+                          - ranking
+                          - cascade_level
+                          - ranking_factors
+                          - what_matched
+                          properties:
+                            person:
+                              type: object
+                              description: Person identifying information
+                              properties:
+                                first_name:
+                                  type: string
+                                  examples:
+                                  - John
+                                  nullable: true
+                                last_name:
+                                  type: string
+                                  examples:
+                                  - Doe
+                                  nullable: true
+                                linkedin_url:
+                                  type: string
+                                  examples:
+                                  - https://www.linkedin.com/in/johndoe
+                                  nullable: true
+                                linkedin_headline:
+                                  type: string
+                                  examples:
+                                  - CTO at Google
+                                  nullable: true
+                                location:
+                                  type: string
+                                  description: Concatenation of city, state, and country
+                                  examples:
+                                  - San Francisco, California, United States
+                                  nullable: true
+                                email_domain:
+                                  type: string
+                                  examples:
+                                  - google.com
+                                  nullable: true
+                            current_position:
+                              type: object
+                              description: Current job position details
+                              properties:
+                                title:
+                                  type: string
+                                  examples:
+                                  - CTO
+                                  nullable: true
+                                company:
+                                  type: string
+                                  examples:
+                                  - Google
+                                  nullable: true
+                                level:
+                                  type: string
+                                  examples:
+                                  - C-Level
+                                  nullable: true
+                                function:
+                                  type: string
+                                  examples:
+                                  - Engineering
+                                  nullable: true
+                                is_current:
+                                  type: boolean
+                                  examples:
+                                  - true
+                                  nullable: true
+                                start_date:
+                                  type: string
+                                  description: Job start date in YYYY-MM-DD format
+                                  examples:
+                                  - '2020-01-15'
+                                  nullable: true
+                            skills:
+                              type: array
+                              items:
+                                type: string
+                              description: Parsed skills list from candidate profile
+                              examples:
+                              - - Python
+                                - Machine Learning
+                                - Cloud Architecture
+                            education:
+                              type: string
+                              examples:
+                              - Stanford University
+                              nullable: true
+                            certifications:
+                              type: string
+                              examples:
+                              - null
+                              nullable: true
+                            score:
+                              type: number
+                              minimum: 0
+                              maximum: 100
+                              description: Normalized ICP score (0-100). Normalized against only the scoring
+                                dimensions that were specified in the cascade level.
+                              examples:
+                              - 92
+                            ranking:
+                              type: integer
+                              minimum: 1
+                              description: Rank position (1-based, sorted by score descending)
+                              examples:
+                              - 1
+                            cascade_level:
+                              type: integer
+                              minimum: 0
+                              description: Which cascade level matched this candidate (0-based index)
+                              examples:
+                              - 0
+                            ranking_factors:
+                              type: object
+                              description: Breakdown of raw points awarded for each scoring dimension
+                              properties:
+                                title_match:
+                                  type: number
+                                  description: Points from title matching (max 30). 30=exact, 25=partial/substring,
+                                    20=headline, 10=function match
+                                  examples:
+                                  - 30
+                                job_level:
+                                  type: number
+                                  description: Points from job level matching (max 20). 20=exact, 10=adjacent
+                                    ±1, 5=near ±2
+                                  examples:
+                                  - 20
+                                skills_overlap:
+                                  type: number
+                                  description: Points from skills overlap (max 15). Calculated as (matched/requested)
+                                    * 15
+                                  examples:
+                                  - 10
+                                location_match:
+                                  type: number
+                                  description: Points from location matching (max 15). 15=country/WORLD,
+                                    7=continent
+                                  examples:
+                                  - 15
+                                current_job:
+                                  type: number
+                                  description: Points from current job status (max 10). 10 if JOB_IS_CURRENT_PER
+                                    is true
+                                  examples:
+                                  - 10
+                                profile_completeness:
+                                  type: number
+                                  description: 'Points from profile completeness (max 5). 1 point each
+                                    for: linkedin_url, email_domain, skills, education, headline'
+                                  examples:
+                                  - 5
+                                experience:
+                                  type: number
+                                  description: Points from job tenure (max 5). 5=>5yr, 4=>3yr, 3=>2yr,
+                                    2=>1yr, 1=≤1yr
+                                  examples:
+                                  - 5
+                                priority_bonus:
+                                  type: number
+                                  description: Seniority priority bonus from cascade level (0-30). Higher
+                                    = ranked above other cascade levels at equal match quality
+                                  examples:
+                                  - 0
+                            what_matched:
+                              type: array
+                              items:
+                                type: string
+                              description: Human-readable list of matching criteria for this candidate
+                              examples:
+                              - - 'Exact title match: CTO'
+                                - 'Exact level: C-Level'
+                                - 'Skills: 2/3 matched'
+                                - 'Country match: United States'
+                                - Current position
+                      total_found:
+                        type: integer
+                        description: Total candidates found across all cascade levels (before min_score
+                          filtering)
+                        examples:
+                        - 47
+                      total_returned:
+                        type: integer
+                        description: Number of results actually returned after filtering and max_results
+                          cap
+                        examples:
+                        - 10
+                      cascade_stats:
+                        type: array
+                        description: Per-cascade-level statistics showing how many candidates were found
+                          and kept
+                        items:
+                          type: object
+                          required:
+                          - level
+                          - candidates_found
+                          - candidates_kept
+                          properties:
+                            level:
+                              type: integer
+                              description: Cascade level index (0-based)
+                              examples:
+                              - 0
+                            candidates_found:
+                              type: integer
+                              description: Total candidates returned from ClickHouse for this level
+                              examples:
+                              - 35
+                            candidates_kept:
+                              type: integer
+                              description: Candidates that passed min_score and deduplication
+                              examples:
+                              - 8
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        format: uuid
+                        examples:
+                        - 1123c535-e925-4224-b5fb-3d579b75b849
+                      creditsUsed:
+                        type: integer
+                        description: Credits charged for this request (1 per profile returned, 0 if no
+                          results)
+                        examples:
+                        - 10
+                      creditsRemaining:
+                        type: integer
+                        description: Remaining credit balance after this request
+                        examples:
+                        - 999990
+              examples:
+                '1':
+                  summary: 'Basic: C-suite at Google'
+                  value:
+                    success: true
+                    data:
+                      results:
+                      - person:
+                          first_name: John
+                          last_name: Doe
+                          linkedin_url: https://www.linkedin.com/in/johndoe
+                          linkedin_headline: CTO at Google
+                          location: San Francisco, California, United States
+                          email_domain: google.com
+                        current_position:
+                          title: CTO
+                          company: Google
+                          level: C-Level
+                          function: Engineering
+                          is_current: true
+                          start_date: '2020-01-15'
+                        skills:
+                        - Python
+                        - Machine Learning
+                        - Cloud Architecture
+                        education: Stanford University
+                        certifications: null
+                        score: 92
+                        ranking: 1
+                        cascade_level: 0
+                        ranking_factors:
+                          title_match: 30
+                          job_level: 20
+                          skills_overlap: 10
+                          location_match: 15
+                          current_job: 10
+                          profile_completeness: 5
+                          experience: 5
+                          priority_bonus: 0
+                        what_matched:
+                        - 'Exact title match: CTO'
+                        - 'Exact level: C-Level'
+                        - 'Skills: 2/3 matched'
+                        - 'Country match: United States'
+                        - Current position
+                      total_found: 47
+                      total_returned: 10
+                      cascade_stats:
+                      - level: 0
+                        candidates_found: 35
+                        candidates_kept: 8
+                      - level: 1
+                        candidates_found: 12
+                        candidates_kept: 2
+                    meta:
+                      requestId: 1123c535-e925-4224-b5fb-3d579b75b849
+                      creditsUsed: 10
+                      creditsRemaining: 999990
+                '2':
+                  summary: No results found
+                  value:
+                    success: true
+                    data:
+                      results: []
+                      total_found: 0
+                      total_returned: 0
+                      cascade_stats:
+                      - level: 0
+                        candidates_found: 0
+                        candidates_kept: 0
+                    meta:
+                      requestId: a7b2c3d4-e5f6-7890-abcd-ef1234567890
+                      creditsUsed: 0
+                      creditsRemaining: 1000000
+          headers:
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Invalid request — check that company_linkedin_url is a valid LinkedIn company URL,
+            cascade has 1-10 levels, max_results is 1-100, and min_score is 0-100
+          content:
+            application/json:
+              schema: &id002
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: 'company_linkedin_url: Must be a LinkedIn company URL (e.g. https://www.linkedin.com/company/google/)'
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id002
+          headers: {}
+        '402':
+          description: You don't have enough credits for this request
+          content:
+            application/json:
+              schema: *id002
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id002
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id002
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28537859-run
+components:
+  schemas:
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+  securitySchemes:
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
+    BearerToken:
+      type: http
+      scheme: bearer
+      description: 'The same API key sent as an Authorization: Bearer token.'

@@ -1,0 +1,241 @@
+{
+ "info": {
+  "_postman_id": "4261fb4e-e564-5a23-bc97-88db50c7ae11",
+  "name": "Enrich Account API",
+  "description": {
+   "content": "Credit balance and transaction history for the organization behind the API key.\n\nAssembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so \u2014 every documentation page embeds its own OpenAPI fragment, and this document is the union of the fragments carrying these tags, with only the components they reference.",
+   "type": "text/plain"
+  },
+  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+ },
+ "item": [
+  {
+   "id": "19d286a0-6937-5c72-adf7-bff9e645a4e7",
+   "name": "Wallets",
+   "description": {
+    "content": "",
+    "type": "text/plain"
+   },
+   "item": [
+    {
+     "id": "485491a8-7fd2-54bd-8f77-6fdc6ac07541",
+     "name": "Get your credit balance",
+     "request": {
+      "name": "Get your credit balance",
+      "description": {
+       "content": "Returns the current credit balance for your organization.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/wallets/balance",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "wallets",
+        "balance"
+       ],
+       "query": [],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "3cad579b-8ef2-514a-ac6d-e588155c1ba5",
+       "name": "Current credit balance",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"organizationId\": \"665e0b2f4a6d8c001abc1234\",\n    \"balance\": 25000,\n    \"currency\": \"credits\",\n    \"asOf\": \"2025-06-03T14:22:10.000Z\"\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "b22c9dee-817b-5a19-92dd-9a16ac6502c4",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "581117ea-cfa7-5ee1-88d8-4a7c6e0cfee4",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    },
+    {
+     "id": "6672cbb9-a81f-50e2-860e-8672c0280bba",
+     "name": "Get transaction history",
+     "request": {
+      "name": "Get transaction history",
+      "description": {
+       "content": "Browse your credit transactions \u2014 top-ups, deductions, refunds, and\nadjustments. Use the `type` parameter to filter by transaction type.\nResults are paginated.",
+       "type": "text/plain"
+      },
+      "url": {
+       "raw": "https://dev.enrich.so/api/v3/wallets/transactions",
+       "host": [
+        "{{baseUrl}}"
+       ],
+       "path": [
+        "wallets",
+        "transactions"
+       ],
+       "query": [
+        {
+         "key": "page",
+         "value": "1",
+         "description": "Page number (default: 1)",
+         "disabled": true
+        },
+        {
+         "key": "limit",
+         "value": "50",
+         "description": "Items per page (default: 50, max: 100)",
+         "disabled": true
+        },
+        {
+         "key": "type",
+         "value": "string",
+         "description": "Filter by type: `deduction`, `topup`, `adjustment`, or `refund`",
+         "disabled": true
+        }
+       ],
+       "variable": []
+      },
+      "header": [
+       {
+        "key": "Accept",
+        "value": "application/json"
+       },
+       {
+        "key": "x-api-key",
+        "value": "{{apiKey}}",
+        "description": {
+         "content": "Added as a part of security scheme: apikey",
+         "type": "text/plain"
+        }
+       }
+      ],
+      "method": "GET",
+      "auth": null
+     },
+     "response": [
+      {
+       "id": "d1012184-8f53-593e-aa27-3612eb4180b0",
+       "name": "Paginated transaction list",
+       "status": "200",
+       "code": 200,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/json"
+        }
+       ],
+       "body": "{\n  \"success\": true,\n  \"data\": {\n    \"transactions\": [\n      {\n        \"id\": \"665e10a14a6d8c001abc2001\",\n        \"organizationId\": \"665e0b2f4a6d8c001abc1234\",\n        \"type\": \"deduction\",\n        \"amount\": -10,\n        \"balanceAfter\": 24990,\n        \"description\": \"Email finder: emily.zhang@figma.com\",\n        \"createdAt\": \"2025-06-03T14:35:00.000Z\"\n      },\n      {\n        \"id\": \"665e10a14a6d8c001abc2002\",\n        \"organizationId\": \"665e0b2f4a6d8c001abc1234\",\n        \"type\": \"refund\",\n        \"amount\": 10,\n        \"balanceAfter\": 25000,\n        \"description\": \"Batch refund \\u2014 1 unfound lead in batch 665b12cf3e4c9200138eaf10\",\n        \"createdAt\": \"2025-06-03T14:30:00.000Z\"\n      },\n      {\n        \"id\": \"665e10a14a6d8c001abc2003\",\n        \"organizationId\": \"665e0b2f4a6d8c001abc1234\",\n        \"type\": \"topup\",\n        \"amount\": 25000,\n        \"balanceAfter\": 25000,\n        \"description\": \"Credit purchase \\u2014 Pro plan (monthly)\",\n        \"createdAt\": \"2025-06-01T00:00:00.000Z\"\n      }\n    ],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 50,\n      \"total\": 3,\n      \"totalPages\": 1\n    }\n  }\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "5aa61848-f7f0-5a2f-8141-d68d29efed29",
+       "name": "Your API key is missing or invalid",
+       "status": "401",
+       "code": 401,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/unauthorized\",\n  \"title\": \"Unauthorized\",\n  \"status\": 401,\n  \"detail\": \"The API key provided is invalid or has been revoked\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      },
+      {
+       "id": "ebb96be9-ec22-529f-a58d-c5ecf930f84a",
+       "name": "You've sent too many requests \u2014 wait and try again",
+       "status": "429",
+       "code": 429,
+       "header": [
+        {
+         "key": "Content-Type",
+         "value": "application/problem+json"
+        }
+       ],
+       "body": "{\n  \"type\": \"https://dev.enrich.so/errors/rate-limit-exceeded\",\n  \"title\": \"Too Many Requests\",\n  \"status\": 429,\n  \"detail\": \"Rate limit exceeded. Please retry after 30 seconds.\"\n}",
+       "cookie": [],
+       "_postman_previewlanguage": "json"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "variable": [
+  {
+   "key": "baseUrl",
+   "value": "https://dev.enrich.so/api/v3"
+  },
+  {
+   "key": "apiKey",
+   "value": "<your Enrich API key>"
+  }
+ ],
+ "auth": {
+  "type": "apikey",
+  "apikey": [
+   {
+    "key": "key",
+    "value": "x-api-key"
+   },
+   {
+    "key": "value",
+    "value": "{{apiKey}}"
+   },
+   {
+    "key": "in",
+    "value": "header"
+   }
+  ]
+ }
+}

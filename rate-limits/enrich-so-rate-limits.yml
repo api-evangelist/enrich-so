@@ -1,11 +1,15 @@
+generated: '2026-08-14'
+method: searched
+source: https://doc.enrich.so/rate-limits-1951030m0
 specification: API Commons Rate Limits
 specificationVersion: '0.1'
 schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
 provider: Enrich
 providerId: enrich-so
 created: '2026-07-11'
-modified: '2026-07-11'
-reconciled: false
+modified: '2026-08-14'
+reconciled: true
+limit_count: 18
 tags:
 - Data Enrichment
 - Contact Discovery
@@ -22,10 +26,14 @@ description: >-
   with a Retry-After header. The tier values below are captured from the Enrich rate-limits
   documentation and should be reconciled against the live docs, which control.
 notes: >-
-  Values taken from the Enrich rate-limits documentation page. Enrichment and bulk
-  endpoints have stricter overrides (for example, Free-plan enrichment is limited well
-  below the global sustained limit, and Free-plan bulk submissions to roughly 1 request per
-  second). Confirm current numbers in the docs on reconciliation.
+  RECONCILED 2026-08-14 against https://doc.enrich.so/rate-limits-1951030m0, which publishes
+  the full per-plan table plus two endpoint-category overrides with real numbers — those
+  overrides were previously recorded only as "stricter than global" and are now itemised
+  below. The three X-RateLimit-* headers and Retry-After are additionally confirmed as
+  declared response headers on 66 and 50 operations respectively in the OpenAPI fragments
+  Enrich publishes on its endpoint pages. Note the header naming is the legacy X-prefixed
+  form, not the IETF RateLimit-Limit/Remaining/Reset fields, and X-RateLimit-Reset carries
+  SECONDS UNTIL RESET rather than a UNIX timestamp.
 sources:
 - https://doc.enrich.so/rate-limits-1951030m0
 responseCodes:
@@ -86,17 +94,67 @@ limits:
   metric: requests_per_minute
   limit: 10000
   notes: Sustained throughput on the Enterprise plan.
-- name: Enrichment Endpoint Override
+- name: Free - Enrichment Endpoints
   scope: endpoint
   metric: requests_per_minute
-  limit: stricter than global
-  notes: Enrichment endpoints (person/company/phone) have tighter per-endpoint caps than the global sustained limit.
-- name: Bulk Submission Override
+  limit: 10
+  applies_to: 'POST:/api/enrich/*'
+  notes: Enrichment endpoints are capped at 10 rpm on Free versus the 60 rpm global sustained limit.
+- name: Growth - Enrichment Endpoints
+  scope: endpoint
+  metric: requests_per_minute
+  limit: 100
+  applies_to: 'POST:/api/enrich/*'
+- name: Scale - Enrichment Endpoints
+  scope: endpoint
+  metric: requests_per_minute
+  limit: 500
+  applies_to: 'POST:/api/enrich/*'
+- name: Pro - Enrichment Endpoints
+  scope: endpoint
+  metric: requests_per_minute
+  limit: 2000
+  applies_to: 'POST:/api/enrich/*'
+- name: Free - Bulk Submit
   scope: endpoint
   metric: requests_per_second
-  limit: stricter than global
-  notes: Bulk/batch submission endpoints are throttled below the global burst limit (Free plan ~1 rps).
+  limit: 1
+  sustained_per_minute: 2
+  applies_to: 'POST:/api/bulk/*'
+  notes: The tightest limit in the API. One bulk submit per second, two per minute.
+- name: Growth - Bulk Submit
+  scope: endpoint
+  metric: requests_per_second
+  limit: 3
+  sustained_per_minute: 10
+  applies_to: 'POST:/api/bulk/*'
+- name: Scale - Bulk Submit
+  scope: endpoint
+  metric: requests_per_second
+  limit: 5
+  sustained_per_minute: 20
+  applies_to: 'POST:/api/bulk/*'
+- name: Pro - Bulk Submit
+  scope: endpoint
+  metric: requests_per_second
+  limit: 10
+  sustained_per_minute: 50
+  applies_to: 'POST:/api/bulk/*'
+headerSemantics:
+- header: X-RateLimit-Limit
+  meaning: Maximum requests allowed in the current window.
+- header: X-RateLimit-Remaining
+  meaning: Requests remaining in the current window. Pace against this rather than waiting for the 429.
+- header: X-RateLimit-Reset
+  meaning: SECONDS until the window resets. Not a UNIX timestamp.
+- header: Retry-After
+  meaning: Seconds to wait before retrying, returned on 429.
+scope: >-
+  Limits are applied per ORGANIZATION (the team behind the API key), not per key. Issuing
+  additional keys does not buy additional throughput — it only separates cost attribution.
 policies:
+- name: Enterprise Exemption
+  description: Enterprise plans have no endpoint-specific overrides; the global limits apply.
 - name: Tiered Limits
   description: Burst and sustained limits increase from Free through Growth, Scale, Pro, and Enterprise plans.
 - name: Backoff Strategy
