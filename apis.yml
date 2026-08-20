@@ -198,6 +198,9 @@ apis:
   humanURL: https://doc.enrich.so/list-team-members-27483209e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
+  - Team
+  - Account
+  tags_raw:
   - Teams
   - Account
   properties:
