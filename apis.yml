@@ -44,54 +44,11 @@ created: '2026-07-11'
 modified: '2026-08-14'
 specificationVersion: '0.23'
 apis:
-- aid: enrich-so:enrich-so-account-api
-  name: Enrich Account API
-  description: Credit balance and transaction history for the organization behind the API key.
-  humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
-  baseURL: https://dev.enrich.so/api/v3
-  tags:
-  - Account
-  - Wallets
-  properties:
-  - type: OpenAPI
-    url: openapi/enrich-so-account-api-openapi.yml
-  - type: Overlay
-    url: overlays/enrich-so-account-overlay.yaml
-  - type: Documentation
-    url: https://doc.enrich.so/introduction-1951028m0
-  - type: APIReference
-    url: https://doc.enrich.so/get-your-credit-balance-27483207e0
-  - type: PostmanCollection
-    url: collections/enrich-so-account-api.postman_collection.json
-  - type: OpenCollection
-    url: collections/enrich-so-account-api.opencollection.json
-- aid: enrich-so:enrich-so-company-intelligence-api
-  name: Enrich Company Intelligence API
-  description: IP-to-company resolution (single and batch) and LinkedIn company-follower scraping with
-    audience count estimation. The company-follower endpoints are restricted to approved accounts.
-  humanURL: https://doc.enrich.so/resolve-company-from-ip-35511038e0
-  baseURL: https://dev.enrich.so/api/v3
-  tags:
-  - Company Intelligence
-  - IP Intelligence
-  - LinkedIn
-  properties:
-  - type: OpenAPI
-    url: openapi/enrich-so-company-intelligence-api-openapi.yml
-  - type: Overlay
-    url: overlays/enrich-so-company-intelligence-overlay.yaml
-  - type: Documentation
-    url: https://doc.enrich.so/introduction-1951028m0
-  - type: APIReference
-    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
-  - type: PostmanCollection
-    url: collections/enrich-so-company-intelligence-api.postman_collection.json
-  - type: OpenCollection
-    url: collections/enrich-so-company-intelligence-api.opencollection.json
 - aid: enrich-so:enrich-so-email-finder-api
   name: Enrich Email Finder API
-  description: Find a professional email from a first name, last name and company domain, single or in
-    batches of up to 500,000 leads.
+  description: >-
+    Find a professional email from a first name, last name and company domain, single or in batches of
+    up to 500,000 leads.
   humanURL: https://doc.enrich.so/find-a-professional-email-27483195e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
@@ -109,30 +66,11 @@ apis:
     url: collections/enrich-so-email-finder-api.postman_collection.json
   - type: OpenCollection
     url: collections/enrich-so-email-finder-api.opencollection.json
-- aid: enrich-so:enrich-so-email-verification-api
-  name: Enrich Email Verification API
-  description: Validate email addresses for deliverability, single or in batches of up to 500,000 emails.
-  humanURL: https://doc.enrich.so/validate-a-single-email-27483191e0
-  baseURL: https://dev.enrich.so/api/v3
-  tags:
-  - Email Verification
-  properties:
-  - type: OpenAPI
-    url: openapi/enrich-so-email-verification-api-openapi.yml
-  - type: Overlay
-    url: overlays/enrich-so-email-verification-overlay.yaml
-  - type: Documentation
-    url: https://doc.enrich.so/introduction-1951028m0
-  - type: APIReference
-    url: https://doc.enrich.so/validate-a-single-email-27483191e0
-  - type: PostmanCollection
-    url: collections/enrich-so-email-verification-api.postman_collection.json
-  - type: OpenCollection
-    url: collections/enrich-so-email-verification-api.opencollection.json
 - aid: enrich-so:enrich-so-lead-finder-api
   name: Enrich Lead Finder API
-  description: Search, count, reveal, enrich, unlock and export leads across people and organizations,
-    with saved searches and asynchronous reveal and export jobs.
+  description: >-
+    Search, count, reveal, enrich, unlock and export leads across people and organizations, with saved
+    searches and asynchronous reveal and export jobs.
   humanURL: https://doc.enrich.so/search-leads-28165853e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
@@ -150,30 +88,10 @@ apis:
     url: collections/enrich-so-lead-finder-api.postman_collection.json
   - type: OpenCollection
     url: collections/enrich-so-lead-finder-api.opencollection.json
-- aid: enrich-so:enrich-so-person-enrichment-api
-  name: Enrich Person Enrichment API
-  description: Reverse email lookup returning a person's professional profile, single or in bulk.
-  humanURL: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
-  baseURL: https://dev.enrich.so/api/v3
-  tags:
-  - Person Enrichment
-  properties:
-  - type: OpenAPI
-    url: openapi/enrich-so-person-enrichment-api-openapi.yml
-  - type: Overlay
-    url: overlays/enrich-so-person-enrichment-overlay.yaml
-  - type: Documentation
-    url: https://doc.enrich.so/introduction-1951028m0
-  - type: APIReference
-    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
-  - type: PostmanCollection
-    url: collections/enrich-so-person-enrichment-api.postman_collection.json
-  - type: OpenCollection
-    url: collections/enrich-so-person-enrichment-api.opencollection.json
 - aid: enrich-so:enrich-so-phone-finder-api
   name: Enrich Phone Finder API
-  description: Find phone and mobile numbers for a person from an email address or profile URL, single
-    or in bulk.
+  description: >-
+    Find phone and mobile numbers for a person from an email address or profile URL, single or in bulk.
   humanURL: https://doc.enrich.so/find-phone-numbers-27483199e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
@@ -193,8 +111,8 @@ apis:
     url: collections/enrich-so-phone-finder-api.opencollection.json
 - aid: enrich-so:enrich-so-teams-api
   name: Enrich Teams API
-  description: List team members and manage pending team invitations for the organization behind the API
-    key.
+  description: >-
+    List team members and manage pending team invitations for the organization behind the API key.
   humanURL: https://doc.enrich.so/list-team-members-27483209e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
@@ -218,7 +136,8 @@ apis:
     url: collections/enrich-so-teams-api.opencollection.json
 - aid: enrich-so:enrich-so-people-search-api
   name: Enrich People Search API
-  description: Find employees at a company and run cascading ICP (ideal customer profile) people searches.
+  description: >-
+    Find employees at a company and run cascading ICP (ideal customer profile) people searches.
   humanURL: https://doc.enrich.so/find-employees-at-a-company-28537860e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
@@ -236,23 +155,321 @@ apis:
     url: collections/enrich-so-people-search-api.postman_collection.json
   - type: OpenCollection
     url: collections/enrich-so-people-search-api.opencollection.json
-- aid: enrich-so:enrich-so-legacy-api
-  name: Enrich Labs Legacy API (v1/v2)
-  description: 'The prior major version of the Enrich API, still live at api.enrich.so and still serving
-    its own Swagger UI at https://api.enrich.so/docs. Two operations: GET /v1/api/auth returns the account/credit
-    context for a JWT bearer token, and GET /v2/api/person enriches a person from an email address. Superseded
-    by the v3 API at dev.enrich.so/api/v3, but no deprecation notice or sunset date has been published.'
-  humanURL: https://api.enrich.so/docs
-  baseURL: https://api.enrich.so
+- aid: enrich-so:enrich-so-authentication-api
+  name: Enrich Authentication API
+  description: The Authentication API from Enrich — 1 operation(s) for authentication.
+  humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  baseURL: https://dev.enrich.so/api/v3
   tags:
-  - Person Enrichment
-  - Legacy
+  - Authentication
   properties:
   - type: OpenAPI
-    url: openapi/enrich-so-legacy-api-openapi.json
+    url: openapi/enrich-so-authentication-api-openapi.yml
+  - type: Documentation
+    url: https://doc.enrich.so/introduction-1951028m0
+  - type: APIReference
+    url: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  - type: PostmanCollection
+    url: collections/enrich-so-account-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-account-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+  - type: PostmanCollection
+    url: collections/enrich-so-company-intelligence-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-company-intelligence-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/validate-a-single-email-27483191e0
+  - type: PostmanCollection
+    url: collections/enrich-so-email-verification-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-email-verification-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  - type: PostmanCollection
+    url: collections/enrich-so-person-enrichment-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-person-enrichment-api.opencollection.json
+  - type: APIReference
+    url: https://api.enrich.so/docs
+- aid: enrich-so:enrich-so-company-followers-api
+  name: Enrich Company Followers API
+  description: The Company Followers API from Enrich — 7 operation(s) for company followers.
+  humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Company Followers
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-company-followers-api-openapi.yml
+  - type: Documentation
+    url: https://doc.enrich.so/introduction-1951028m0
+  - type: APIReference
+    url: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  - type: PostmanCollection
+    url: collections/enrich-so-account-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-account-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+  - type: PostmanCollection
+    url: collections/enrich-so-company-intelligence-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-company-intelligence-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/validate-a-single-email-27483191e0
+  - type: PostmanCollection
+    url: collections/enrich-so-email-verification-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-email-verification-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  - type: PostmanCollection
+    url: collections/enrich-so-person-enrichment-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-person-enrichment-api.opencollection.json
+  - type: APIReference
+    url: https://api.enrich.so/docs
+- aid: enrich-so:enrich-so-company-followers-count-estimation-api
+  name: Enrich Company Followers/Count Estimation API
+  description: >-
+    The Company Followers/Count Estimation API from Enrich — 2 operation(s) for company followers/count
+    estimation.
+  humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Company Followers/Count Estimation
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-company-followers-count-estimation-api-openapi.yml
+  - type: Documentation
+    url: https://doc.enrich.so/introduction-1951028m0
+  - type: APIReference
+    url: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  - type: PostmanCollection
+    url: collections/enrich-so-account-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-account-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+  - type: PostmanCollection
+    url: collections/enrich-so-company-intelligence-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-company-intelligence-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/validate-a-single-email-27483191e0
+  - type: PostmanCollection
+    url: collections/enrich-so-email-verification-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-email-verification-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  - type: PostmanCollection
+    url: collections/enrich-so-person-enrichment-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-person-enrichment-api.opencollection.json
+  - type: APIReference
+    url: https://api.enrich.so/docs
+- aid: enrich-so:enrich-so-email-validation-api
+  name: Enrich Email Validation API
+  description: The Email Validation API from Enrich — 4 operation(s) for email validation.
+  humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Email Validation
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-email-validation-api-openapi.yml
+  - type: Documentation
+    url: https://doc.enrich.so/introduction-1951028m0
+  - type: APIReference
+    url: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  - type: PostmanCollection
+    url: collections/enrich-so-account-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-account-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+  - type: PostmanCollection
+    url: collections/enrich-so-company-intelligence-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-company-intelligence-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/validate-a-single-email-27483191e0
+  - type: PostmanCollection
+    url: collections/enrich-so-email-verification-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-email-verification-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  - type: PostmanCollection
+    url: collections/enrich-so-person-enrichment-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-person-enrichment-api.opencollection.json
+  - type: APIReference
+    url: https://api.enrich.so/docs
+- aid: enrich-so:enrich-so-enrich-api
+  name: Enrich Enrich API
+  description: The Enrich API from Enrich — 1 operation(s) for enrich.
+  humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Enrich
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-enrich-api-openapi.yml
+  - type: Documentation
+    url: https://doc.enrich.so/introduction-1951028m0
+  - type: APIReference
+    url: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  - type: PostmanCollection
+    url: collections/enrich-so-account-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-account-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+  - type: PostmanCollection
+    url: collections/enrich-so-company-intelligence-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-company-intelligence-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/validate-a-single-email-27483191e0
+  - type: PostmanCollection
+    url: collections/enrich-so-email-verification-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-email-verification-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  - type: PostmanCollection
+    url: collections/enrich-so-person-enrichment-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-person-enrichment-api.opencollection.json
+  - type: APIReference
+    url: https://api.enrich.so/docs
+- aid: enrich-so:enrich-so-ip-to-company-api
+  name: Enrich IP to Company API
+  description: The IP to Company API from Enrich — 4 operation(s) for ip to company.
+  humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - IP to Company
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-ip-to-company-api-openapi.yml
+  - type: Documentation
+    url: https://doc.enrich.so/introduction-1951028m0
+  - type: APIReference
+    url: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  - type: PostmanCollection
+    url: collections/enrich-so-account-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-account-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+  - type: PostmanCollection
+    url: collections/enrich-so-company-intelligence-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-company-intelligence-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/validate-a-single-email-27483191e0
+  - type: PostmanCollection
+    url: collections/enrich-so-email-verification-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-email-verification-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  - type: PostmanCollection
+    url: collections/enrich-so-person-enrichment-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-person-enrichment-api.opencollection.json
+  - type: APIReference
+    url: https://api.enrich.so/docs
+- aid: enrich-so:enrich-so-reverse-email-lookup-api
+  name: Enrich Reverse Email Lookup API
+  description: The Reverse Email Lookup API from Enrich — 4 operation(s) for reverse email lookup.
+  humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Reverse Email Lookup
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-reverse-email-lookup-api-openapi.yml
+  - type: Documentation
+    url: https://doc.enrich.so/introduction-1951028m0
+  - type: APIReference
+    url: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  - type: PostmanCollection
+    url: collections/enrich-so-account-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-account-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+  - type: PostmanCollection
+    url: collections/enrich-so-company-intelligence-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-company-intelligence-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/validate-a-single-email-27483191e0
+  - type: PostmanCollection
+    url: collections/enrich-so-email-verification-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-email-verification-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  - type: PostmanCollection
+    url: collections/enrich-so-person-enrichment-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-person-enrichment-api.opencollection.json
+  - type: APIReference
+    url: https://api.enrich.so/docs
+- aid: enrich-so:enrich-so-wallets-api
+  name: Enrich Wallets API
+  description: The Wallets API from Enrich — 2 operation(s) for wallets.
+  humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Wallets
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-wallets-api-openapi.yml
+  - type: Documentation
+    url: https://doc.enrich.so/introduction-1951028m0
+  - type: APIReference
+    url: https://doc.enrich.so/get-your-credit-balance-27483207e0
+  - type: PostmanCollection
+    url: collections/enrich-so-account-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-account-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/resolve-company-from-ip-35511038e0
+  - type: PostmanCollection
+    url: collections/enrich-so-company-intelligence-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-company-intelligence-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/validate-a-single-email-27483191e0
+  - type: PostmanCollection
+    url: collections/enrich-so-email-verification-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-email-verification-api.opencollection.json
+  - type: APIReference
+    url: https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0
+  - type: PostmanCollection
+    url: collections/enrich-so-person-enrichment-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/enrich-so-person-enrichment-api.opencollection.json
   - type: APIReference
     url: https://api.enrich.so/docs
 common:
+- type: Overlay
+  url: overlays/enrich-so-account-overlay.yaml
+- type: Overlay
+  url: overlays/enrich-so-company-intelligence-overlay.yaml
+- type: Overlay
+  url: overlays/enrich-so-email-verification-overlay.yaml
+- type: Overlay
+  url: overlays/enrich-so-person-enrichment-overlay.yaml
 - type: DomainSecurity
   url: security/enrich-so-domain-security.yml
 - type: AgenticAccess
