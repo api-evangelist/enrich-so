@@ -1,0 +1,3217 @@
+openapi: 3.2.0
+info:
+  title: Enrich So Company Followers/Count Estimation API
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms-of-service
+  description: 'Operations tagged Company Followers/Count Estimation across 2 of this provider''s published API definitions: enrich-so-company-intelligence-api-openapi.yml, enrich-so-v3-harvested-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+tags:
+- name: Company Followers/Count Estimation
+paths:
+  /count-estimate:
+    post:
+      summary: Start count estimation
+      deprecated: false
+      description: '> **Access required** — This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.
+
+
+        Starts an asynchronous count estimation job. Returns the estimated number of followers matching your filters, with optional breakdowns by department and seniority.
+
+
+        **Cost:** 100 credits (fixed). Cached results for the same company + filters within 24 hours are free.
+
+
+        **Results:** Poll the status endpoint to get results. Typically completes within 30–60 seconds.
+
+        '
+      operationId: startCountEstimate
+      tags:
+      - Company Followers/Count Estimation
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountEstimateRequest'
+            example:
+              companyUrl: https://linkedin.com/company/stripe
+              departments:
+              - Engineering
+              - Sales
+      responses:
+        '200':
+          description: Count estimation job started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartCountEstimateResponse'
+              example:
+                success: true
+                data:
+                  batchId: 665b2a3f4c5d6e0013fgh002
+                  status: pending
+                  message: Count estimation job started. Results typically available within 30-60 seconds.
+                meta:
+                  requestId: 664f2b3c9a1e4d0012abcdef
+                  creditsUsed: 100
+                  creditsRemaining: 24900
+          headers: {}
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body/companyUrl Invalid url
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '402':
+          description: You don't have enough credits for this request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/insufficient-credits
+                title: Insufficient Credits
+                status: 402
+                detail: 'Not enough credits. Required: 100, available: 3'
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27728074-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+  /count-estimate/{batchId}:
+    get:
+      summary: Get estimation status/results
+      deprecated: false
+      description: '> **Access required** — This endpoint is available to approved accounts only. [Contact us](https://enrich.so) to request access.
+
+
+        Check the status of a count estimation job and retrieve results when complete.
+
+
+        **Cost:** Free — polling never costs credits.
+
+
+        **Refunds:** If the job fails within 7 days, the 100 credits are refunded automatically on the next status check.
+
+        '
+      operationId: getCountEstimateStatus
+      tags:
+      - Company Followers/Count Estimation
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch identifier returned when you started the estimation
+        required: true
+        example: 665b2a3f4c5d6e0013fgh002
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: Estimation status and results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountEstimateStatusResponse'
+              example:
+                success: true
+                data:
+                  batchId: 665b2a3f4c5d6e0013fgh002
+                  status: completed
+                  companyUrl: https://linkedin.com/company/stripe
+                  message: Count estimation complete. Found 8542 followers matching your criteria.
+                  createdAt: '2025-06-03T14:30:00.000Z'
+                  completedAt: '2025-06-03T14:31:15.000Z'
+                  data:
+                    totalCount: 8542
+                    functionBreakdown:
+                    - functionName: Engineering
+                      functionId: '8'
+                      count: 3200
+                      percentage: 37.5
+                    - functionName: Sales
+                      functionId: '25'
+                      count: 1850
+                      percentage: 21.7
+                    filtersApplied:
+                      departments:
+                      - Engineering
+                      - Sales
+                meta:
+                  requestId: 664f2b3c9a1e4d0012abcdef
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '404':
+          description: The resource you requested doesn't exist or doesn't belong to your organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: No batch found with that ID
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27728075-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+components:
+  schemas:
+    CountEstimateResultData:
+      type: object
+      required:
+      - totalCount
+      properties:
+        totalCount:
+          type: integer
+          description: Total estimated follower count
+        functionBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctionBreakdownItem'
+          description: Breakdown by department/function (if departments filter was applied)
+          nullable: true
+        seniorityBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeniorityBreakdownItem'
+          description: Breakdown by seniority level (if levels filter was applied)
+          nullable: true
+        filtersApplied:
+          type: object
+          properties:
+            countries:
+              type: array
+              items:
+                type: string
+            states:
+              type: array
+              items:
+                type: string
+              description: State/province filters applied
+            jobTitles:
+              type: array
+              items:
+                type: string
+            departments:
+              type: array
+              items:
+                type: string
+            levels:
+              type: array
+              items:
+                type: string
+          description: Filters applied to the estimation
+          nullable: true
+    SeniorityBreakdownItem:
+      type: object
+      required:
+      - seniorityLevel
+      - seniorityId
+      - count
+      - percentage
+      properties:
+        seniorityLevel:
+          type: string
+          description: Seniority level name (e.g., Director)
+        seniorityId:
+          type: string
+          description: Seniority level ID
+        count:
+          type: integer
+          description: Count of people at this seniority
+        percentage:
+          type: number
+          description: Percentage of total
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+    FunctionBreakdownItem:
+      type: object
+      required:
+      - functionName
+      - functionId
+      - count
+      - percentage
+      properties:
+        functionName:
+          type: string
+          description: Job function name (e.g., Engineering)
+        functionId:
+          type: string
+          description: Job function ID
+        count:
+          type: integer
+          description: Count of people in this function
+        percentage:
+          type: number
+          description: Percentage of total
+        seniorityBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeniorityBreakdownItem'
+          description: Nested seniority breakdown within this department
+          nullable: true
+    CountEstimateStatusResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/CountEstimateStatusData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsRefunded:
+              type: number
+              description: Credits refunded (100, if job failed)
+            creditsRemaining:
+              type: number
+              description: Remaining credit balance
+    CountEstimateRequest:
+      type: object
+      required:
+      - companyUrl
+      properties:
+        companyUrl:
+          type: string
+          format: uri
+          description: The LinkedIn company URL to estimate follower count for
+          examples:
+          - https://linkedin.com/company/stripe
+        countries:
+          type: array
+          items:
+            type: string
+            enum:
+            - Argentina
+            - Australia
+            - Austria
+            - Bangladesh
+            - Belgium
+            - Brazil
+            - Canada
+            - Chile
+            - China
+            - Colombia
+            - Czech Republic
+            - Denmark
+            - Egypt
+            - Finland
+            - France
+            - Germany
+            - Ghana
+            - Greece
+            - Hong Kong SAR
+            - Hungary
+            - India
+            - Indonesia
+            - Ireland
+            - Israel
+            - Italy
+            - Japan
+            - Kenya
+            - Luxembourg
+            - Malaysia
+            - Mexico
+            - Morocco
+            - Nepal
+            - Netherlands
+            - New Zealand
+            - Nigeria
+            - Norway
+            - Pakistan
+            - Peru
+            - Philippines
+            - Poland
+            - Portugal
+            - Romania
+            - Russia
+            - Saudi Arabia
+            - Singapore
+            - South Africa
+            - South Korea
+            - Spain
+            - Sri Lanka
+            - Sweden
+            - Switzerland
+            - Thailand
+            - Turkey
+            - Ukraine
+            - United Arab Emirates
+            - United Kingdom
+            - United States
+            - Vietnam
+          description: Filter by country names (57 supported countries)
+        states:
+          type: array
+          items:
+            type: string
+            enum:
+            - Aargau
+            - Abruzzo
+            - Abu Dhabi
+            - Abuja
+            - Aichi
+            - Ajman
+            - Alabama
+            - Alaska
+            - Alberta
+            - Alexandria
+            - Amazonas
+            - Andalusia
+            - Andhra Pradesh
+            - Ankara
+            - Antalya
+            - Antioquia
+            - Aragon
+            - Arequipa
+            - Arizona
+            - Arkansas
+            - Arunachal Pradesh
+            - Asir
+            - Assam
+            - Asturias
+            - Atlántico
+            - Attica
+            - Auckland
+            - Australian Capital Territory
+            - Auvergne-Rhône-Alpes
+            - Baden-Württemberg
+            - Bahia
+            - Baja California
+            - Balearic Islands
+            - Bali
+            - Balochistan
+            - Bangkok
+            - Basel-Stadt
+            - Basque Country
+            - Bavaria
+            - Beijing
+            - Berlin
+            - Bern
+            - Bihar
+            - Biobío
+            - Bogotá
+            - Bourgogne-Franche-Comté
+            - Braga
+            - Brandenburg
+            - Bremen
+            - Bretagne
+            - British Columbia
+            - Brussels
+            - Bucharest
+            - Budapest
+            - Buenos Aires
+            - Bursa
+            - Busan
+            - Cairo
+            - Calabarzon
+            - Calabria
+            - California
+            - Campania
+            - Canary Islands
+            - Cantabria
+            - Canterbury
+            - Capital Region
+            - Carinthia
+            - Castile and León
+            - Castilla–La Mancha
+            - Catalonia
+            - Ceará
+            - Cebu
+            - Central Denmark
+            - Central District
+            - Central Java
+            - Central Macedonia
+            - Central Province
+            - Central Singapore
+            - Centre-Val de Loire
+            - Chandigarh
+            - Chhattisgarh
+            - Chiang Mai
+            - Chiba
+            - Chihuahua
+            - Chittagong
+            - Cluj
+            - Colorado
+            - Connecticut
+            - Corse
+            - Cusco
+            - Córdoba
+            - Da Nang
+            - Daegu
+            - Daejeon
+            - Davao
+            - Delaware
+            - Delhi
+            - Dhaka
+            - District of Columbia
+            - Distrito Federal
+            - Drenthe
+            - Dubai
+            - East Java
+            - Eastern Cape
+            - Eastern Province
+            - Emilia-Romagna
+            - England
+            - Espírito Santo
+            - Extremadura
+            - Flanders
+            - Flevoland
+            - Florida
+            - Free State
+            - Friesland
+            - Friuli Venezia Giulia
+            - Fujairah
+            - Fujian
+            - Fukuoka
+            - Galicia
+            - Gauteng
+            - Gelderland
+            - Geneva
+            - Georgia
+            - Giza
+            - Goa
+            - Goiás
+            - Grand Est
+            - Groningen
+            - Guanajuato
+            - Guangdong
+            - Gujarat
+            - Gwangju
+            - Gyeonggi
+            - Haifa
+            - Hamburg
+            - Hanoi
+            - Haryana
+            - Hauts-de-France
+            - Hawaii
+            - Hesse
+            - Himachal Pradesh
+            - Ho Chi Minh City
+            - Hokkaido
+            - Hong Kong Island
+            - Hubei
+            - Hunan
+            - Hyogo
+            - Iași
+            - Idaho
+            - Illinois
+            - Incheon
+            - Indiana
+            - Iowa
+            - Islamabad
+            - Istanbul
+            - Izmir
+            - Jakarta
+            - Jalisco
+            - Jeju
+            - Jerusalem
+            - Jharkhand
+            - Jiangsu
+            - Johor
+            - Kanagawa
+            - Kano
+            - Kansas
+            - Karnataka
+            - Kentucky
+            - Kerala
+            - Khyber Pakhtunkhwa
+            - Kisumu
+            - Kowloon
+            - Kuala Lumpur
+            - KwaZulu-Natal
+            - Kyoto
+            - La Rioja
+            - Lagos
+            - Lazio
+            - Leinster
+            - Liguria
+            - Lima
+            - Limburg
+            - Limpopo
+            - Lisbon
+            - Lombardy
+            - Louisiana
+            - Lower Austria
+            - Lower Saxony
+            - Lower Silesian
+            - Lucerne
+            - Madhya Pradesh
+            - Madinah
+            - Madrid
+            - Maharashtra
+            - Maine
+            - Makkah
+            - Manipur
+            - Manitoba
+            - Maranhão
+            - Marche
+            - Maryland
+            - Masovian
+            - Massachusetts
+            - Mato Grosso
+            - Mato Grosso do Sul
+            - Mecklenburg-Vorpommern
+            - Meghalaya
+            - Mendoza
+            - Metro Manila
+            - Mexico City
+            - Michigan
+            - Minas Gerais
+            - Minnesota
+            - Mississippi
+            - Missouri
+            - Mizoram
+            - Mombasa
+            - Montana
+            - Moravia-Silesia
+            - Moscow
+            - Mpumalanga
+            - Munster
+            - Murcia
+            - Nagaland
+            - Nairobi
+            - Navarre
+            - Nebraska
+            - Nevada
+            - New Brunswick
+            - New Hampshire
+            - New Jersey
+            - New Mexico
+            - New South Wales
+            - New Territories
+            - New York
+            - Newfoundland and Labrador
+            - Nonthaburi
+            - Normandie
+            - North Brabant
+            - North Carolina
+            - North Dakota
+            - North Denmark
+            - North Holland
+            - North Rhine-Westphalia
+            - North West
+            - North-East Singapore
+            - North-West Singapore
+            - Northern Cape
+            - Northern Ireland
+            - Northern Territory
+            - Northwest Territories
+            - Nouvelle-Aquitaine
+            - Nova Scotia
+            - Novosibirsk Oblast
+            - Nuevo León
+            - Nunavut
+            - Occitanie
+            - Odisha
+            - Ohio
+            - Oklahoma
+            - Ontario
+            - Oregon
+            - Osaka
+            - Oslo
+            - Overijssel
+            - Oyo
+            - Paraná
+            - Pará
+            - Pays de la Loire
+            - Penang
+            - Pennsylvania
+            - Pernambuco
+            - Pest
+            - Phuket
+            - Piedmont
+            - Pirkanmaa
+            - Pomeranian
+            - Porto
+            - Prague
+            - Prince Edward Island
+            - Provence-Alpes-Côte d'Azur
+            - Puebla
+            - Puglia
+            - Punjab
+            - Qassim
+            - Quebec
+            - Queensland
+            - Querétaro
+            - Quintana Roo
+            - Rajasthan
+            - Rajshahi
+            - Ras Al Khaimah
+            - Rhineland-Palatinate
+            - Rhode Island
+            - Rio Grande do Sul
+            - Rio de Janeiro
+            - Rivers
+            - Riyadh
+            - Rogaland
+            - Saarland
+            - Sabah
+            - Saint Petersburg
+            - Saitama
+            - Salzburg
+            - Santa Catarina
+            - Santa Fe
+            - Santiago Metropolitan
+            - Sarawak
+            - Sardinia
+            - Saskatchewan
+            - Saxony
+            - Saxony-Anhalt
+            - Schleswig-Holstein
+            - Scotland
+            - Selangor
+            - Seoul
+            - Shandong
+            - Shanghai
+            - Sharjah
+            - Sichuan
+            - Sicily
+            - Sikkim
+            - Silesian
+            - Sindh
+            - Skåne
+            - South Australia
+            - South Carolina
+            - South Dakota
+            - South Holland
+            - South-East Singapore
+            - South-West Singapore
+            - Southern Denmark
+            - Southern Province
+            - Southwest Finland
+            - St. Gallen
+            - Stockholm
+            - Styria
+            - Sverdlovsk Oblast
+            - São Paulo
+            - Tamil Nadu
+            - Tasmania
+            - Tel Aviv
+            - Telangana
+            - Tennessee
+            - Texas
+            - Thuringia
+            - Ticino
+            - Timiș
+            - Tokyo
+            - Trentino-Alto Adige
+            - Tripura
+            - Trøndelag
+            - Tuscany
+            - Tyrol
+            - Ulsan
+            - Ulster
+            - Umbria
+            - Upper Austria
+            - Uppsala
+            - Utah
+            - Utrecht
+            - Uttar Pradesh
+            - Uttarakhand
+            - Uusimaa
+            - Valencia
+            - Valle del Cauca
+            - Valparaíso
+            - Vaud
+            - Veneto
+            - Veracruz
+            - Vermont
+            - Vestland
+            - Victoria
+            - Vienna
+            - Viken
+            - Virginia
+            - Vorarlberg
+            - Västra Götaland
+            - Waikato
+            - Wales
+            - Wallonia
+            - Washington
+            - Wellington
+            - West Bengal
+            - West Java
+            - West Virginia
+            - Western Australia
+            - Western Cape
+            - Western Province
+            - Wisconsin
+            - Wyoming
+            - Yucatán
+            - Yukon
+            - Zealand
+            - Zeeland
+            - Zhejiang
+            - Zurich
+            - Île-de-France
+            - Östergötland
+            - Łódź
+          description: Filter by state/province/region names. 401 states across 48 countries supported. When states are provided, the parent country is automatically inferred.
+        jobTitles:
+          type: array
+          items:
+            type: string
+            enum:
+            - Account Coordinator
+            - Account Director
+            - Account Executive
+            - Account Manager
+            - Account Specialist
+            - Accountant
+            - Accounting Intern
+            - Acting Chief Executive Officer
+            - Acting Chief Financial Officer
+            - Administrative Assistant
+            - Administrative Assistant to Chief Executive Officer
+            - Administrative Coordinator
+            - Administrative Specialist
+            - Administrator
+            - Advisor
+            - Advisor to Chief Executive Officer
+            - Agency Owner
+            - Analyst
+            - Analytical Scientist
+            - Android Developer
+            - Application Developer
+            - Area Manager
+            - Art Director
+            - Assistant
+            - Assistant Chief Executive
+            - Assistant Director
+            - Assistant Head
+            - Assistant Manager
+            - Assistant Professor
+            - Assistant Scientist
+            - Assistant Vice President
+            - Assistant to Chief Executive Officer
+            - Assistant to Owner
+            - Assistant to Vice President
+            - Assistant to the Chief Financial Officer
+            - Assistant to the President
+            - Associate
+            - Associate Director
+            - Associate Founder
+            - Associate Researcher
+            - Associate Scientist
+            - Attorney
+            - Audit Intern
+            - Bank Employee
+            - Bar Manager
+            - Barista
+            - Bartender
+            - Biologist
+            - Biomedical Equipment Technician
+            - Biomedical Scientist
+            - Blogger
+            - Board Member
+            - Bookkeeper
+            - Branch Manager
+            - Branch Owner
+            - Business Analyst
+            - Business Consultant
+            - Business Development Manager
+            - Business Development Specialist
+            - Business Intelligence Developer
+            - Business Lead
+            - Business Manager
+            - Business Process Owner
+            - Business Specialist
+            - Business System Analyst
+            - Business Unit Manager
+            - Buyer
+            - Carpenter
+            - Cashier
+            - Catering Specialist
+            - Certified Nursing Assistant
+            - Certified Specialist
+            - Chemist
+            - Chief Administrative Officer
+            - Chief Architect
+            - Chief Executive Director
+            - Chief Executive Officer
+            - Chief Financial Officer
+            - Chief Information Officer
+            - Chief Marketing Officer
+            - Chief Officer
+            - Chief Operating Officer
+            - Chief Scientist
+            - Chief Specialist
+            - Chief Technology Officer
+            - Chief of Development
+            - Chief of Staff
+            - Child And Youth Worker
+            - Child Care Specialist
+            - Civil Engineer
+            - Civil Servant
+            - Cleaning Specialist
+            - Clerk
+            - Client Services Representative
+            - Clinical Laboratory Scientist
+            - Clinical Scientist
+            - Co President
+            - Co-Founder
+            - Co-Owner
+            - Communications Specialist
+            - Computer Scientist
+            - Construction Supervisor
+            - Construction Worker
+            - Consultant
+            - Consulting Chief Financial Officer
+            - Contract Specialist
+            - Cook
+            - Coordinator
+            - Coordinator of Volunteers
+            - Corporate Specialist
+            - Creative Director
+            - Credit Analyst
+            - Crew
+            - Crew Chief
+            - Crew Member
+            - Customer Service Representative
+            - Customer Service Specialist
+            - Data Analyst
+            - Data Entry Clerk
+            - Data Scientist
+            - Data Specialist
+            - Database Developer
+            - Delivery Driver
+            - Deputy Chief Executive Officer
+            - Deputy Chief Financial Officer
+            - Deputy Chief Technology Officer
+            - Deputy Head
+            - Design Engineer
+            - Design Specialist
+            - Designer
+            - Developer
+            - Development Intern
+            - Development Scientist
+            - Development Specialist
+            - Digital Specialist
+            - Director
+            - Director General
+            - Director of Business Development
+            - Director of Communications
+            - Director of Development
+            - Director of Engineering
+            - Director of Information Technology
+            - Director of Operations
+            - Director of Quality
+            - Director of Sales Marketing
+            - Director of Services
+            - Director of Youth Ministry
+            - Dishwasher
+            - Disk Jockey
+            - Division Chief Financial Officer
+            - Doctor
+            - Dotnet Developer
+            - Driver
+            - Early Childhood Educator
+            - Editor
+            - Editor in Chief
+            - Editorial Intern
+            - Electrical Engineer
+            - Electrician
+            - Employee
+            - Engineer
+            - Engineer Intern
+            - Engineering Manager
+            - Engineering Specialist
+            - Environmental Scientist
+            - Event Coordinator
+            - Executive
+            - Executive Assistant
+            - Executive Assistant to Chief Executive Officer
+            - Executive Assistant to Chief Financial Officer
+            - Executive Director
+            - Executive Vice President
+            - Field Engineer
+            - Field Specialist
+            - Final Year Student
+            - Finance Intern
+            - Finance Manager
+            - Finance Specialist
+            - Financial Advisor
+            - Financial Analyst
+            - Financial Assistant
+            - Financial Director
+            - Food Server
+            - Food Service Worker
+            - Food Specialist
+            - Foreperson
+            - Former Owner
+            - Founder
+            - Franchise Owner
+            - Freelance
+            - Freelance Journalist
+            - Freelance Writer
+            - Front Desk Staff
+            - Frontend Developer
+            - Game Developer
+            - General
+            - General Manager
+            - Graduate
+            - Graduate Student
+            - Graphic Design Intern
+            - Graphic Designer
+            - Group Chief Executive Officer
+            - Group Chief Financial Officer
+            - Group Lead
+            - Hairstylist
+            - Head
+            - Head Accountant
+            - Head Cashier
+            - Head Chef
+            - Head Coach
+            - Head Engineer
+            - Head Manager
+            - Head of Business Development
+            - Head of Communications
+            - Head of Department
+            - Head of Development
+            - Head of Finance
+            - Head of Human Resources
+            - Head of Information Technology
+            - Head of Marketing
+            - Head of Operations
+            - Head of Product
+            - Head of Production
+            - Head of Quality Assurance
+            - Head of Sales
+            - Head of Section
+            - Head of Service Management
+            - Head of Unit
+            - Healthcare Specialist
+            - Homemaker
+            - Host
+            - Hostess
+            - Housekeeping Specialist
+            - Human Resources Assistant
+            - Human Resources Consultant
+            - Human Resources Coordinator
+            - Human Resources Director
+            - Human Resources Executive
+            - Human Resources Generalist
+            - Human Resources Intern
+            - Human Resources Manager
+            - Human Resources Specialist
+            - Independent Owner
+            - Information Specialist
+            - Information Technology Analyst
+            - Information Technology Consultant
+            - Information Technology Developer
+            - Information Technology Intern
+            - Information Technology Manager
+            - Information Technology Specialist
+            - Inspector
+            - Instructor
+            - Interim Chief Executive Officer
+            - Interim Chief Financial Officer
+            - Interim Chief Technology Officer
+            - Intern
+            - Intern Assistant
+            - International Specialist
+            - Investment Analyst
+            - Investment Specialist
+            - Janitor
+            - Java Software Engineer
+            - Java Specialist
+            - Joint Chief Executive Officer
+            - Joint Owner
+            - Journalist
+            - Journeyperson
+            - Judge
+            - Junior Accountant
+            - Junior Engineer
+            - Junior Software Engineer
+            - Keeper
+            - Key Account
+            - Key Account Executive
+            - Key Account Manager
+            - Key Account Sales Specialist
+            - Keyholder
+            - Kindergarten Teacher
+            - Kitchen Assistant
+            - Kitchen Manager
+            - Kitchen Staff
+            - Knowledge Specialist
+            - Laboratory Assistant
+            - Laboratory Scientist
+            - Laboratory Specialist
+            - Laboratory Technician
+            - Laborer
+            - Law Clerk
+            - Law Specialist
+            - Lawyer
+            - Lead
+            - Lead Consultant
+            - Lead Designer
+            - Lead Engineer
+            - Lead Instructor
+            - Lead Project Manager
+            - Lead Scientist
+            - Lead Software Engineer
+            - Lead Teacher
+            - Lead Technician
+            - Learning Specialist
+            - Lecturer
+            - Legal Assistant
+            - Legal Intern
+            - Legal Secretary
+            - Legal Specialist
+            - Licensed Practical Nurse
+            - Lifeguard
+            - Line Cook
+            - Logistics Coordinator
+            - Logistics Manager
+            - Logistics Specialist
+            - Maintenance Specialist
+            - Makeup Artist
+            - Management Analyst
+            - Management Intern
+            - Manager
+            - Managing Director
+            - Managing Owner
+            - Marine
+            - Marketing Analyst
+            - Marketing And Public Relations Specialist
+            - Marketing Assistant
+            - Marketing Associate
+            - Marketing Communications Manager
+            - Marketing Communications Specialist
+            - Marketing Consultant
+            - Marketing Coordinator
+            - Marketing Director
+            - Marketing Executive
+            - Marketing Intern
+            - Marketing Manager
+            - Marketing Officer
+            - Marketing Representative
+            - Marketing Specialist
+            - Mechanical Engineer
+            - Medical Doctor
+            - Medical Laboratory Scientist
+            - Member
+            - Mental Health Specialist
+            - Moving Company Owner
+            - Nanny
+            - National Account Manager
+            - National Account Specialist
+            - National Sales Manager
+            - National Sales Specialist
+            - Network Administrator
+            - Network Engineer
+            - Network Specialist
+            - Networking Specialist
+            - News Specialist
+            - Nightclub Owner
+            - Nurse
+            - Nurse Practitioner
+            - Nursing Manager
+            - Nursing Specialist
+            - Nutrition Specialist
+            - Office Associate
+            - Office Coordinator
+            - Office Head
+            - Office Manager
+            - Officer
+            - Operational Specialist
+            - Operations Analyst
+            - Operations Coordinator
+            - Operations Intern
+            - Operations Lead
+            - Operations Manager
+            - Operations Team Lead
+            - Operator
+            - Owner
+            - Owner Associate
+            - Owner Support Specialist
+            - PHP Developer
+            - Painter
+            - Partner
+            - Past President
+            - Personal Assistant to Chief Executive Officer
+            - Planning Specialist
+            - Postdoctoral Researcher
+            - President
+            - President of Sales
+            - Principal
+            - Principal Chief Executive Officer
+            - Principal Chief Financial Officer
+            - Principal Owner
+            - Principal Scientist
+            - Process Engineer
+            - Product Analyst
+            - Product Assistant
+            - Product Consultant
+            - Product Designer
+            - Product Developer
+            - Product Development Manager
+            - Product Development Specialist
+            - Product Engineer
+            - Product Management Specialist
+            - Product Manager
+            - Product Marketing Manager
+            - Product Marketing Specialist
+            - Product Owner
+            - Product Specialist
+            - Product Support Specialist
+            - Production Assistant
+            - Production Coordinator
+            - Production Engineer
+            - Production Intern
+            - Production Manager
+            - Production Specialist
+            - Production Supervisor
+            - Professional
+            - Professional Singer
+            - Professor
+            - Program Coordinator
+            - Program Developer
+            - Program Director
+            - Program Lead
+            - Program Manager
+            - Program Specialist
+            - Project Chief
+            - Project Director
+            - Project Engineer
+            - Project Lead
+            - Project Lead Developer
+            - Project Manager
+            - Project Scientist
+            - Project Specialist
+            - Public Relations Intern
+            - Quality Analyst
+            - Quality Assurance Analyst
+            - Quality Assurance Engineer
+            - Quality Assurance Lead
+            - Quality Assurance Manager
+            - Quality Assurance Officer
+            - Quality Assurance Specialist
+            - Quality Assurance Supervisor
+            - Quality Assurance Tester
+            - Quality Control Analyst
+            - Quality Control Engineer
+            - Quality Control Inspector
+            - Quality Control Lead
+            - Quality Coordinator
+            - Quality Engineer
+            - Quality Inspector
+            - Quality Management Specialist
+            - Quality Specialist
+            - Quantity Surveyor
+            - Radiology Nurse
+            - Receptionist
+            - Recruiter
+            - Recruitment Specialist
+            - Regional Chief Financial Officer
+            - Regional Collections Manager
+            - Regional Director
+            - Regional Manager
+            - Regional Sales Manager
+            - Regional Vice President
+            - Registered Nurse
+            - Relationship Manager
+            - Representative
+            - Research Analyst
+            - Research And Development Scientist
+            - Research And Development Specialist
+            - Research Assistant
+            - Research Intern
+            - Researcher
+            - Restaurant Owner
+            - Retail Specialist
+            - Retail Zone Specialist
+            - Retired
+            - Risk Analyst
+            - Sales Analyst
+            - Sales And Marketing Intern
+            - Sales And Marketing Specialist
+            - Sales Assistant
+            - Sales Consultant
+            - Sales Coordinator
+            - Sales Director
+            - Sales Engineer
+            - Sales Executive
+            - Sales Intern
+            - Sales Lead
+            - Sales Manager
+            - Sales Marketing Manager
+            - Sales Specialist
+            - Sales Team Lead
+            - Salesperson
+            - Salon Owner
+            - Scientist
+            - Scout Executive
+            - Secretary
+            - Security Guard
+            - Self Employed
+            - Seller
+            - Senior Analyst
+            - Senior Application Developer
+            - Senior Business Analyst
+            - Senior Business Developer
+            - Senior Consultant
+            - Senior Developer
+            - Senior Engineer
+            - Senior Environmental Scientist
+            - Senior Financial Analyst
+            - Senior Manager
+            - Senior Marketing Manager
+            - Senior Marketing Specialist
+            - Senior Network Engineer
+            - Senior Product Manager
+            - Senior Product Specialist
+            - Senior Project Manager
+            - Senior Quality Assurance Engineer
+            - Senior Quality Assurance Specialist
+            - Senior Scientist
+            - Senior Software Engineer
+            - Senior System Analyst
+            - Senior System Engineer
+            - Senior Team Lead
+            - Senior Underwriter
+            - Senior Vice President
+            - Senior Web Developer
+            - Service Coordinator
+            - Service Engineer
+            - Service Manager
+            - Shift Lead
+            - Shop Owner
+            - Site Engineer
+            - Small Business Owner
+            - Social Worker
+            - Software Engineer
+            - Software Quality Assurance Engineer
+            - Special Assistant to Chief Executive Officer
+            - Specialist
+            - Staff Scientist
+            - Store Manager
+            - Storekeeper
+            - Student
+            - Student Intern
+            - Summer Intern
+            - Supervisor
+            - Support Analyst
+            - Support Specialist
+            - System Administrator
+            - System Analyst
+            - System Developer
+            - System Engineer
+            - System Owner
+            - Teacher
+            - Teaching Assistant
+            - Team Lead
+            - Team Specialist
+            - Technical Analyst
+            - Technical Director
+            - Technical Lead
+            - Technical Specialist
+            - Technical Support Analyst
+            - Technical Support Engineer
+            - Technical Team Lead
+            - Technician
+            - Technology Specialist
+            - Test Analyst
+            - Test Engineer
+            - Test Lead
+            - Trainee
+            - Training Coordinator
+            - Training Specialist
+            - Truck Driver
+            - Tutor
+            - Undergraduate
+            - Undergraduate Research Assistant
+            - Undergraduate Research Fellow
+            - Undergraduate Student
+            - Undergraduate Teaching Assistant
+            - Underwriter
+            - Unemployed
+            - Unit Manager
+            - University Lecturer
+            - User Experience Designer
+            - User Interface Designer
+            - Usher
+            - Utilities Specialist
+            - Vice Chief Executive Officer
+            - Vice President
+            - Vice President Business
+            - Vice President Finance
+            - Vice President Human Resources
+            - Vice President Marketing
+            - Vice President Operations
+            - Vice President Sales Marketing
+            - Vice President Strategy
+            - Vice President of Business Development
+            - Vice President of Development
+            - Vice President of Engineering
+            - Vice President of Products
+            - Vice President of Sales
+            - Vice President of Services
+            - Vice President of Technology
+            - Video Editor
+            - Videographer
+            - Visiting Scientist
+            - Visual Merchandiser
+            - Volunteer
+            - Warehouse Specialist
+            - Web Application Developer
+            - Web Designer
+            - Web Developer
+            - Web Specialist
+            - Website Owner
+            - Welder
+            - Worker
+            - Writer
+            - Xray Technician
+            - Xray Technologist
+            - Year Student
+            - Yoga Instructor
+            - Youth Advisor
+            - Youth Advocate
+            - Youth Care Worker
+            - Youth Coordinator
+            - Youth Counselor
+            - Youth Development Specialist
+            - Youth Director
+            - Youth Intern
+            - Youth Lead
+            - Youth Minister
+            - Youth Pastor
+            - Youth Program Coordinator
+            - Youth Specialist
+            - Youth Worker
+            - Zonal Business Manager
+            - Zonal Head
+            - Zonal Manager
+            - Zonal Sales Manager
+            - Zone Director
+            - Zone Operations Manager
+            - Zone Sales Lead
+            - Zone Sales Manager
+            - Zone Vice President
+            - Zoning Administrator
+            - Zookeeper
+            - Zoologist
+            - Zumba Instructor
+            - iOS Developer
+          description: Filter by job titles (642 supported titles, e.g. Account Executive, Chief Executive Officer, Data Scientist)
+        departments:
+          type: array
+          items:
+            type: string
+            enum:
+            - Accounting
+            - Administrative
+            - Arts and Design
+            - Business Development
+            - Community and Social Services
+            - Consulting
+            - Customer Success and Support
+            - Education
+            - Engineering
+            - Entrepreneurship
+            - Finance
+            - Healthcare Services
+            - Human Resources
+            - Information Technology
+            - Legal
+            - Marketing
+            - Media and Communication
+            - Military and Protective Services
+            - Operations
+            - Product Management
+            - Program and Project Management
+            - Purchasing
+            - Quality Assurance
+            - Real Estate
+            - Research
+            - Sales
+          description: Filter by department, returns breakdown for selected departments (26 supported)
+        levels:
+          type: array
+          items:
+            type: string
+            enum:
+            - CXO
+            - Director
+            - Entry Level
+            - Entry Level Manager
+            - Experienced Manager
+            - In Training
+            - Owner / Partner
+            - Senior
+            - Strategic
+            - Vice President
+          description: Filter by seniority level, returns breakdown for selected levels (10 supported)
+    StartCountEstimateResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/StartCountEstimateData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsUsed:
+              type: number
+              description: Credits consumed (100, or 0 if from cache)
+            creditsRemaining:
+              type: number
+              description: Remaining credit balance
+    StartCountEstimateData:
+      type: object
+      required:
+      - batchId
+      - status
+      properties:
+        batchId:
+          type: string
+          description: Unique batch ID for this estimation
+        status:
+          type: string
+          enum:
+          - pending
+          - completed
+          description: Job status — pending (queued) or completed (from cache)
+        message:
+          type: string
+          description: Human-readable status message
+        fromCache:
+          type: boolean
+          description: Whether result was served from cache (no credits charged)
+        cachedAt:
+          type: string
+          format: date-time
+          description: When the cached result was originally computed
+        data:
+          $ref: '#/components/schemas/CountEstimateResultData'
+          description: Result data (only present if returned from cache)
+    CountEstimateStatusData:
+      type: object
+      required:
+      - batchId
+      - status
+      - companyUrl
+      - createdAt
+      properties:
+        batchId:
+          type: string
+          description: Batch ID
+        status:
+          type: string
+          enum:
+          - pending
+          - in_progress
+          - completed
+          - failed
+          - cancelled
+          description: Current job status
+        companyUrl:
+          type: string
+          description: LinkedIn company URL
+        message:
+          type: string
+          description: Human-readable status message
+        createdAt:
+          type: string
+          format: date-time
+          description: When the job was created
+        completedAt:
+          type: string
+          format: date-time
+          description: When the job completed
+          nullable: true
+        data:
+          $ref: '#/components/schemas/CountEstimateResultData'
+          description: Result data (when completed)
+    CountEstimateResultData_2:
+      type: object
+      required:
+      - totalCount
+      properties:
+        totalCount:
+          type: integer
+          description: Total estimated follower count
+        functionBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctionBreakdownItem_2'
+          description: Breakdown by department/function (if departments filter was applied)
+          nullable: true
+        seniorityBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeniorityBreakdownItem_2'
+          description: Breakdown by seniority level (if levels filter was applied)
+          nullable: true
+        filtersApplied:
+          type: object
+          properties:
+            countries:
+              type: array
+              items:
+                type: string
+            states:
+              type: array
+              items:
+                type: string
+              description: State/province filters applied
+            jobTitles:
+              type: array
+              items:
+                type: string
+            departments:
+              type: array
+              items:
+                type: string
+            levels:
+              type: array
+              items:
+                type: string
+          description: Filters applied to the estimation
+          x-apidog-orders:
+          - countries
+          - states
+          - jobTitles
+          - departments
+          - levels
+          x-apidog-ignore-properties: []
+          nullable: true
+      x-apidog-orders:
+      - totalCount
+      - functionBreakdown
+      - seniorityBreakdown
+      - filtersApplied
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    SeniorityBreakdownItem_2:
+      type: object
+      required:
+      - seniorityLevel
+      - seniorityId
+      - count
+      - percentage
+      properties:
+        seniorityLevel:
+          type: string
+          description: Seniority level name (e.g., Director)
+        seniorityId:
+          type: string
+          description: Seniority level ID
+        count:
+          type: integer
+          description: Count of people at this seniority
+        percentage:
+          type: number
+          description: Percentage of total
+      x-apidog-orders:
+      - seniorityLevel
+      - seniorityId
+      - count
+      - percentage
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    ErrorEnvelope_2:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+      x-apidog-orders:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    FunctionBreakdownItem_2:
+      type: object
+      required:
+      - functionName
+      - functionId
+      - count
+      - percentage
+      properties:
+        functionName:
+          type: string
+          description: Job function name (e.g., Engineering)
+        functionId:
+          type: string
+          description: Job function ID
+        count:
+          type: integer
+          description: Count of people in this function
+        percentage:
+          type: number
+          description: Percentage of total
+        seniorityBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeniorityBreakdownItem_2'
+          description: Nested seniority breakdown within this department
+          nullable: true
+      x-apidog-orders:
+      - functionName
+      - functionId
+      - count
+      - percentage
+      - seniorityBreakdown
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    CountEstimateStatusResponse_2:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/CountEstimateStatusData_2'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsRefunded:
+              type: number
+              description: Credits refunded (100, if job failed)
+            creditsRemaining:
+              type: number
+              description: Remaining credit balance
+          x-apidog-orders:
+          - requestId
+          - creditsRefunded
+          - creditsRemaining
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    CountEstimateRequest_2:
+      type: object
+      required:
+      - companyUrl
+      properties:
+        companyUrl:
+          type: string
+          format: uri
+          description: The LinkedIn company URL to estimate follower count for
+          examples:
+          - https://linkedin.com/company/stripe
+        countries:
+          type: array
+          items:
+            type: string
+            enum:
+            - Argentina
+            - Australia
+            - Austria
+            - Bangladesh
+            - Belgium
+            - Brazil
+            - Canada
+            - Chile
+            - China
+            - Colombia
+            - Czech Republic
+            - Denmark
+            - Egypt
+            - Finland
+            - France
+            - Germany
+            - Ghana
+            - Greece
+            - Hong Kong SAR
+            - Hungary
+            - India
+            - Indonesia
+            - Ireland
+            - Israel
+            - Italy
+            - Japan
+            - Kenya
+            - Luxembourg
+            - Malaysia
+            - Mexico
+            - Morocco
+            - Nepal
+            - Netherlands
+            - New Zealand
+            - Nigeria
+            - Norway
+            - Pakistan
+            - Peru
+            - Philippines
+            - Poland
+            - Portugal
+            - Romania
+            - Russia
+            - Saudi Arabia
+            - Singapore
+            - South Africa
+            - South Korea
+            - Spain
+            - Sri Lanka
+            - Sweden
+            - Switzerland
+            - Thailand
+            - Turkey
+            - Ukraine
+            - United Arab Emirates
+            - United Kingdom
+            - United States
+            - Vietnam
+          description: Filter by country names (57 supported countries)
+        states:
+          type: array
+          items:
+            type: string
+            enum:
+            - Aargau
+            - Abruzzo
+            - Abu Dhabi
+            - Abuja
+            - Aichi
+            - Ajman
+            - Alabama
+            - Alaska
+            - Alberta
+            - Alexandria
+            - Amazonas
+            - Andalusia
+            - Andhra Pradesh
+            - Ankara
+            - Antalya
+            - Antioquia
+            - Aragon
+            - Arequipa
+            - Arizona
+            - Arkansas
+            - Arunachal Pradesh
+            - Asir
+            - Assam
+            - Asturias
+            - Atlántico
+            - Attica
+            - Auckland
+            - Australian Capital Territory
+            - Auvergne-Rhône-Alpes
+            - Baden-Württemberg
+            - Bahia
+            - Baja California
+            - Balearic Islands
+            - Bali
+            - Balochistan
+            - Bangkok
+            - Basel-Stadt
+            - Basque Country
+            - Bavaria
+            - Beijing
+            - Berlin
+            - Bern
+            - Bihar
+            - Biobío
+            - Bogotá
+            - Bourgogne-Franche-Comté
+            - Braga
+            - Brandenburg
+            - Bremen
+            - Bretagne
+            - British Columbia
+            - Brussels
+            - Bucharest
+            - Budapest
+            - Buenos Aires
+            - Bursa
+            - Busan
+            - Cairo
+            - Calabarzon
+            - Calabria
+            - California
+            - Campania
+            - Canary Islands
+            - Cantabria
+            - Canterbury
+            - Capital Region
+            - Carinthia
+            - Castile and León
+            - Castilla–La Mancha
+            - Catalonia
+            - Ceará
+            - Cebu
+            - Central Denmark
+            - Central District
+            - Central Java
+            - Central Macedonia
+            - Central Province
+            - Central Singapore
+            - Centre-Val de Loire
+            - Chandigarh
+            - Chhattisgarh
+            - Chiang Mai
+            - Chiba
+            - Chihuahua
+            - Chittagong
+            - Cluj
+            - Colorado
+            - Connecticut
+            - Corse
+            - Cusco
+            - Córdoba
+            - Da Nang
+            - Daegu
+            - Daejeon
+            - Davao
+            - Delaware
+            - Delhi
+            - Dhaka
+            - District of Columbia
+            - Distrito Federal
+            - Drenthe
+            - Dubai
+            - East Java
+            - Eastern Cape
+            - Eastern Province
+            - Emilia-Romagna
+            - England
+            - Espírito Santo
+            - Extremadura
+            - Flanders
+            - Flevoland
+            - Florida
+            - Free State
+            - Friesland
+            - Friuli Venezia Giulia
+            - Fujairah
+            - Fujian
+            - Fukuoka
+            - Galicia
+            - Gauteng
+            - Gelderland
+            - Geneva
+            - Georgia
+            - Giza
+            - Goa
+            - Goiás
+            - Grand Est
+            - Groningen
+            - Guanajuato
+            - Guangdong
+            - Gujarat
+            - Gwangju
+            - Gyeonggi
+            - Haifa
+            - Hamburg
+            - Hanoi
+            - Haryana
+            - Hauts-de-France
+            - Hawaii
+            - Hesse
+            - Himachal Pradesh
+            - Ho Chi Minh City
+            - Hokkaido
+            - Hong Kong Island
+            - Hubei
+            - Hunan
+            - Hyogo
+            - Iași
+            - Idaho
+            - Illinois
+            - Incheon
+            - Indiana
+            - Iowa
+            - Islamabad
+            - Istanbul
+            - Izmir
+            - Jakarta
+            - Jalisco
+            - Jeju
+            - Jerusalem
+            - Jharkhand
+            - Jiangsu
+            - Johor
+            - Kanagawa
+            - Kano
+            - Kansas
+            - Karnataka
+            - Kentucky
+            - Kerala
+            - Khyber Pakhtunkhwa
+            - Kisumu
+            - Kowloon
+            - Kuala Lumpur
+            - KwaZulu-Natal
+            - Kyoto
+            - La Rioja
+            - Lagos
+            - Lazio
+            - Leinster
+            - Liguria
+            - Lima
+            - Limburg
+            - Limpopo
+            - Lisbon
+            - Lombardy
+            - Louisiana
+            - Lower Austria
+            - Lower Saxony
+            - Lower Silesian
+            - Lucerne
+            - Madhya Pradesh
+            - Madinah
+            - Madrid
+            - Maharashtra
+            - Maine
+            - Makkah
+            - Manipur
+            - Manitoba
+            - Maranhão
+            - Marche
+            - Maryland
+            - Masovian
+            - Massachusetts
+            - Mato Grosso
+            - Mato Grosso do Sul
+            - Mecklenburg-Vorpommern
+            - Meghalaya
+            - Mendoza
+            - Metro Manila
+            - Mexico City
+            - Michigan
+            - Minas Gerais
+            - Minnesota
+            - Mississippi
+            - Missouri
+            - Mizoram
+            - Mombasa
+            - Montana
+            - Moravia-Silesia
+            - Moscow
+            - Mpumalanga
+            - Munster
+            - Murcia
+            - Nagaland
+            - Nairobi
+            - Navarre
+            - Nebraska
+            - Nevada
+            - New Brunswick
+            - New Hampshire
+            - New Jersey
+            - New Mexico
+            - New South Wales
+            - New Territories
+            - New York
+            - Newfoundland and Labrador
+            - Nonthaburi
+            - Normandie
+            - North Brabant
+            - North Carolina
+            - North Dakota
+            - North Denmark
+            - North Holland
+            - North Rhine-Westphalia
+            - North West
+            - North-East Singapore
+            - North-West Singapore
+            - Northern Cape
+            - Northern Ireland
+            - Northern Territory
+            - Northwest Territories
+            - Nouvelle-Aquitaine
+            - Nova Scotia
+            - Novosibirsk Oblast
+            - Nuevo León
+            - Nunavut
+            - Occitanie
+            - Odisha
+            - Ohio
+            - Oklahoma
+            - Ontario
+            - Oregon
+            - Osaka
+            - Oslo
+            - Overijssel
+            - Oyo
+            - Paraná
+            - Pará
+            - Pays de la Loire
+            - Penang
+            - Pennsylvania
+            - Pernambuco
+            - Pest
+            - Phuket
+            - Piedmont
+            - Pirkanmaa
+            - Pomeranian
+            - Porto
+            - Prague
+            - Prince Edward Island
+            - Provence-Alpes-Côte d'Azur
+            - Puebla
+            - Puglia
+            - Punjab
+            - Qassim
+            - Quebec
+            - Queensland
+            - Querétaro
+            - Quintana Roo
+            - Rajasthan
+            - Rajshahi
+            - Ras Al Khaimah
+            - Rhineland-Palatinate
+            - Rhode Island
+            - Rio Grande do Sul
+            - Rio de Janeiro
+            - Rivers
+            - Riyadh
+            - Rogaland
+            - Saarland
+            - Sabah
+            - Saint Petersburg
+            - Saitama
+            - Salzburg
+            - Santa Catarina
+            - Santa Fe
+            - Santiago Metropolitan
+            - Sarawak
+            - Sardinia
+            - Saskatchewan
+            - Saxony
+            - Saxony-Anhalt
+            - Schleswig-Holstein
+            - Scotland
+            - Selangor
+            - Seoul
+            - Shandong
+            - Shanghai
+            - Sharjah
+            - Sichuan
+            - Sicily
+            - Sikkim
+            - Silesian
+            - Sindh
+            - Skåne
+            - South Australia
+            - South Carolina
+            - South Dakota
+            - South Holland
+            - South-East Singapore
+            - South-West Singapore
+            - Southern Denmark
+            - Southern Province
+            - Southwest Finland
+            - St. Gallen
+            - Stockholm
+            - Styria
+            - Sverdlovsk Oblast
+            - São Paulo
+            - Tamil Nadu
+            - Tasmania
+            - Tel Aviv
+            - Telangana
+            - Tennessee
+            - Texas
+            - Thuringia
+            - Ticino
+            - Timiș
+            - Tokyo
+            - Trentino-Alto Adige
+            - Tripura
+            - Trøndelag
+            - Tuscany
+            - Tyrol
+            - Ulsan
+            - Ulster
+            - Umbria
+            - Upper Austria
+            - Uppsala
+            - Utah
+            - Utrecht
+            - Uttar Pradesh
+            - Uttarakhand
+            - Uusimaa
+            - Valencia
+            - Valle del Cauca
+            - Valparaíso
+            - Vaud
+            - Veneto
+            - Veracruz
+            - Vermont
+            - Vestland
+            - Victoria
+            - Vienna
+            - Viken
+            - Virginia
+            - Vorarlberg
+            - Västra Götaland
+            - Waikato
+            - Wales
+            - Wallonia
+            - Washington
+            - Wellington
+            - West Bengal
+            - West Java
+            - West Virginia
+            - Western Australia
+            - Western Cape
+            - Western Province
+            - Wisconsin
+            - Wyoming
+            - Yucatán
+            - Yukon
+            - Zealand
+            - Zeeland
+            - Zhejiang
+            - Zurich
+            - Île-de-France
+            - Östergötland
+            - Łódź
+          description: Filter by state/province/region names. 401 states across 48 countries supported. When states are provided, the parent country is automatically inferred.
+        jobTitles:
+          type: array
+          items:
+            type: string
+            enum:
+            - Account Coordinator
+            - Account Director
+            - Account Executive
+            - Account Manager
+            - Account Specialist
+            - Accountant
+            - Accounting Intern
+            - Acting Chief Executive Officer
+            - Acting Chief Financial Officer
+            - Administrative Assistant
+            - Administrative Assistant to Chief Executive Officer
+            - Administrative Coordinator
+            - Administrative Specialist
+            - Administrator
+            - Advisor
+            - Advisor to Chief Executive Officer
+            - Agency Owner
+            - Analyst
+            - Analytical Scientist
+            - Android Developer
+            - Application Developer
+            - Area Manager
+            - Art Director
+            - Assistant
+            - Assistant Chief Executive
+            - Assistant Director
+            - Assistant Head
+            - Assistant Manager
+            - Assistant Professor
+            - Assistant Scientist
+            - Assistant Vice President
+            - Assistant to Chief Executive Officer
+            - Assistant to Owner
+            - Assistant to Vice President
+            - Assistant to the Chief Financial Officer
+            - Assistant to the President
+            - Associate
+            - Associate Director
+            - Associate Founder
+            - Associate Researcher
+            - Associate Scientist
+            - Attorney
+            - Audit Intern
+            - Bank Employee
+            - Bar Manager
+            - Barista
+            - Bartender
+            - Biologist
+            - Biomedical Equipment Technician
+            - Biomedical Scientist
+            - Blogger
+            - Board Member
+            - Bookkeeper
+            - Branch Manager
+            - Branch Owner
+            - Business Analyst
+            - Business Consultant
+            - Business Development Manager
+            - Business Development Specialist
+            - Business Intelligence Developer
+            - Business Lead
+            - Business Manager
+            - Business Process Owner
+            - Business Specialist
+            - Business System Analyst
+            - Business Unit Manager
+            - Buyer
+            - Carpenter
+            - Cashier
+            - Catering Specialist
+            - Certified Nursing Assistant
+            - Certified Specialist
+            - Chemist
+            - Chief Administrative Officer
+            - Chief Architect
+            - Chief Executive Director
+            - Chief Executive Officer
+            - Chief Financial Officer
+            - Chief Information Officer
+            - Chief Marketing Officer
+            - Chief Officer
+            - Chief Operating Officer
+            - Chief Scientist
+            - Chief Specialist
+            - Chief Technology Officer
+            - Chief of Development
+            - Chief of Staff
+            - Child And Youth Worker
+            - Child Care Specialist
+            - Civil Engineer
+            - Civil Servant
+            - Cleaning Specialist
+            - Clerk
+            - Client Services Representative
+            - Clinical Laboratory Scientist
+            - Clinical Scientist
+            - Co President
+            - Co-Founder
+            - Co-Owner
+            - Communications Specialist
+            - Computer Scientist
+            - Construction Supervisor
+            - Construction Worker
+            - Consultant
+            - Consulting Chief Financial Officer
+            - Contract Specialist
+            - Cook
+            - Coordinator
+            - Coordinator of Volunteers
+            - Corporate Specialist
+            - Creative Director
+            - Credit Analyst
+            - Crew
+            - Crew Chief
+            - Crew Member
+            - Customer Service Representative
+            - Customer Service Specialist
+            - Data Analyst
+            - Data Entry Clerk
+            - Data Scientist
+            - Data Specialist
+            - Database Developer
+            - Delivery Driver
+            - Deputy Chief Executive Officer
+            - Deputy Chief Financial Officer
+            - Deputy Chief Technology Officer
+            - Deputy Head
+            - Design Engineer
+            - Design Specialist
+            - Designer
+            - Developer
+            - Development Intern
+            - Development Scientist
+            - Development Specialist
+            - Digital Specialist
+            - Director
+            - Director General
+            - Director of Business Development
+            - Director of Communications
+            - Director of Development
+            - Director of Engineering
+            - Director of Information Technology
+            - Director of Operations
+            - Director of Quality
+            - Director of Sales Marketing
+            - Director of Services
+            - Director of Youth Ministry
+            - Dishwasher
+            - Disk Jockey
+            - Division Chief Financial Officer
+            - Doctor
+            - Dotnet Developer
+            - Driver
+            - Early Childhood Educator
+            - Editor
+            - Editor in Chief
+            - Editorial Intern
+            - Electrical Engineer
+            - Electrician
+            - Employee
+            - Engineer
+            - Engineer Intern
+            - Engineering Manager
+            - Engineering Specialist
+            - Environmental Scientist
+            - Event Coordinator
+            - Executive
+            - Executive Assistant
+            - Executive Assistant to Chief Executive Officer
+            - Executive Assistant to Chief Financial Officer
+            - Executive Director
+            - Executive Vice President
+            - Field Engineer
+            - Field Specialist
+            - Final Year Student
+            - Finance Intern
+            - Finance Manager
+            - Finance Specialist
+            - Financial Advisor
+            - Financial Analyst
+            - Financial Assistant
+            - Financial Director
+            - Food Server
+            - Food Service Worker
+            - Food Specialist
+            - Foreperson
+            - Former Owner
+            - Founder
+            - Franchise Owner
+            - Freelance
+            - Freelance Journalist
+            - Freelance Writer
+            - Front Desk Staff
+            - Frontend Developer
+            - Game Developer
+            - General
+            - General Manager
+            - Graduate
+            - Graduate Student
+            - Graphic Design Intern
+            - Graphic Designer
+            - Group Chief Executive Officer
+            - Group Chief Financial Officer
+            - Group Lead
+            - Hairstylist
+            - Head
+            - Head Accountant
+            - Head Cashier
+            - Head Chef
+            - Head Coach
+            - Head Engineer
+            - Head Manager
+            - Head of Business Development
+            - Head of Communications
+            - Head of Department
+            - Head of Development
+            - Head of Finance
+            - Head of Human Resources
+            - Head of Information Technology
+            - Head of Marketing
+            - Head of Operations
+            - Head of Product
+            - Head of Production
+            - Head of Quality Assurance
+            - Head of Sales
+            - Head of Section
+            - Head of Service Management
+            - Head of Unit
+            - Healthcare Specialist
+            - Homemaker
+            - Host
+            - Hostess
+            - Housekeeping Specialist
+            - Human Resources Assistant
+            - Human Resources Consultant
+            - Human Resources Coordinator
+            - Human Resources Director
+            - Human Resources Executive
+            - Human Resources Generalist
+            - Human Resources Intern
+            - Human Resources Manager
+            - Human Resources Specialist
+            - Independent Owner
+            - Information Specialist
+            - Information Technology Analyst
+            - Information Technology Consultant
+            - Information Technology Developer
+            - Information Technology Intern
+            - Information Technology Manager
+            - Information Technology Specialist
+            - Inspector
+            - Instructor
+            - Interim Chief Executive Officer
+            - Interim Chief Financial Officer
+            - Interim Chief Technology Officer
+            - Intern
+            - Intern Assistant
+            - International Specialist
+            - Investment Analyst
+            - Investment Specialist
+            - Janitor
+            - Java Software Engineer
+            - Java Specialist
+            - Joint Chief Executive Officer
+            - Joint Owner
+            - Journalist
+            - Journeyperson
+            - Judge
+            - Junior Accountant
+            - Junior Engineer
+            - Junior Software Engineer
+            - Keeper
+            - Key Account
+            - Key Account Executive
+            - Key Account Manager
+            - Key Account Sales Specialist
+            - Keyholder
+            - Kindergarten Teacher
+            - Kitchen Assistant
+            - Kitchen Manager
+            - Kitchen Staff
+            - Knowledge Specialist
+            - Laboratory Assistant
+            - Laboratory Scientist
+            - Laboratory Specialist
+            - Laboratory Technician
+            - Laborer
+            - Law Clerk
+            - Law Specialist
+            - Lawyer
+            - Lead
+            - Lead Consultant
+            - Lead Designer
+            - Lead Engineer
+            - Lead Instructor
+            - Lead Project Manager
+            - Lead Scientist
+            - Lead Software Engineer
+            - Lead Teacher
+            - Lead Technician
+            - Learning Specialist
+            - Lecturer
+            - Legal Assistant
+            - Legal Intern
+            - Legal Secretary
+            - Legal Specialist
+            - Licensed Practical Nurse
+            - Lifeguard
+            - Line Cook
+            - Logistics Coordinator
+            - Logistics Manager
+            - Logistics Specialist
+            - Maintenance Specialist
+            - Makeup Artist
+            - Management Analyst
+            - Management Intern
+            - Manager
+            - Managing Director
+            - Managing Owner
+            - Marine
+            - Marketing Analyst
+            - Marketing And Public Relations Specialist
+            - Marketing Assistant
+            - Marketing Associate
+            - Marketing Communications Manager
+            - Marketing Communications Specialist
+            - Marketing Consultant
+            - Marketing Coordinator
+            - Marketing Director
+            - Marketing Executive
+            - Marketing Intern
+            - Marketing Manager
+            - Marketing Officer
+            - Marketing Representative
+            - Marketing Specialist
+            - Mechanical Engineer
+            - Medical Doctor
+            - Medical Laboratory Scientist
+            - Member
+            - Mental Health Specialist
+            - Moving Company Owner
+            - Nanny
+            - National Account Manager
+            - National Account Specialist
+            - National Sales Manager
+            - National Sales Specialist
+            - Network Administrator
+            - Network Engineer
+            - Network Specialist
+            - Networking Specialist
+            - News Specialist
+            - Nightclub Owner
+            - Nurse
+            - Nurse Practitioner
+            - Nursing Manager
+            - Nursing Specialist
+            - Nutrition Specialist
+            - Office Associate
+            - Office Coordinator
+            - Office Head
+            - Office Manager
+            - Officer
+            - Operational Specialist
+            - Operations Analyst
+            - Operations Coordinator
+            - Operations Intern
+            - Operations Lead
+            - Operations Manager
+            - Operations Team Lead
+            - Operator
+            - Owner
+            - Owner Associate
+            - Owner Support Specialist
+            - PHP Developer
+            - Painter
+            - Partner
+            - Past President
+            - Personal Assistant to Chief Executive Officer
+            - Planning Specialist
+            - Postdoctoral Researcher
+            - President
+            - President of Sales
+            - Principal
+            - Principal Chief Executive Officer
+            - Principal Chief Financial Officer
+            - Principal Owner
+            - Principal Scientist
+            - Process Engineer
+            - Product Analyst
+            - Product Assistant
+            - Product Consultant
+            - Product Designer
+            - Product Developer
+            - Product Development Manager
+            - Product Development Specialist
+            - Product Engineer
+            - Product Management Specialist
+            - Product Manager
+            - Product Marketing Manager
+            - Product Marketing Specialist
+            - Product Owner
+            - Product Specialist
+            - Product Support Specialist
+            - Production Assistant
+            - Production Coordinator
+            - Production Engineer
+            - Production Intern
+            - Production Manager
+            - Production Specialist
+            - Production Supervisor
+            - Professional
+            - Professional Singer
+            - Professor
+            - Program Coordinator
+            - Program Developer
+            - Program Director
+            - Program Lead
+            - Program Manager
+            - Program Specialist
+            - Project Chief
+            - Project Director
+            - Project Engineer
+            - Project Lead
+            - Project Lead Developer
+            - Project Manager
+            - Project Scientist
+            - Project Specialist
+            - Public Relations Intern
+            - Quality Analyst
+            - Quality Assurance Analyst
+            - Quality Assurance Engineer
+            - Quality Assurance Lead
+            - Quality Assurance Manager
+            - Quality Assurance Officer
+            - Quality Assurance Specialist
+            - Quality Assurance Supervisor
+            - Quality Assurance Tester
+            - Quality Control Analyst
+            - Quality Control Engineer
+            - Quality Control Inspector
+            - Quality Control Lead
+            - Quality Coordinator
+            - Quality Engineer
+            - Quality Inspector
+            - Quality Management Specialist
+            - Quality Specialist
+            - Quantity Surveyor
+            - Radiology Nurse
+            - Receptionist
+            - Recruiter
+            - Recruitment Specialist
+            - Regional Chief Financial Officer
+            - Regional Collections Manager
+            - Regional Director
+            - Regional Manager
+            - Regional Sales Manager
+            - Regional Vice President
+            - Registered Nurse
+            - Relationship Manager
+            - Representative
+            - Research Analyst
+            - Research And Development Scientist
+            - Research And Development Specialist
+            - Research Assistant
+            - Research Intern
+            - Researcher
+            - Restaurant Owner
+            - Retail Specialist
+            - Retail Zone Specialist
+            - Retired
+            - Risk Analyst
+            - Sales Analyst
+            - Sales And Marketing Intern
+            - Sales And Marketing Specialist
+            - Sales Assistant
+            - Sales Consultant
+            - Sales Coordinator
+            - Sales Director
+            - Sales Engineer
+            - Sales Executive
+            - Sales Intern
+            - Sales Lead
+            - Sales Manager
+            - Sales Marketing Manager
+            - Sales Specialist
+            - Sales Team Lead
+            - Salesperson
+            - Salon Owner
+            - Scientist
+            - Scout Executive
+            - Secretary
+            - Security Guard
+            - Self Employed
+            - Seller
+            - Senior Analyst
+            - Senior Application Developer
+            - Senior Business Analyst
+            - Senior Business Developer
+            - Senior Consultant
+            - Senior Developer
+            - Senior Engineer
+            - Senior Environmental Scientist
+            - Senior Financial Analyst
+            - Senior Manager
+            - Senior Marketing Manager
+            - Senior Marketing Specialist
+            - Senior Network Engineer
+            - Senior Product Manager
+            - Senior Product Specialist
+            - Senior Project Manager
+            - Senior Quality Assurance Engineer
+            - Senior Quality Assurance Specialist
+            - Senior Scientist
+            - Senior Software Engineer
+            - Senior System Analyst
+            - Senior System Engineer
+            - Senior Team Lead
+            - Senior Underwriter
+            - Senior Vice President
+            - Senior Web Developer
+            - Service Coordinator
+            - Service Engineer
+            - Service Manager
+            - Shift Lead
+            - Shop Owner
+            - Site Engineer
+            - Small Business Owner
+            - Social Worker
+            - Software Engineer
+            - Software Quality Assurance Engineer
+            - Special Assistant to Chief Executive Officer
+            - Specialist
+            - Staff Scientist
+            - Store Manager
+            - Storekeeper
+            - Student
+            - Student Intern
+            - Summer Intern
+            - Supervisor
+            - Support Analyst
+            - Support Specialist
+            - System Administrator
+            - System Analyst
+            - System Developer
+            - System Engineer
+            - System Owner
+            - Teacher
+            - Teaching Assistant
+            - Team Lead
+            - Team Specialist
+            - Technical Analyst
+            - Technical Director
+            - Technical Lead
+            - Technical Specialist
+            - Technical Support Analyst
+            - Technical Support Engineer
+            - Technical Team Lead
+            - Technician
+            - Technology Specialist
+            - Test Analyst
+            - Test Engineer
+            - Test Lead
+            - Trainee
+            - Training Coordinator
+            - Training Specialist
+            - Truck Driver
+            - Tutor
+            - Undergraduate
+            - Undergraduate Research Assistant
+            - Undergraduate Research Fellow
+            - Undergraduate Student
+            - Undergraduate Teaching Assistant
+            - Underwriter
+            - Unemployed
+            - Unit Manager
+            - University Lecturer
+            - User Experience Designer
+            - User Interface Designer
+            - Usher
+            - Utilities Specialist
+            - Vice Chief Executive Officer
+            - Vice President
+            - Vice President Business
+            - Vice President Finance
+            - Vice President Human Resources
+            - Vice President Marketing
+            - Vice President Operations
+            - Vice President Sales Marketing
+            - Vice President Strategy
+            - Vice President of Business Development
+            - Vice President of Development
+            - Vice President of Engineering
+            - Vice President of Products
+            - Vice President of Sales
+            - Vice President of Services
+            - Vice President of Technology
+            - Video Editor
+            - Videographer
+            - Visiting Scientist
+            - Visual Merchandiser
+            - Volunteer
+            - Warehouse Specialist
+            - Web Application Developer
+            - Web Designer
+            - Web Developer
+            - Web Specialist
+            - Website Owner
+            - Welder
+            - Worker
+            - Writer
+            - Xray Technician
+            - Xray Technologist
+            - Year Student
+            - Yoga Instructor
+            - Youth Advisor
+            - Youth Advocate
+            - Youth Care Worker
+            - Youth Coordinator
+            - Youth Counselor
+            - Youth Development Specialist
+            - Youth Director
+            - Youth Intern
+            - Youth Lead
+            - Youth Minister
+            - Youth Pastor
+            - Youth Program Coordinator
+            - Youth Specialist
+            - Youth Worker
+            - Zonal Business Manager
+            - Zonal Head
+            - Zonal Manager
+            - Zonal Sales Manager
+            - Zone Director
+            - Zone Operations Manager
+            - Zone Sales Lead
+            - Zone Sales Manager
+            - Zone Vice President
+            - Zoning Administrator
+            - Zookeeper
+            - Zoologist
+            - Zumba Instructor
+            - iOS Developer
+          description: Filter by job titles (642 supported titles, e.g. Account Executive, Chief Executive Officer, Data Scientist)
+        departments:
+          type: array
+          items:
+            type: string
+            enum:
+            - Accounting
+            - Administrative
+            - Arts and Design
+            - Business Development
+            - Community and Social Services
+            - Consulting
+            - Customer Success and Support
+            - Education
+            - Engineering
+            - Entrepreneurship
+            - Finance
+            - Healthcare Services
+            - Human Resources
+            - Information Technology
+            - Legal
+            - Marketing
+            - Media and Communication
+            - Military and Protective Services
+            - Operations
+            - Product Management
+            - Program and Project Management
+            - Purchasing
+            - Quality Assurance
+            - Real Estate
+            - Research
+            - Sales
+          description: Filter by department, returns breakdown for selected departments (26 supported)
+        levels:
+          type: array
+          items:
+            type: string
+            enum:
+            - CXO
+            - Director
+            - Entry Level
+            - Entry Level Manager
+            - Experienced Manager
+            - In Training
+            - Owner / Partner
+            - Senior
+            - Strategic
+            - Vice President
+          description: Filter by seniority level, returns breakdown for selected levels (10 supported)
+      x-apidog-orders:
+      - companyUrl
+      - countries
+      - states
+      - jobTitles
+      - departments
+      - levels
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    StartCountEstimateResponse_2:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/StartCountEstimateData_2'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsUsed:
+              type: number
+              description: Credits consumed (100, or 0 if from cache)
+            creditsRemaining:
+              type: number
+              description: Remaining credit balance
+          x-apidog-orders:
+          - requestId
+          - creditsUsed
+          - creditsRemaining
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    StartCountEstimateData_2:
+      type: object
+      required:
+      - batchId
+      - status
+      properties:
+        batchId:
+          type: string
+          description: Unique batch ID for this estimation
+        status:
+          type: string
+          enum:
+          - pending
+          - completed
+          description: Job status — pending (queued) or completed (from cache)
+        message:
+          type: string
+          description: Human-readable status message
+        fromCache:
+          type: boolean
+          description: Whether result was served from cache (no credits charged)
+        cachedAt:
+          type: string
+          format: date-time
+          description: When the cached result was originally computed
+        data:
+          $ref: '#/components/schemas/CountEstimateResultData_2'
+          description: Result data (only present if returned from cache)
+      x-apidog-orders:
+      - batchId
+      - status
+      - message
+      - fromCache
+      - cachedAt
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    CountEstimateStatusData_2:
+      type: object
+      required:
+      - batchId
+      - status
+      - companyUrl
+      - createdAt
+      properties:
+        batchId:
+          type: string
+          description: Batch ID
+        status:
+          type: string
+          enum:
+          - pending
+          - in_progress
+          - completed
+          - failed
+          - cancelled
+          description: Current job status
+        companyUrl:
+          type: string
+          description: LinkedIn company URL
+        message:
+          type: string
+          description: Human-readable status message
+        createdAt:
+          type: string
+          format: date-time
+          description: When the job was created
+        completedAt:
+          type: string
+          format: date-time
+          description: When the job completed
+          nullable: true
+        data:
+          $ref: '#/components/schemas/CountEstimateResultData_2'
+          description: Result data (when completed)
+      x-apidog-orders:
+      - batchId
+      - status
+      - companyUrl
+      - message
+      - createdAt
+      - completedAt
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+  securitySchemes:
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
+    BearerToken:
+      type: http
+      scheme: bearer
+      description: 'The same API key sent as an Authorization: Bearer token.'
+    apiKey:
+      type: apikey
+      name: x-api-key
+      in: header
+      description: 'Your API key. Keys start with `sk_live_` and are 64 characters long.
+
+        '
+    bearerAuth:
+      type: bearer
+      scheme: bearer
+      description: 'Alternative — send the same key as a Bearer token:
+
+        `Authorization: Bearer sk_live_...`
+
+        '
+x-refined-from:
+- enrich-so-company-intelligence-api-openapi.yml
+- enrich-so-v3-harvested-openapi.yml

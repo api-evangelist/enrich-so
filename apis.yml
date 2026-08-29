@@ -473,6 +473,56 @@ apis:
     url: collections/enrich-so-person-enrichment-api.opencollection.json
   - type: APIReference
     url: https://api.enrich.so/docs
+- aid: enrich-so:enrich-so-account-api
+  name: Enrich Account API
+  description: Credit balance and transaction history.
+  humanURL: https://doc.enrich.so/find-a-professional-email-27483195e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Account
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-account-api-openapi.yml
+- aid: enrich-so:enrich-so-company-intelligence-api
+  name: Enrich Company Intelligence API
+  description: IP-to-company resolution and LinkedIn company-follower scraping.
+  humanURL: https://doc.enrich.so/find-a-professional-email-27483195e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Company Intelligence
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-company-intelligence-api-openapi.yml
+- aid: enrich-so:enrich-so-email-verification-api
+  name: Enrich Email Verification API
+  description: Validate email addresses for deliverability.
+  humanURL: https://doc.enrich.so/find-a-professional-email-27483195e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Email Verification
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-email-verification-api-openapi.yml
+- aid: enrich-so:enrich-so-person-enrichment-api
+  name: Enrich Person Enrichment API
+  description: Reverse email lookup returning a person's professional profile.
+  humanURL: https://doc.enrich.so/find-a-professional-email-27483195e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Person Enrichment
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-person-enrichment-api-openapi.yml
+- aid: enrich-so:enrich-so-webhooks-api
+  name: Enrich Webhooks API
+  description: The Webhooks API from Enrich — 0 operation(s) for webhooks.
+  humanURL: https://doc.enrich.so/find-a-professional-email-27483195e0
+  baseURL: https://dev.enrich.so/api/v3
+  tags:
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/enrich-so-webhooks-api-openapi.yml
 common:
 - type: Overlay
   url: overlays/enrich-so-account-overlay.yaml

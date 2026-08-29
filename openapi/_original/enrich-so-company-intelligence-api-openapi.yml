@@ -1,0 +1,3407 @@
+openapi: 3.1.0
+info:
+  title: Enrich Company Intelligence API
+  description: 'IP-to-company resolution (single and batch) and LinkedIn company-follower scraping with
+    audience count estimation.
+
+
+    Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so
+    — every documentation page embeds its own OpenAPI fragment, and this document is the union of the
+    fragments carrying these tags, with only the components they reference.'
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms-of-service
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+security:
+- ApiKeyHeader: []
+- BearerToken: []
+tags:
+- name: Company Followers
+- name: Company Followers/Count Estimation
+- name: IP to Company
+paths:
+  /company-follower:
+    post:
+      summary: Continue company follower scrape
+      deprecated: false
+      description: '> **Access required** — approved accounts only. [Contact us](https://enrich.so) to
+        request access.
+
+
+        Continue an under-delivered **partial** company-follower scrape to fill the gap. Re-runs **only**
+        the filter combinations that under-delivered on the original run and appends the new profiles
+        to the **same batch** (already-collected profiles are kept and de-duplicated within the batch).
+
+
+        **How to call:** POST to this same `/company-follower` endpoint with the original batch id as
+        the `batchId` query parameter and an **empty body**. The presence of `batchId` switches the endpoint
+        from “start a new scrape” to “continue”.
+
+
+        **Eligibility:** only a batch whose status is `partial` and that is **less than 3 days old** can
+        be continued (after 3 days the per-filter diagnostics used to target the gap have expired → `410
+        Gone`). A fully `completed` batch, or one already being continued, returns `409 Conflict`. If
+        nothing is recoverable (every filter already delivered, or the remaining gap is unreachable) you
+        get `422`.
+
+
+        **Cost:** credits are reserved only for the recoverable **additional** profiles — not the whole
+        batch again — under a separate reservation. On settle you are charged for the profiles the continue
+        actually added and refunded the rest.
+
+
+        **Polling & results:** keep using the **same** `batchId` with the progress and results endpoints;
+        the continue tops up that same batch.
+
+        '
+      operationId: continueCompanyFollowerScrape
+      tags:
+      - Company Followers
+      parameters:
+      - name: batchId
+        in: query
+        description: The batch id of the PARTIAL scrape you want to continue. Its presence switches this
+          endpoint from 'start a new scrape' to 'continue (fill the gap)'.
+        required: true
+        example: 665a1f4e2c3b7800129dce01
+        schema:
+          type: string
+          minLength: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: No body required — send an empty object. All filters are inherited from the
+                original batch.
+              properties: {}
+            example: {}
+      responses:
+        '200':
+          description: Continue accepted — the gap scrape has been queued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartCompanyFollowerResponse'
+              example:
+                success: true
+                data:
+                  batchId: 665a1f4e2c3b7800129dce01
+                  message: Continuing scrape for the remaining 7076 profile(s).
+                  estimatedAdditional: 7076
+                meta:
+                  requestId: 664f2b3c9a1e4d0012abcdef
+                  creditsReserved: 707600
+                  creditsPerItem: 100
+          headers: {}
+        '400':
+          description: Missing batchId or team context.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Short error class, e.g. "Conflict", "Gone".
+                  message:
+                    type: string
+                    description: Human-readable explanation.
+                required:
+                - error
+                - message
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid.
+          content:
+            application/json:
+              schema: &id001
+                $ref: '#/components/schemas/ErrorEnvelope'
+          headers: {}
+        '402':
+          description: Not enough credits to reserve the recoverable gap.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Short error class, e.g. "Conflict", "Gone".
+                  message:
+                    type: string
+                    description: Human-readable explanation.
+                required:
+                - error
+                - message
+              example:
+                error: Payment Required
+                message: Insufficient credits
+                detail:
+                  required: 707600
+                  itemCount: 7076
+          headers: {}
+        '404':
+          description: No batch with that id belongs to your team.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Short error class, e.g. "Conflict", "Gone".
+                  message:
+                    type: string
+                    description: Human-readable explanation.
+                required:
+                - error
+                - message
+              example:
+                error: Not Found
+                message: Job not found
+          headers: {}
+        '409':
+          description: The batch is not partial (nothing to continue), a continue is already in progress,
+            or the scrape is still running.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Short error class, e.g. "Conflict", "Gone".
+                  message:
+                    type: string
+                    description: Human-readable explanation.
+                required:
+                - error
+                - message
+              example:
+                error: Conflict
+                message: This scrape completed fully — there is nothing to continue.
+          headers: {}
+        '410':
+          description: The batch is older than 3 days — the diagnostics needed to target the gap have
+            expired. Start a fresh scrape instead.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Short error class, e.g. "Conflict", "Gone".
+                  message:
+                    type: string
+                    description: Human-readable explanation.
+                required:
+                - error
+                - message
+              example:
+                error: Gone
+                message: Continue is only available within 3 days of the scrape. Start a fresh scrape
+                  instead.
+          headers: {}
+        '422':
+          description: 'Nothing is recoverable: every filter already delivered, or the remaining gap is
+            unreachable.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Short error class, e.g. "Conflict", "Gone".
+                  message:
+                    type: string
+                    description: Human-readable explanation.
+                required:
+                - error
+                - message
+              example:
+                error: Unprocessable Entity
+                message: Every filter fully delivered — the remaining gap is unclassified followers that
+                  no filter can reach (not recoverable by re-running).
+          headers: {}
+        '429':
+          description: Rate limit exceeded.
+          content:
+            application/json:
+              schema: *id001
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-40599317-run
+  /company-follower/limit:
+    get:
+      summary: Check daily scraping limit
+      deprecated: false
+      description: 'Check your team''s daily company follower scraping limit and current usage. No credits
+        consumed.
+
+
+        **Possible statuses:**
+
+        - `approved` — Team has access; `creditsPerProfile`, `dailyLimit`, `dailyUsed`, and `dailyRemaining`
+        are included.
+
+        - `pending` — Application is under review.
+
+        - `rejected` — Application was rejected.
+
+        - `revoked` — Access was revoked.
+
+        - `none` — No application on file.
+
+        '
+      operationId: checkCompanyFollowerLimit
+      tags:
+      - Company Followers
+      parameters: []
+      responses:
+        '200':
+          description: Returns the team's current access status and daily limit info. For approved teams,
+            includes dailyLimit, dailyUsed, and dailyRemaining. For non-approved statuses (none, pending,
+            rejected, revoked), only the status field is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                    - true
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        description: 'Access status: approved, pending, rejected, revoked, or none'
+                        examples:
+                        - approved
+                      dailyLimit:
+                        type: integer
+                        description: Maximum profiles allowed per day
+                        examples:
+                        - 5000
+                      dailyUsed:
+                        type: integer
+                        description: Profiles used today
+                        examples:
+                        - 1200
+                      dailyRemaining:
+                        type: integer
+                        description: Profiles remaining today
+                        examples:
+                        - 3800
+                      creditsPerProfile:
+                        type: integer
+                        description: Credit cost per follower profile for your team
+                        examples:
+                        - 100
+                    required:
+                    - status
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                required:
+                - success
+                - data
+              examples:
+                '1':
+                  summary: Approved team
+                  value:
+                    success: true
+                    data:
+                      status: approved
+                      creditsPerProfile: 100
+                      dailyLimit: 5000
+                      dailyUsed: 1200
+                      dailyRemaining: 3800
+                    meta:
+                      requestId: 664f2b3c9a1e4d0012abcdef
+                '2':
+                  summary: No access
+                  value:
+                    success: true
+                    data:
+                      status: none
+                    meta:
+                      requestId: 664f2b3c9a1e4d0012abcdef
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id002
+                $ref: '#/components/schemas/ErrorEnvelope'
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id002
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id002
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27814759-run
+  /company-follower/{batchId}/export:
+    get:
+      summary: Export results as CSV
+      deprecated: false
+      description: '> **Access required** — This endpoint is available to approved accounts only. [Contact
+        us](https://enrich.so) to request access.
+
+
+        Download scrape results as a CSV file. Batch must be complete. No credits consumed.
+
+        '
+      operationId: exportCompanyFollowerCsv
+      tags:
+      - Company Followers
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch identifier returned when you started the scrape
+        required: true
+        example: 665a1f4e2c3b7800129dce01
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: CSV file download containing all follower profiles
+          content:
+            text/csv:
+              schema:
+                type: string
+          headers:
+            Content-Type:
+              example: text/csv
+              required: false
+              description: ''
+              schema:
+                type: string
+            Content-Disposition:
+              example: attachment; filename="followers-665a1f4e2c3b7800129dce01.csv"
+              required: false
+              description: ''
+              schema:
+                type: string
+        '400':
+          description: Batch is not yet complete. Wait for the scrape to finish before exporting.
+          content:
+            application/json:
+              schema: &id003
+                $ref: '#/components/schemas/ErrorEnvelope'
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id003
+          headers: {}
+        '404':
+          description: The resource you requested doesn't exist or doesn't belong to your organization
+          content:
+            application/json:
+              schema: *id003
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id003
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27730401-run
+  /company-follower/{batchId}/progress:
+    get:
+      summary: Check scrape progress
+      deprecated: false
+      description: '> **Access required** — This endpoint is available to approved accounts only. [Contact
+        us](https://enrich.so) to request access.
+
+
+        Poll this endpoint to track the progress of your company follower scrape.
+
+
+        **Cost:** Free — polling never costs credits.
+
+        '
+      operationId: getCompanyFollowerProgress
+      tags:
+      - Company Followers
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch identifier returned when you started the scrape
+        required: true
+        example: 665a1f4e2c3b7800129dce01
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: Current scrape progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyFollowerProgressResponse'
+              example:
+                success: true
+                data:
+                  batchId: 665a1f4e2c3b7800129dce01
+                  processed: 125
+                  total: 500
+                  errors: 0
+                  done: false
+                  message: Fetching profiles... 25% complete (125/500)
+                meta:
+                  requestId: 664f2b3c9a1e4d0012abcdef
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id004
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '404':
+          description: The resource you requested doesn't exist or doesn't belong to your organization
+          content:
+            application/json:
+              schema: *id004
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: No batch found with that ID
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id004
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27728072-run
+  /company-follower/{batchId}/results:
+    get:
+      summary: Get scrape results
+      deprecated: false
+      description: '> **Access required** This endpoint is available to approved accounts only. [Contact
+        us](https://enrich.so) to request access.
+
+
+        Returns paginated follower profiles for a completed batch. Use `page` and `limit` query params
+        to paginate through results.
+
+
+        Credits are charged upfront when you start the scrape. If fewer profiles are found than `max_limit`,
+        unused credits are refunded automatically.
+
+
+        If you provided a `webhookUrl`, results are already delivered via webhooks and credits are auto-settled.
+        No need to call this endpoint.
+
+
+        Only call this after the progress endpoint reports `done: true`.
+
+        '
+      operationId: getCompanyFollowerResults
+      tags:
+      - Company Followers
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch identifier returned when you started the scrape
+        required: true
+        example: 665a1f4e2c3b7800129dce01
+        schema:
+          type: string
+          minLength: 1
+      - name: page
+        in: query
+        description: 'Page number (default: 1)'
+        required: false
+        example: 1
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: limit
+        in: query
+        description: 'Results per page, max 500 (default: 100)'
+        required: false
+        example: 100
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 100
+      responses:
+        '200':
+          description: Follower profiles retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyFollowerResultsResponse'
+              example:
+                success: true
+                data:
+                  batchId: 665a1f4e2c3b7800129dce01
+                  count: 100
+                  data:
+                  - objectURN: urn:li:member:123456
+                    name: Sarah Chen
+                    firstName: Sarah
+                    lastName: Chen
+                    profileUrl: https://linkedin.com/in/sarahchen
+                    title: Senior Software Engineer
+                    companyName: Stripe
+                    location: San Francisco, CA
+                    connectionDegree: 2
+                    isPremium: false
+                    isOpenProfile: true
+                  pagination:
+                    page: 1
+                    limit: 100
+                    total: 342
+                    totalPages: 4
+                meta:
+                  requestId: 664f2b3c9a1e4d0012abcdef
+                  creditsUsed: 34200
+                  creditsRefunded: 15800
+                  creditsRemaining: 0
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id005
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '404':
+          description: The resource you requested doesn't exist or doesn't belong to your organization
+          content:
+            application/json:
+              schema: *id005
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: No batch found with that ID
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id005
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27728073-run
+  /count-estimate:
+    post:
+      summary: Start count estimation
+      deprecated: false
+      description: '> **Access required** — This endpoint is available to approved accounts only. [Contact
+        us](https://enrich.so) to request access.
+
+
+        Starts an asynchronous count estimation job. Returns the estimated number of followers matching
+        your filters, with optional breakdowns by department and seniority.
+
+
+        **Cost:** 100 credits (fixed). Cached results for the same company + filters within 24 hours are
+        free.
+
+
+        **Results:** Poll the status endpoint to get results. Typically completes within 30–60 seconds.
+
+        '
+      operationId: startCountEstimate
+      tags:
+      - Company Followers
+      - Company Followers/Count Estimation
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountEstimateRequest'
+            example:
+              companyUrl: https://linkedin.com/company/stripe
+              departments:
+              - Engineering
+              - Sales
+      responses:
+        '200':
+          description: Count estimation job started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartCountEstimateResponse'
+              example:
+                success: true
+                data:
+                  batchId: 665b2a3f4c5d6e0013fgh002
+                  status: pending
+                  message: Count estimation job started. Results typically available within 30-60 seconds.
+                meta:
+                  requestId: 664f2b3c9a1e4d0012abcdef
+                  creditsUsed: 100
+                  creditsRemaining: 24900
+          headers: {}
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema: &id006
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: body/companyUrl Invalid url
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: *id006
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '402':
+          description: You don't have enough credits for this request
+          content:
+            application/json:
+              schema: *id006
+              example:
+                type: https://dev.enrich.so/errors/insufficient-credits
+                title: Insufficient Credits
+                status: 402
+                detail: 'Not enough credits. Required: 100, available: 3'
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id006
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema: *id006
+              example:
+                type: https://dev.enrich.so/errors/internal-error
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred. Please try again later.
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27728074-run
+  /count-estimate/{batchId}:
+    get:
+      summary: Get estimation status/results
+      deprecated: false
+      description: '> **Access required** — This endpoint is available to approved accounts only. [Contact
+        us](https://enrich.so) to request access.
+
+
+        Check the status of a count estimation job and retrieve results when complete.
+
+
+        **Cost:** Free — polling never costs credits.
+
+
+        **Refunds:** If the job fails within 7 days, the 100 credits are refunded automatically on the
+        next status check.
+
+        '
+      operationId: getCountEstimateStatus
+      tags:
+      - Company Followers
+      - Company Followers/Count Estimation
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch identifier returned when you started the estimation
+        required: true
+        example: 665b2a3f4c5d6e0013fgh002
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: Estimation status and results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountEstimateStatusResponse'
+              example:
+                success: true
+                data:
+                  batchId: 665b2a3f4c5d6e0013fgh002
+                  status: completed
+                  companyUrl: https://linkedin.com/company/stripe
+                  message: Count estimation complete. Found 8542 followers matching your criteria.
+                  createdAt: '2025-06-03T14:30:00.000Z'
+                  completedAt: '2025-06-03T14:31:15.000Z'
+                  data:
+                    totalCount: 8542
+                    functionBreakdown:
+                    - functionName: Engineering
+                      functionId: '8'
+                      count: 3200
+                      percentage: 37.5
+                    - functionName: Sales
+                      functionId: '25'
+                      count: 1850
+                      percentage: 21.7
+                    filtersApplied:
+                      departments:
+                      - Engineering
+                      - Sales
+                meta:
+                  requestId: 664f2b3c9a1e4d0012abcdef
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id007
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '404':
+          description: The resource you requested doesn't exist or doesn't belong to your organization
+          content:
+            application/json:
+              schema: *id007
+              example:
+                type: https://dev.enrich.so/errors/not-found
+                title: Not Found
+                status: 404
+                detail: No batch found with that ID
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id007
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              required: false
+              description: ''
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              required: false
+              description: ''
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27728075-run
+  /ip-to-company:
+    post:
+      summary: Resolve company from IP
+      deprecated: false
+      description: 'Resolves company, organization, and geolocation info from an IP address. Results are
+        cached for 7 days.
+
+
+        **Cost:** 100 credits. You are **not** charged if no domain is found (i.e. `ipDomain` is absent
+        from the response).
+
+        '
+      operationId: ipToCompany
+      tags:
+      - IP to Company
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - ip
+              properties:
+                ip:
+                  type: string
+                  minLength: 1
+                  maxLength: 45
+                  description: IPv4 or IPv6 address to look up
+            example:
+              ip: 8.8.8.8
+      responses:
+        '200':
+          description: Domain resolved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      searchIp:
+                        type: string
+                      ipDomain:
+                        type: string
+                      ipOrganization:
+                        type: string
+                      ipCountryName:
+                        type: string
+                      ipCountryCode:
+                        type: string
+                      ipRegionName:
+                        type: string
+                      ipCity:
+                        type: string
+                      ipSubContinent:
+                        type: string
+                      ipLatitude:
+                        type: number
+                      ipLongitude:
+                        type: number
+                      ipTimezone:
+                        type: string
+                      ipIsp:
+                        type: string
+                      ipRange:
+                        type: string
+                      ipUsageType:
+                        type: string
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                      creditsUsed:
+                        type: integer
+                      creditsRemaining:
+                        type: integer
+              example:
+                success: true
+                data:
+                  searchIp: 8.8.8.8
+                  ipDomain: google.com
+                  ipOrganization: Google LLC
+                  ipCountryName: United States
+                  ipCountryCode: US
+                  ipRegionName: California
+                  ipCity: Mountain View
+                  ipSubContinent: Northern America
+                  ipLatitude: 37.386
+                  ipLongitude: -122.0838
+                  ipTimezone: America/Los_Angeles
+                  ipIsp: Google LLC
+                  ipRange: 8.8.8.0/24
+                  ipUsageType: DCH
+                meta:
+                  requestId: 664f2b3c9a1e4d0012abcdef
+                  creditsUsed: 100
+                  creditsRemaining: 4900
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: '"ip" must be a non-empty string'
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Unauthorized
+                message: The API key provided is invalid or has been revoked
+                statusCode: 401
+          headers: {}
+        '402':
+          description: You don’t have enough credits for this request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Payment Required
+                message: 'Not enough credits. Required: 100, available: 0'
+                statusCode: 402
+          headers: {}
+        '429':
+          description: You’ve sent too many requests — wait and try again
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Too Many Requests
+                message: Rate limit exceeded. Please retry after 30 seconds.
+                statusCode: 429
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Internal Server Error
+                message: An unexpected error occurred. Please try again later.
+                statusCode: 500
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511038-run
+  /ip-to-company/batch:
+    post:
+      summary: Submit batch IP to company lookup
+      deprecated: false
+      description: 'Submit up to **500 000 IPs** in a single request for async company lookup. Duplicates
+        are removed automatically before processing.
+
+
+        **Cost:** 100 credits per unique IP, reserved when you submit. Credits are charged based on found
+        domains when you fetch results — any excess is refunded automatically.
+
+        '
+      operationId: batchIpToCompany
+      tags:
+      - IP to Company
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - ips
+              properties:
+                ips:
+                  type: array
+                  minItems: 1
+                  maxItems: 500000
+                  items:
+                    type: object
+                    required:
+                    - ip
+                    properties:
+                      ip:
+                        type: string
+                        minLength: 1
+                        maxLength: 45
+                  description: Array of IP addresses to look up
+            example:
+              ips:
+              - ip: 8.8.8.8
+              - ip: 1.1.1.1
+              - ip: 104.16.132.229
+      responses:
+        '200':
+          description: Batch submitted — credits have been reserved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      batchId:
+                        type: string
+                      status:
+                        type: string
+                      itemCount:
+                        type: integer
+                      originalCount:
+                        type: integer
+                      duplicatesRemoved:
+                        type: integer
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                      creditsReserved:
+                        type: integer
+                      creditsPerItem:
+                        type: integer
+                      estimatedCredits:
+                        type: integer
+              example:
+                success: true
+                data:
+                  batchId: 550e8400-e29b-41d4-a716-446655440000
+                  status: processing
+                  itemCount: 3
+                  originalCount: 3
+                  duplicatesRemoved: 0
+                meta:
+                  requestId: 665a1f4e2c3b7800129dce00
+                  creditsReserved: 300
+                  creditsPerItem: 100
+                  estimatedCredits: 300
+          headers: {}
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: '"ips" must be a non-empty array'
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Unauthorized
+                message: The API key provided is invalid or has been revoked
+                statusCode: 401
+          headers: {}
+        '402':
+          description: You don’t have enough credits — `detail.required` shows how many are needed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  detail:
+                    type: object
+                    properties:
+                      required:
+                        type: integer
+                      itemCount:
+                        type: integer
+                      creditCostPerItem:
+                        type: integer
+              example:
+                error: Payment Required
+                message: Insufficient credits for batch operation
+                detail:
+                  required: 50000
+                  itemCount: 500
+                  creditCostPerItem: 100
+                statusCode: 402
+          headers: {}
+        '409':
+          description: Duplicate batch submission
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Conflict
+                message: Duplicate batch submission detected
+                statusCode: 409
+          headers: {}
+        '429':
+          description: You’ve sent too many requests — wait and try again
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Too Many Requests
+                message: Rate limit exceeded. Please retry after 30 seconds.
+                statusCode: 429
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Internal Server Error
+                message: An unexpected error occurred. Please try again later.
+                statusCode: 500
+          headers: {}
+        '503':
+          description: Database or credit service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Service Unavailable
+                message: The service is temporarily unavailable. Please try again later.
+                statusCode: 503
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511039-run
+  /ip-to-company/batch/{batchId}:
+    get:
+      summary: Check batch progress
+      deprecated: false
+      description: 'Poll this endpoint to track your batch. `progress` is a percentage (0–100) and `status`
+        will be `processing`, `completed`, or `failed`.
+
+
+        **Cost:** Free — polling never costs credits.
+
+        '
+      operationId: getIpToCompanyBatchStatus
+      tags:
+      - IP to Company
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch identifier returned when you submitted the job
+        required: true
+        example: 550e8400-e29b-41d4-a716-446655440000
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: Current batch status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      batchId:
+                        type: string
+                      status:
+                        type: string
+                      totalItems:
+                        type: integer
+                      processedItems:
+                        type: integer
+                      foundCount:
+                        type: integer
+                      progress:
+                        type: integer
+                      createdAt:
+                        type: string
+                      completedAt:
+                        type: string
+                        nullable: true
+              example:
+                success: true
+                data:
+                  batchId: 550e8400-e29b-41d4-a716-446655440000
+                  status: processing
+                  totalItems: 3
+                  processedItems: 1
+                  foundCount: 1
+                  progress: 33
+                  createdAt: '2026-05-13T10:00:00.000Z'
+                  completedAt: null
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Unauthorized
+                message: The API key provided is invalid or has been revoked
+                statusCode: 401
+          headers: {}
+        '404':
+          description: The resource you requested doesn’t exist or doesn’t belong to your organization
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Not Found
+                message: No batch found with that ID
+                statusCode: 404
+          headers: {}
+        '429':
+          description: You’ve sent too many requests — wait and try again
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Too Many Requests
+                message: Rate limit exceeded. Please retry after 30 seconds.
+                statusCode: 429
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511040-run
+  /ip-to-company/batch/{batchId}/results:
+    get:
+      summary: Get batch results
+      deprecated: false
+      description: 'Fetch results once your batch has finished. Results are paginated — use `page` and
+        `limit` to walk through them.
+
+
+        **Credit settlement:** The first time you call this after the batch reaches `completed` or `failed`,
+        we calculate the final cost (100 credits per IP where a domain was found) and refund any excess.
+        Subsequent calls return the cached settlement — you are never double-charged.
+
+        '
+      operationId: getIpToCompanyBatchResults
+      tags:
+      - IP to Company
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch identifier returned when you submitted the job
+        required: true
+        example: 550e8400-e29b-41d4-a716-446655440000
+        schema:
+          type: string
+          minLength: 1
+      - name: page
+        in: query
+        description: 'Page number (default: 1)'
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: limit
+        in: query
+        description: 'Results per page (default: 100, max: 1 000)'
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      responses:
+        '200':
+          description: Paginated IP to Company results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      batchId:
+                        type: string
+                      status:
+                        type: string
+                      totalItems:
+                        type: integer
+                      processedCount:
+                        type: integer
+                      foundCount:
+                        type: integer
+                      results:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            searchIp:
+                              type: string
+                            ipDomain:
+                              type: string
+                              nullable: true
+                            ipOrganization:
+                              type: string
+                            ipCountryName:
+                              type: string
+                            ipCountryCode:
+                              type: string
+                            ipCity:
+                              type: string
+                            ipTimezone:
+                              type: string
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                      creditsUsed:
+                        type: integer
+                      creditsRefunded:
+                        type: integer
+                      creditsRemaining:
+                        type: integer
+                      totalItems:
+                        type: integer
+                      processedItems:
+                        type: integer
+              example:
+                success: true
+                data:
+                  batchId: 550e8400-e29b-41d4-a716-446655440000
+                  status: completed
+                  totalItems: 3
+                  processedCount: 3
+                  foundCount: 2
+                  results:
+                  - searchIp: 8.8.8.8
+                    ipDomain: google.com
+                    ipOrganization: Google LLC
+                    ipCountryName: United States
+                    ipCountryCode: US
+                    ipCity: Mountain View
+                    ipTimezone: America/Los_Angeles
+                  - searchIp: 1.1.1.1
+                    ipDomain: cloudflare.com
+                    ipOrganization: Cloudflare Inc
+                    ipCountryName: Australia
+                    ipCountryCode: AU
+                    ipCity: Sydney
+                    ipTimezone: Australia/Sydney
+                  - searchIp: 104.16.132.229
+                    ipDomain: null
+                    ipOrganization: Cloudflare Inc
+                  page: 1
+                  limit: 100
+                meta:
+                  requestId: 665a23bc2c3b7800129dce10
+                  creditsUsed: 200
+                  creditsRefunded: 100
+                  creditsRemaining: 4700
+                  totalItems: 3
+                  processedItems: 3
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Unauthorized
+                message: The API key provided is invalid or has been revoked
+                statusCode: 401
+          headers: {}
+        '404':
+          description: The resource you requested doesn’t exist or doesn’t belong to your organization
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Not Found
+                message: No batch found with that ID
+                statusCode: 404
+          headers: {}
+        '429':
+          description: You’ve sent too many requests — wait and try again
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Too Many Requests
+                message: Rate limit exceeded. Please retry after 30 seconds.
+                statusCode: 429
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511041-run
+components:
+  schemas:
+    CompanyFollowerProgressData:
+      type: object
+      required:
+      - batchId
+      - processed
+      - total
+      - errors
+      - done
+      properties:
+        batchId:
+          type: string
+          description: Batch ID for this scrape job
+        processed:
+          type: integer
+          description: Number of profiles processed so far
+        total:
+          type: integer
+          description: Total profiles to process (-1 if unknown yet)
+        errors:
+          type: integer
+          description: Number of errors encountered
+        done:
+          type: boolean
+          description: Whether scraping is complete
+        partial:
+          type: boolean
+          description: True when the scrape finished but under-collected followers — a filter (or the
+            overall total) delivered fewer results than expected beyond the allowed tolerance. The profiles
+            returned are valid; re-run the scrape (optionally with skipCache) to fill the gap.
+        message:
+          type: string
+          description: Human-readable status message
+    CompanyFollowerProgressResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/CompanyFollowerProgressData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+    CompanyFollowerResultsData:
+      type: object
+      required:
+      - batchId
+      - count
+      - data
+      - pagination
+      properties:
+        batchId:
+          type: string
+          description: Batch ID for this scrape job
+        count:
+          type: integer
+          description: Number of follower profiles in this page
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/FollowerProfile'
+          description: Array of follower profiles
+        pagination:
+          type: object
+          required:
+          - page
+          - limit
+          - total
+          - totalPages
+          description: Pagination metadata
+          properties:
+            page:
+              type: integer
+              description: Current page number
+            limit:
+              type: integer
+              description: Results per page
+            total:
+              type: integer
+              description: Total number of follower profiles
+            totalPages:
+              type: integer
+              description: Total number of pages
+    CompanyFollowerResultsResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/CompanyFollowerResultsData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsUsed:
+              type: number
+              description: Credits consumed (count × creditsPerItem)
+            creditsRefunded:
+              type: number
+              description: Excess credits refunded
+            creditsRemaining:
+              type: number
+              description: Remaining credit balance
+    CountEstimateRequest:
+      type: object
+      required:
+      - companyUrl
+      properties:
+        companyUrl:
+          type: string
+          format: uri
+          description: The LinkedIn company URL to estimate follower count for
+          examples:
+          - https://linkedin.com/company/stripe
+        countries:
+          type: array
+          items:
+            type: string
+            enum:
+            - Argentina
+            - Australia
+            - Austria
+            - Bangladesh
+            - Belgium
+            - Brazil
+            - Canada
+            - Chile
+            - China
+            - Colombia
+            - Czech Republic
+            - Denmark
+            - Egypt
+            - Finland
+            - France
+            - Germany
+            - Ghana
+            - Greece
+            - Hong Kong SAR
+            - Hungary
+            - India
+            - Indonesia
+            - Ireland
+            - Israel
+            - Italy
+            - Japan
+            - Kenya
+            - Luxembourg
+            - Malaysia
+            - Mexico
+            - Morocco
+            - Nepal
+            - Netherlands
+            - New Zealand
+            - Nigeria
+            - Norway
+            - Pakistan
+            - Peru
+            - Philippines
+            - Poland
+            - Portugal
+            - Romania
+            - Russia
+            - Saudi Arabia
+            - Singapore
+            - South Africa
+            - South Korea
+            - Spain
+            - Sri Lanka
+            - Sweden
+            - Switzerland
+            - Thailand
+            - Turkey
+            - Ukraine
+            - United Arab Emirates
+            - United Kingdom
+            - United States
+            - Vietnam
+          description: Filter by country names (57 supported countries)
+        states:
+          type: array
+          items:
+            type: string
+            enum:
+            - Aargau
+            - Abruzzo
+            - Abu Dhabi
+            - Abuja
+            - Aichi
+            - Ajman
+            - Alabama
+            - Alaska
+            - Alberta
+            - Alexandria
+            - Amazonas
+            - Andalusia
+            - Andhra Pradesh
+            - Ankara
+            - Antalya
+            - Antioquia
+            - Aragon
+            - Arequipa
+            - Arizona
+            - Arkansas
+            - Arunachal Pradesh
+            - Asir
+            - Assam
+            - Asturias
+            - Atlántico
+            - Attica
+            - Auckland
+            - Australian Capital Territory
+            - Auvergne-Rhône-Alpes
+            - Baden-Württemberg
+            - Bahia
+            - Baja California
+            - Balearic Islands
+            - Bali
+            - Balochistan
+            - Bangkok
+            - Basel-Stadt
+            - Basque Country
+            - Bavaria
+            - Beijing
+            - Berlin
+            - Bern
+            - Bihar
+            - Biobío
+            - Bogotá
+            - Bourgogne-Franche-Comté
+            - Braga
+            - Brandenburg
+            - Bremen
+            - Bretagne
+            - British Columbia
+            - Brussels
+            - Bucharest
+            - Budapest
+            - Buenos Aires
+            - Bursa
+            - Busan
+            - Cairo
+            - Calabarzon
+            - Calabria
+            - California
+            - Campania
+            - Canary Islands
+            - Cantabria
+            - Canterbury
+            - Capital Region
+            - Carinthia
+            - Castile and León
+            - Castilla–La Mancha
+            - Catalonia
+            - Ceará
+            - Cebu
+            - Central Denmark
+            - Central District
+            - Central Java
+            - Central Macedonia
+            - Central Province
+            - Central Singapore
+            - Centre-Val de Loire
+            - Chandigarh
+            - Chhattisgarh
+            - Chiang Mai
+            - Chiba
+            - Chihuahua
+            - Chittagong
+            - Cluj
+            - Colorado
+            - Connecticut
+            - Corse
+            - Cusco
+            - Córdoba
+            - Da Nang
+            - Daegu
+            - Daejeon
+            - Davao
+            - Delaware
+            - Delhi
+            - Dhaka
+            - District of Columbia
+            - Distrito Federal
+            - Drenthe
+            - Dubai
+            - East Java
+            - Eastern Cape
+            - Eastern Province
+            - Emilia-Romagna
+            - England
+            - Espírito Santo
+            - Extremadura
+            - Flanders
+            - Flevoland
+            - Florida
+            - Free State
+            - Friesland
+            - Friuli Venezia Giulia
+            - Fujairah
+            - Fujian
+            - Fukuoka
+            - Galicia
+            - Gauteng
+            - Gelderland
+            - Geneva
+            - Georgia
+            - Giza
+            - Goa
+            - Goiás
+            - Grand Est
+            - Groningen
+            - Guanajuato
+            - Guangdong
+            - Gujarat
+            - Gwangju
+            - Gyeonggi
+            - Haifa
+            - Hamburg
+            - Hanoi
+            - Haryana
+            - Hauts-de-France
+            - Hawaii
+            - Hesse
+            - Himachal Pradesh
+            - Ho Chi Minh City
+            - Hokkaido
+            - Hong Kong Island
+            - Hubei
+            - Hunan
+            - Hyogo
+            - Iași
+            - Idaho
+            - Illinois
+            - Incheon
+            - Indiana
+            - Iowa
+            - Islamabad
+            - Istanbul
+            - Izmir
+            - Jakarta
+            - Jalisco
+            - Jeju
+            - Jerusalem
+            - Jharkhand
+            - Jiangsu
+            - Johor
+            - Kanagawa
+            - Kano
+            - Kansas
+            - Karnataka
+            - Kentucky
+            - Kerala
+            - Khyber Pakhtunkhwa
+            - Kisumu
+            - Kowloon
+            - Kuala Lumpur
+            - KwaZulu-Natal
+            - Kyoto
+            - La Rioja
+            - Lagos
+            - Lazio
+            - Leinster
+            - Liguria
+            - Lima
+            - Limburg
+            - Limpopo
+            - Lisbon
+            - Lombardy
+            - Louisiana
+            - Lower Austria
+            - Lower Saxony
+            - Lower Silesian
+            - Lucerne
+            - Madhya Pradesh
+            - Madinah
+            - Madrid
+            - Maharashtra
+            - Maine
+            - Makkah
+            - Manipur
+            - Manitoba
+            - Maranhão
+            - Marche
+            - Maryland
+            - Masovian
+            - Massachusetts
+            - Mato Grosso
+            - Mato Grosso do Sul
+            - Mecklenburg-Vorpommern
+            - Meghalaya
+            - Mendoza
+            - Metro Manila
+            - Mexico City
+            - Michigan
+            - Minas Gerais
+            - Minnesota
+            - Mississippi
+            - Missouri
+            - Mizoram
+            - Mombasa
+            - Montana
+            - Moravia-Silesia
+            - Moscow
+            - Mpumalanga
+            - Munster
+            - Murcia
+            - Nagaland
+            - Nairobi
+            - Navarre
+            - Nebraska
+            - Nevada
+            - New Brunswick
+            - New Hampshire
+            - New Jersey
+            - New Mexico
+            - New South Wales
+            - New Territories
+            - New York
+            - Newfoundland and Labrador
+            - Nonthaburi
+            - Normandie
+            - North Brabant
+            - North Carolina
+            - North Dakota
+            - North Denmark
+            - North Holland
+            - North Rhine-Westphalia
+            - North West
+            - North-East Singapore
+            - North-West Singapore
+            - Northern Cape
+            - Northern Ireland
+            - Northern Territory
+            - Northwest Territories
+            - Nouvelle-Aquitaine
+            - Nova Scotia
+            - Novosibirsk Oblast
+            - Nuevo León
+            - Nunavut
+            - Occitanie
+            - Odisha
+            - Ohio
+            - Oklahoma
+            - Ontario
+            - Oregon
+            - Osaka
+            - Oslo
+            - Overijssel
+            - Oyo
+            - Paraná
+            - Pará
+            - Pays de la Loire
+            - Penang
+            - Pennsylvania
+            - Pernambuco
+            - Pest
+            - Phuket
+            - Piedmont
+            - Pirkanmaa
+            - Pomeranian
+            - Porto
+            - Prague
+            - Prince Edward Island
+            - Provence-Alpes-Côte d'Azur
+            - Puebla
+            - Puglia
+            - Punjab
+            - Qassim
+            - Quebec
+            - Queensland
+            - Querétaro
+            - Quintana Roo
+            - Rajasthan
+            - Rajshahi
+            - Ras Al Khaimah
+            - Rhineland-Palatinate
+            - Rhode Island
+            - Rio Grande do Sul
+            - Rio de Janeiro
+            - Rivers
+            - Riyadh
+            - Rogaland
+            - Saarland
+            - Sabah
+            - Saint Petersburg
+            - Saitama
+            - Salzburg
+            - Santa Catarina
+            - Santa Fe
+            - Santiago Metropolitan
+            - Sarawak
+            - Sardinia
+            - Saskatchewan
+            - Saxony
+            - Saxony-Anhalt
+            - Schleswig-Holstein
+            - Scotland
+            - Selangor
+            - Seoul
+            - Shandong
+            - Shanghai
+            - Sharjah
+            - Sichuan
+            - Sicily
+            - Sikkim
+            - Silesian
+            - Sindh
+            - Skåne
+            - South Australia
+            - South Carolina
+            - South Dakota
+            - South Holland
+            - South-East Singapore
+            - South-West Singapore
+            - Southern Denmark
+            - Southern Province
+            - Southwest Finland
+            - St. Gallen
+            - Stockholm
+            - Styria
+            - Sverdlovsk Oblast
+            - São Paulo
+            - Tamil Nadu
+            - Tasmania
+            - Tel Aviv
+            - Telangana
+            - Tennessee
+            - Texas
+            - Thuringia
+            - Ticino
+            - Timiș
+            - Tokyo
+            - Trentino-Alto Adige
+            - Tripura
+            - Trøndelag
+            - Tuscany
+            - Tyrol
+            - Ulsan
+            - Ulster
+            - Umbria
+            - Upper Austria
+            - Uppsala
+            - Utah
+            - Utrecht
+            - Uttar Pradesh
+            - Uttarakhand
+            - Uusimaa
+            - Valencia
+            - Valle del Cauca
+            - Valparaíso
+            - Vaud
+            - Veneto
+            - Veracruz
+            - Vermont
+            - Vestland
+            - Victoria
+            - Vienna
+            - Viken
+            - Virginia
+            - Vorarlberg
+            - Västra Götaland
+            - Waikato
+            - Wales
+            - Wallonia
+            - Washington
+            - Wellington
+            - West Bengal
+            - West Java
+            - West Virginia
+            - Western Australia
+            - Western Cape
+            - Western Province
+            - Wisconsin
+            - Wyoming
+            - Yucatán
+            - Yukon
+            - Zealand
+            - Zeeland
+            - Zhejiang
+            - Zurich
+            - Île-de-France
+            - Östergötland
+            - Łódź
+          description: Filter by state/province/region names. 401 states across 48 countries supported.
+            When states are provided, the parent country is automatically inferred.
+        jobTitles:
+          type: array
+          items:
+            type: string
+            enum:
+            - Account Coordinator
+            - Account Director
+            - Account Executive
+            - Account Manager
+            - Account Specialist
+            - Accountant
+            - Accounting Intern
+            - Acting Chief Executive Officer
+            - Acting Chief Financial Officer
+            - Administrative Assistant
+            - Administrative Assistant to Chief Executive Officer
+            - Administrative Coordinator
+            - Administrative Specialist
+            - Administrator
+            - Advisor
+            - Advisor to Chief Executive Officer
+            - Agency Owner
+            - Analyst
+            - Analytical Scientist
+            - Android Developer
+            - Application Developer
+            - Area Manager
+            - Art Director
+            - Assistant
+            - Assistant Chief Executive
+            - Assistant Director
+            - Assistant Head
+            - Assistant Manager
+            - Assistant Professor
+            - Assistant Scientist
+            - Assistant Vice President
+            - Assistant to Chief Executive Officer
+            - Assistant to Owner
+            - Assistant to Vice President
+            - Assistant to the Chief Financial Officer
+            - Assistant to the President
+            - Associate
+            - Associate Director
+            - Associate Founder
+            - Associate Researcher
+            - Associate Scientist
+            - Attorney
+            - Audit Intern
+            - Bank Employee
+            - Bar Manager
+            - Barista
+            - Bartender
+            - Biologist
+            - Biomedical Equipment Technician
+            - Biomedical Scientist
+            - Blogger
+            - Board Member
+            - Bookkeeper
+            - Branch Manager
+            - Branch Owner
+            - Business Analyst
+            - Business Consultant
+            - Business Development Manager
+            - Business Development Specialist
+            - Business Intelligence Developer
+            - Business Lead
+            - Business Manager
+            - Business Process Owner
+            - Business Specialist
+            - Business System Analyst
+            - Business Unit Manager
+            - Buyer
+            - Carpenter
+            - Cashier
+            - Catering Specialist
+            - Certified Nursing Assistant
+            - Certified Specialist
+            - Chemist
+            - Chief Administrative Officer
+            - Chief Architect
+            - Chief Executive Director
+            - Chief Executive Officer
+            - Chief Financial Officer
+            - Chief Information Officer
+            - Chief Marketing Officer
+            - Chief Officer
+            - Chief Operating Officer
+            - Chief Scientist
+            - Chief Specialist
+            - Chief Technology Officer
+            - Chief of Development
+            - Chief of Staff
+            - Child And Youth Worker
+            - Child Care Specialist
+            - Civil Engineer
+            - Civil Servant
+            - Cleaning Specialist
+            - Clerk
+            - Client Services Representative
+            - Clinical Laboratory Scientist
+            - Clinical Scientist
+            - Co President
+            - Co-Founder
+            - Co-Owner
+            - Communications Specialist
+            - Computer Scientist
+            - Construction Supervisor
+            - Construction Worker
+            - Consultant
+            - Consulting Chief Financial Officer
+            - Contract Specialist
+            - Cook
+            - Coordinator
+            - Coordinator of Volunteers
+            - Corporate Specialist
+            - Creative Director
+            - Credit Analyst
+            - Crew
+            - Crew Chief
+            - Crew Member
+            - Customer Service Representative
+            - Customer Service Specialist
+            - Data Analyst
+            - Data Entry Clerk
+            - Data Scientist
+            - Data Specialist
+            - Database Developer
+            - Delivery Driver
+            - Deputy Chief Executive Officer
+            - Deputy Chief Financial Officer
+            - Deputy Chief Technology Officer
+            - Deputy Head
+            - Design Engineer
+            - Design Specialist
+            - Designer
+            - Developer
+            - Development Intern
+            - Development Scientist
+            - Development Specialist
+            - Digital Specialist
+            - Director
+            - Director General
+            - Director of Business Development
+            - Director of Communications
+            - Director of Development
+            - Director of Engineering
+            - Director of Information Technology
+            - Director of Operations
+            - Director of Quality
+            - Director of Sales Marketing
+            - Director of Services
+            - Director of Youth Ministry
+            - Dishwasher
+            - Disk Jockey
+            - Division Chief Financial Officer
+            - Doctor
+            - Dotnet Developer
+            - Driver
+            - Early Childhood Educator
+            - Editor
+            - Editor in Chief
+            - Editorial Intern
+            - Electrical Engineer
+            - Electrician
+            - Employee
+            - Engineer
+            - Engineer Intern
+            - Engineering Manager
+            - Engineering Specialist
+            - Environmental Scientist
+            - Event Coordinator
+            - Executive
+            - Executive Assistant
+            - Executive Assistant to Chief Executive Officer
+            - Executive Assistant to Chief Financial Officer
+            - Executive Director
+            - Executive Vice President
+            - Field Engineer
+            - Field Specialist
+            - Final Year Student
+            - Finance Intern
+            - Finance Manager
+            - Finance Specialist
+            - Financial Advisor
+            - Financial Analyst
+            - Financial Assistant
+            - Financial Director
+            - Food Server
+            - Food Service Worker
+            - Food Specialist
+            - Foreperson
+            - Former Owner
+            - Founder
+            - Franchise Owner
+            - Freelance
+            - Freelance Journalist
+            - Freelance Writer
+            - Front Desk Staff
+            - Frontend Developer
+            - Game Developer
+            - General
+            - General Manager
+            - Graduate
+            - Graduate Student
+            - Graphic Design Intern
+            - Graphic Designer
+            - Group Chief Executive Officer
+            - Group Chief Financial Officer
+            - Group Lead
+            - Hairstylist
+            - Head
+            - Head Accountant
+            - Head Cashier
+            - Head Chef
+            - Head Coach
+            - Head Engineer
+            - Head Manager
+            - Head of Business Development
+            - Head of Communications
+            - Head of Department
+            - Head of Development
+            - Head of Finance
+            - Head of Human Resources
+            - Head of Information Technology
+            - Head of Marketing
+            - Head of Operations
+            - Head of Product
+            - Head of Production
+            - Head of Quality Assurance
+            - Head of Sales
+            - Head of Section
+            - Head of Service Management
+            - Head of Unit
+            - Healthcare Specialist
+            - Homemaker
+            - Host
+            - Hostess
+            - Housekeeping Specialist
+            - Human Resources Assistant
+            - Human Resources Consultant
+            - Human Resources Coordinator
+            - Human Resources Director
+            - Human Resources Executive
+            - Human Resources Generalist
+            - Human Resources Intern
+            - Human Resources Manager
+            - Human Resources Specialist
+            - Independent Owner
+            - Information Specialist
+            - Information Technology Analyst
+            - Information Technology Consultant
+            - Information Technology Developer
+            - Information Technology Intern
+            - Information Technology Manager
+            - Information Technology Specialist
+            - Inspector
+            - Instructor
+            - Interim Chief Executive Officer
+            - Interim Chief Financial Officer
+            - Interim Chief Technology Officer
+            - Intern
+            - Intern Assistant
+            - International Specialist
+            - Investment Analyst
+            - Investment Specialist
+            - Janitor
+            - Java Software Engineer
+            - Java Specialist
+            - Joint Chief Executive Officer
+            - Joint Owner
+            - Journalist
+            - Journeyperson
+            - Judge
+            - Junior Accountant
+            - Junior Engineer
+            - Junior Software Engineer
+            - Keeper
+            - Key Account
+            - Key Account Executive
+            - Key Account Manager
+            - Key Account Sales Specialist
+            - Keyholder
+            - Kindergarten Teacher
+            - Kitchen Assistant
+            - Kitchen Manager
+            - Kitchen Staff
+            - Knowledge Specialist
+            - Laboratory Assistant
+            - Laboratory Scientist
+            - Laboratory Specialist
+            - Laboratory Technician
+            - Laborer
+            - Law Clerk
+            - Law Specialist
+            - Lawyer
+            - Lead
+            - Lead Consultant
+            - Lead Designer
+            - Lead Engineer
+            - Lead Instructor
+            - Lead Project Manager
+            - Lead Scientist
+            - Lead Software Engineer
+            - Lead Teacher
+            - Lead Technician
+            - Learning Specialist
+            - Lecturer
+            - Legal Assistant
+            - Legal Intern
+            - Legal Secretary
+            - Legal Specialist
+            - Licensed Practical Nurse
+            - Lifeguard
+            - Line Cook
+            - Logistics Coordinator
+            - Logistics Manager
+            - Logistics Specialist
+            - Maintenance Specialist
+            - Makeup Artist
+            - Management Analyst
+            - Management Intern
+            - Manager
+            - Managing Director
+            - Managing Owner
+            - Marine
+            - Marketing Analyst
+            - Marketing And Public Relations Specialist
+            - Marketing Assistant
+            - Marketing Associate
+            - Marketing Communications Manager
+            - Marketing Communications Specialist
+            - Marketing Consultant
+            - Marketing Coordinator
+            - Marketing Director
+            - Marketing Executive
+            - Marketing Intern
+            - Marketing Manager
+            - Marketing Officer
+            - Marketing Representative
+            - Marketing Specialist
+            - Mechanical Engineer
+            - Medical Doctor
+            - Medical Laboratory Scientist
+            - Member
+            - Mental Health Specialist
+            - Moving Company Owner
+            - Nanny
+            - National Account Manager
+            - National Account Specialist
+            - National Sales Manager
+            - National Sales Specialist
+            - Network Administrator
+            - Network Engineer
+            - Network Specialist
+            - Networking Specialist
+            - News Specialist
+            - Nightclub Owner
+            - Nurse
+            - Nurse Practitioner
+            - Nursing Manager
+            - Nursing Specialist
+            - Nutrition Specialist
+            - Office Associate
+            - Office Coordinator
+            - Office Head
+            - Office Manager
+            - Officer
+            - Operational Specialist
+            - Operations Analyst
+            - Operations Coordinator
+            - Operations Intern
+            - Operations Lead
+            - Operations Manager
+            - Operations Team Lead
+            - Operator
+            - Owner
+            - Owner Associate
+            - Owner Support Specialist
+            - PHP Developer
+            - Painter
+            - Partner
+            - Past President
+            - Personal Assistant to Chief Executive Officer
+            - Planning Specialist
+            - Postdoctoral Researcher
+            - President
+            - President of Sales
+            - Principal
+            - Principal Chief Executive Officer
+            - Principal Chief Financial Officer
+            - Principal Owner
+            - Principal Scientist
+            - Process Engineer
+            - Product Analyst
+            - Product Assistant
+            - Product Consultant
+            - Product Designer
+            - Product Developer
+            - Product Development Manager
+            - Product Development Specialist
+            - Product Engineer
+            - Product Management Specialist
+            - Product Manager
+            - Product Marketing Manager
+            - Product Marketing Specialist
+            - Product Owner
+            - Product Specialist
+            - Product Support Specialist
+            - Production Assistant
+            - Production Coordinator
+            - Production Engineer
+            - Production Intern
+            - Production Manager
+            - Production Specialist
+            - Production Supervisor
+            - Professional
+            - Professional Singer
+            - Professor
+            - Program Coordinator
+            - Program Developer
+            - Program Director
+            - Program Lead
+            - Program Manager
+            - Program Specialist
+            - Project Chief
+            - Project Director
+            - Project Engineer
+            - Project Lead
+            - Project Lead Developer
+            - Project Manager
+            - Project Scientist
+            - Project Specialist
+            - Public Relations Intern
+            - Quality Analyst
+            - Quality Assurance Analyst
+            - Quality Assurance Engineer
+            - Quality Assurance Lead
+            - Quality Assurance Manager
+            - Quality Assurance Officer
+            - Quality Assurance Specialist
+            - Quality Assurance Supervisor
+            - Quality Assurance Tester
+            - Quality Control Analyst
+            - Quality Control Engineer
+            - Quality Control Inspector
+            - Quality Control Lead
+            - Quality Coordinator
+            - Quality Engineer
+            - Quality Inspector
+            - Quality Management Specialist
+            - Quality Specialist
+            - Quantity Surveyor
+            - Radiology Nurse
+            - Receptionist
+            - Recruiter
+            - Recruitment Specialist
+            - Regional Chief Financial Officer
+            - Regional Collections Manager
+            - Regional Director
+            - Regional Manager
+            - Regional Sales Manager
+            - Regional Vice President
+            - Registered Nurse
+            - Relationship Manager
+            - Representative
+            - Research Analyst
+            - Research And Development Scientist
+            - Research And Development Specialist
+            - Research Assistant
+            - Research Intern
+            - Researcher
+            - Restaurant Owner
+            - Retail Specialist
+            - Retail Zone Specialist
+            - Retired
+            - Risk Analyst
+            - Sales Analyst
+            - Sales And Marketing Intern
+            - Sales And Marketing Specialist
+            - Sales Assistant
+            - Sales Consultant
+            - Sales Coordinator
+            - Sales Director
+            - Sales Engineer
+            - Sales Executive
+            - Sales Intern
+            - Sales Lead
+            - Sales Manager
+            - Sales Marketing Manager
+            - Sales Specialist
+            - Sales Team Lead
+            - Salesperson
+            - Salon Owner
+            - Scientist
+            - Scout Executive
+            - Secretary
+            - Security Guard
+            - Self Employed
+            - Seller
+            - Senior Analyst
+            - Senior Application Developer
+            - Senior Business Analyst
+            - Senior Business Developer
+            - Senior Consultant
+            - Senior Developer
+            - Senior Engineer
+            - Senior Environmental Scientist
+            - Senior Financial Analyst
+            - Senior Manager
+            - Senior Marketing Manager
+            - Senior Marketing Specialist
+            - Senior Network Engineer
+            - Senior Product Manager
+            - Senior Product Specialist
+            - Senior Project Manager
+            - Senior Quality Assurance Engineer
+            - Senior Quality Assurance Specialist
+            - Senior Scientist
+            - Senior Software Engineer
+            - Senior System Analyst
+            - Senior System Engineer
+            - Senior Team Lead
+            - Senior Underwriter
+            - Senior Vice President
+            - Senior Web Developer
+            - Service Coordinator
+            - Service Engineer
+            - Service Manager
+            - Shift Lead
+            - Shop Owner
+            - Site Engineer
+            - Small Business Owner
+            - Social Worker
+            - Software Engineer
+            - Software Quality Assurance Engineer
+            - Special Assistant to Chief Executive Officer
+            - Specialist
+            - Staff Scientist
+            - Store Manager
+            - Storekeeper
+            - Student
+            - Student Intern
+            - Summer Intern
+            - Supervisor
+            - Support Analyst
+            - Support Specialist
+            - System Administrator
+            - System Analyst
+            - System Developer
+            - System Engineer
+            - System Owner
+            - Teacher
+            - Teaching Assistant
+            - Team Lead
+            - Team Specialist
+            - Technical Analyst
+            - Technical Director
+            - Technical Lead
+            - Technical Specialist
+            - Technical Support Analyst
+            - Technical Support Engineer
+            - Technical Team Lead
+            - Technician
+            - Technology Specialist
+            - Test Analyst
+            - Test Engineer
+            - Test Lead
+            - Trainee
+            - Training Coordinator
+            - Training Specialist
+            - Truck Driver
+            - Tutor
+            - Undergraduate
+            - Undergraduate Research Assistant
+            - Undergraduate Research Fellow
+            - Undergraduate Student
+            - Undergraduate Teaching Assistant
+            - Underwriter
+            - Unemployed
+            - Unit Manager
+            - University Lecturer
+            - User Experience Designer
+            - User Interface Designer
+            - Usher
+            - Utilities Specialist
+            - Vice Chief Executive Officer
+            - Vice President
+            - Vice President Business
+            - Vice President Finance
+            - Vice President Human Resources
+            - Vice President Marketing
+            - Vice President Operations
+            - Vice President Sales Marketing
+            - Vice President Strategy
+            - Vice President of Business Development
+            - Vice President of Development
+            - Vice President of Engineering
+            - Vice President of Products
+            - Vice President of Sales
+            - Vice President of Services
+            - Vice President of Technology
+            - Video Editor
+            - Videographer
+            - Visiting Scientist
+            - Visual Merchandiser
+            - Volunteer
+            - Warehouse Specialist
+            - Web Application Developer
+            - Web Designer
+            - Web Developer
+            - Web Specialist
+            - Website Owner
+            - Welder
+            - Worker
+            - Writer
+            - Xray Technician
+            - Xray Technologist
+            - Year Student
+            - Yoga Instructor
+            - Youth Advisor
+            - Youth Advocate
+            - Youth Care Worker
+            - Youth Coordinator
+            - Youth Counselor
+            - Youth Development Specialist
+            - Youth Director
+            - Youth Intern
+            - Youth Lead
+            - Youth Minister
+            - Youth Pastor
+            - Youth Program Coordinator
+            - Youth Specialist
+            - Youth Worker
+            - Zonal Business Manager
+            - Zonal Head
+            - Zonal Manager
+            - Zonal Sales Manager
+            - Zone Director
+            - Zone Operations Manager
+            - Zone Sales Lead
+            - Zone Sales Manager
+            - Zone Vice President
+            - Zoning Administrator
+            - Zookeeper
+            - Zoologist
+            - Zumba Instructor
+            - iOS Developer
+          description: Filter by job titles (642 supported titles, e.g. Account Executive, Chief Executive
+            Officer, Data Scientist)
+        departments:
+          type: array
+          items:
+            type: string
+            enum:
+            - Accounting
+            - Administrative
+            - Arts and Design
+            - Business Development
+            - Community and Social Services
+            - Consulting
+            - Customer Success and Support
+            - Education
+            - Engineering
+            - Entrepreneurship
+            - Finance
+            - Healthcare Services
+            - Human Resources
+            - Information Technology
+            - Legal
+            - Marketing
+            - Media and Communication
+            - Military and Protective Services
+            - Operations
+            - Product Management
+            - Program and Project Management
+            - Purchasing
+            - Quality Assurance
+            - Real Estate
+            - Research
+            - Sales
+          description: Filter by department, returns breakdown for selected departments (26 supported)
+        levels:
+          type: array
+          items:
+            type: string
+            enum:
+            - CXO
+            - Director
+            - Entry Level
+            - Entry Level Manager
+            - Experienced Manager
+            - In Training
+            - Owner / Partner
+            - Senior
+            - Strategic
+            - Vice President
+          description: Filter by seniority level, returns breakdown for selected levels (10 supported)
+    CountEstimateResultData:
+      type: object
+      required:
+      - totalCount
+      properties:
+        totalCount:
+          type: integer
+          description: Total estimated follower count
+        functionBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctionBreakdownItem'
+          description: Breakdown by department/function (if departments filter was applied)
+          nullable: true
+        seniorityBreakdown:
+          type: array
+          items: &id008
+            $ref: '#/components/schemas/SeniorityBreakdownItem'
+          description: Breakdown by seniority level (if levels filter was applied)
+          nullable: true
+        filtersApplied:
+          type: object
+          properties:
+            countries:
+              type: array
+              items:
+                type: string
+            states:
+              type: array
+              items:
+                type: string
+              description: State/province filters applied
+            jobTitles:
+              type: array
+              items:
+                type: string
+            departments:
+              type: array
+              items:
+                type: string
+            levels:
+              type: array
+              items:
+                type: string
+          description: Filters applied to the estimation
+          nullable: true
+    CountEstimateStatusData:
+      type: object
+      required:
+      - batchId
+      - status
+      - companyUrl
+      - createdAt
+      properties:
+        batchId:
+          type: string
+          description: Batch ID
+        status:
+          type: string
+          enum:
+          - pending
+          - in_progress
+          - completed
+          - failed
+          - cancelled
+          description: Current job status
+        companyUrl:
+          type: string
+          description: LinkedIn company URL
+        message:
+          type: string
+          description: Human-readable status message
+        createdAt:
+          type: string
+          format: date-time
+          description: When the job was created
+        completedAt:
+          type: string
+          format: date-time
+          description: When the job completed
+          nullable: true
+        data:
+          $ref: '#/components/schemas/CountEstimateResultData'
+          description: Result data (when completed)
+    CountEstimateStatusResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/CountEstimateStatusData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsRefunded:
+              type: number
+              description: Credits refunded (100, if job failed)
+            creditsRemaining:
+              type: number
+              description: Remaining credit balance
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+    FollowerProfile:
+      type: object
+      required:
+      - profileUrl
+      properties:
+        objectURN:
+          type: string
+          description: LinkedIn profile URN identifier
+        name:
+          type: string
+          description: Full name
+          nullable: true
+        firstName:
+          type: string
+          description: First name
+          nullable: true
+        lastName:
+          type: string
+          description: Last name
+          nullable: true
+        profileUrl:
+          type: string
+          description: LinkedIn profile URL
+        profilePictureUrl:
+          type: string
+          description: Profile picture URL
+          nullable: true
+        title:
+          type: string
+          description: Job title
+          nullable: true
+        companyName:
+          type: string
+          description: Current company name
+          nullable: true
+        companyProfileUrl:
+          type: string
+          description: Company LinkedIn URL
+          nullable: true
+        companyWebsite:
+          type: string
+          description: Company website URL
+          nullable: true
+        companyDomain:
+          type: string
+          description: Company domain
+          nullable: true
+        companyLogoUrl:
+          type: string
+          description: Company logo URL
+          nullable: true
+        companyLocation:
+          type: string
+          description: Company location
+          nullable: true
+        location:
+          type: string
+          description: Profile location
+          nullable: true
+        summary:
+          type: string
+          description: Profile summary
+          nullable: true
+        connectionDegree:
+          type: number
+          description: Connection degree (1, 2, or 3)
+          nullable: true
+        tenureAtCompany:
+          type: string
+          description: Time at current company
+          nullable: true
+        industry:
+          type: string
+          description: Industry
+          nullable: true
+        isPremium:
+          type: boolean
+          description: Whether profile is Premium
+          nullable: true
+        isOpenProfile:
+          type: boolean
+          description: Whether profile is Open Profile
+          nullable: true
+        isSaved:
+          type: boolean
+          description: Whether profile is saved in Sales Navigator
+          nullable: true
+        spotlights:
+          type: array
+          items:
+            type: string
+          description: Profile badges and highlights
+    FunctionBreakdownItem:
+      type: object
+      required:
+      - functionName
+      - functionId
+      - count
+      - percentage
+      properties:
+        functionName:
+          type: string
+          description: Job function name (e.g., Engineering)
+        functionId:
+          type: string
+          description: Job function ID
+        count:
+          type: integer
+          description: Count of people in this function
+        percentage:
+          type: number
+          description: Percentage of total
+        seniorityBreakdown:
+          type: array
+          items: *id008
+          description: Nested seniority breakdown within this department
+          nullable: true
+    SeniorityBreakdownItem:
+      type: object
+      required:
+      - seniorityLevel
+      - seniorityId
+      - count
+      - percentage
+      properties:
+        seniorityLevel:
+          type: string
+          description: Seniority level name (e.g., Director)
+        seniorityId:
+          type: string
+          description: Seniority level ID
+        count:
+          type: integer
+          description: Count of people at this seniority
+        percentage:
+          type: number
+          description: Percentage of total
+    StartCompanyFollowerData:
+      type: object
+      required:
+      - batchId
+      - message
+      properties:
+        batchId:
+          type: string
+          description: Unique batch ID for tracking this scrape job
+        message:
+          type: string
+          description: Human-readable status message
+    StartCompanyFollowerResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/StartCompanyFollowerData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsReserved:
+              type: number
+              description: Credits reserved upfront based on max_limit × creditsPerItem
+            creditsPerItem:
+              type: number
+              description: Credit cost per profile for your team
+            estimatedCredits:
+              type: number
+              description: Estimated total credits
+    StartCountEstimateData:
+      type: object
+      required:
+      - batchId
+      - status
+      properties:
+        batchId:
+          type: string
+          description: Unique batch ID for this estimation
+        status:
+          type: string
+          enum:
+          - pending
+          - completed
+          description: Job status — pending (queued) or completed (from cache)
+        message:
+          type: string
+          description: Human-readable status message
+        fromCache:
+          type: boolean
+          description: Whether result was served from cache (no credits charged)
+        cachedAt:
+          type: string
+          format: date-time
+          description: When the cached result was originally computed
+        data:
+          $ref: '#/components/schemas/CountEstimateResultData'
+          description: Result data (only present if returned from cache)
+    StartCountEstimateResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/StartCountEstimateData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsUsed:
+              type: number
+              description: Credits consumed (100, or 0 if from cache)
+            creditsRemaining:
+              type: number
+              description: Remaining credit balance
+  securitySchemes:
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
+    BearerToken:
+      type: http
+      scheme: bearer
+      description: 'The same API key sent as an Authorization: Bearer token.'

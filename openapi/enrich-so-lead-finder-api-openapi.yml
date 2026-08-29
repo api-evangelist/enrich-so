@@ -1,142 +1,105 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: Enrich Lead Finder API
-  description: 'Search, count, reveal, enrich, unlock and export leads across people and organizations,
-    with saved searches and async reveal/export jobs.
-
-
-    Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so
-    — every documentation page embeds its own OpenAPI fragment, and this document is the union of the
-    fragments carrying these tags, with only the components they reference.'
+  title: Enrich So Lead Finder API
   version: '3.0'
   contact:
     name: Enrich
     url: https://www.enrich.so
-  termsOfService: https://www.enrich.so/terms-of-service
+  description: 'Operations tagged Lead Finder across 2 of this provider''s published API definitions: enrich-so-openapi.yml, enrich-so-v3-harvested-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://dev.enrich.so/api/v3
-  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
-security:
-- ApiKeyHeader: []
-- BearerToken: []
+  description: Enrich API v3
 tags:
 - name: Lead Finder
+  description: Search and reveal leads across people and organizations.
 paths:
-  /lead-finder/count:
+  /lead-finder/search:
     post:
-      summary: Count matching leads
-      deprecated: false
-      description: Get the total count of leads matching your filters. This endpoint is free and does
-        not consume credits.
-      operationId: countLeads
+      operationId: searchLeads
       tags:
       - Lead Finder
-      parameters: []
+      summary: Search leads
+      description: Searches across people, companies, and insights with roughly 135 filter fields spanning person attributes, firmographics, and technology stack. The first 3 pages (or 75 results) per search are free; pages beyond that cost 1 credit per result. Max 40 pages per search.
       requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadSearchRequest'
+      responses:
+        '200':
+          description: Matching leads.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadSearchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      security:
+      - apiKeyHeader: []
+      - bearerAuth: []
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3
+  /lead-finder/count:
+    post:
+      operationId: countMatchingLeads
+      tags:
+      - Lead Finder
+      summary: Count matching leads
+      description: Returns the number of leads matching a set of filters without returning records.
+      x-endpoint-modeled: true
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LeadCountRequest'
       responses:
         '200':
-          description: Count returned successfully
+          description: Match count.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LeadCountResponse'
-              example:
-                success: true
-                data:
-                  count: 18420
-                  searchType: unified
-                  searchedTotalResult: 18420
-                meta:
-                  requestId: req_664f2b3c9a1e4d0012abcdf0
-          headers:
-            X-RateLimit-Limit:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Remaining:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Reset:
-              required: false
-              description: ''
-              schema:
-                type: string
-        '400':
-          description: Something is wrong with the request — check the `detail` field for specifics
-          content:
-            application/json:
-              schema: &id001
-                $ref: '#/components/schemas/ErrorEnvelope'
-              example:
-                type: https://dev.enrich.so/errors/validation-error
-                title: Validation Error
-                status: 400
-                detail: body Invalid request
-                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-          headers: {}
-        '401':
-          description: Your API key is missing or invalid
-          content:
-            application/json:
-              schema: *id001
-              example:
-                type: https://dev.enrich.so/errors/unauthorized
-                title: Unauthorized
-                status: 401
-                detail: The API key provided is invalid or has been revoked
-          headers: {}
-        '429':
-          description: You've sent too many requests — wait and try again
-          content:
-            application/json:
-              schema: *id001
-              example:
-                type: https://dev.enrich.so/errors/rate-limit-exceeded
-                title: Too Many Requests
-                status: 429
-                detail: Rate limit exceeded. Please retry after 30 seconds.
-          headers:
-            Retry-After:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Limit:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Remaining:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Reset:
-              required: false
-              description: ''
-              schema:
-                type: string
-        '500':
-          description: Something went wrong on our end — try again in a moment
-          content:
-            application/json:
-              schema: *id001
-              example:
-                type: https://dev.enrich.so/errors/internal-error
-                title: Internal Server Error
-                status: 500
-                detail: An unexpected error occurred. Please try again later.
-          headers: {}
       security:
-      - ApiKeyHeader: []
-      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165854-run
+      - apiKeyHeader: []
+      - bearerAuth: []
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3
+  /lead-finder/reveal:
+    post:
+      operationId: revealContactInfo
+      tags:
+      - Lead Finder
+      summary: Reveal contact info
+      description: Asynchronously reveals contact information (email and/or phone) for up to 25 leads, returning a job id to poll. 50 credits per lead for email, 525 for phone, 575 for both (the default). Previously revealed contacts return from cache at no cost.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadRevealRequest'
+      responses:
+        '202':
+          description: Reveal job accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadRevealResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/InsufficientCredits'
+      security:
+      - apiKeyHeader: []
+      - bearerAuth: []
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3
   /lead-finder/enrich:
     post:
       summary: Enrich contacts with specific fields
@@ -154,9 +117,7 @@ paths:
         Previously revealed fields are returned from cache at no cost.
 
 
-        **Async:** Returns a `jobId` immediately (< 100ms). Poll `GET /lead-finder/reveal-jobs/:jobId`
-        every 2 seconds until `status` is `completed` or `failed`. Credits are charged inside the worker
-        — insufficient credits cause the job to fail asynchronously (no synchronous 402).'
+        **Async:** Returns a `jobId` immediately (< 100ms). Poll `GET /lead-finder/reveal-jobs/:jobId` every 2 seconds until `status` is `completed` or `failed`. Credits are charged inside the worker — insufficient credits cause the job to fail asynchronously (no synchronous 402).'
       operationId: enrichLeads
       tags:
       - Lead Finder
@@ -181,8 +142,7 @@ paths:
                   totalLeads: 3
                   fields:
                   - email
-                  message: Enrich job submitted. Poll GET /api/v3/lead-finder/reveal-jobs/rj_a1b2c3d4e5f6g7h8
-                    for results.
+                  message: Enrich job submitted. Poll GET /api/v3/lead-finder/reveal-jobs/rj_a1b2c3d4e5f6g7h8 for results.
                 meta:
                   requestId: req_664f2b3c9a1e4d0012abcdf3
           headers:
@@ -201,12 +161,13 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
             application/json:
-              schema: &id002
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/validation-error
                 title: Validation Error
@@ -214,22 +175,26 @@ paths:
                 detail: body Invalid request
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id002
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/unauthorized
                 title: Unauthorized
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id002
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/rate-limit-exceeded
                 title: Too Many Requests
@@ -256,30 +221,49 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: Too Many Requests
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id002
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/internal-error
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: Internal Server Error
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: D_iolRbJhVvXm3owwg0z7
+            schemeIds:
+            - ApiKeyHeader
+          - id: yNJmfNQ8Bi3lr79qzx8UZ
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: D_iolRbJhVvXm3owwg0z7
+          scopes:
+            yNJmfNQ8Bi3lr79qzx8UZ: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165857-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
   /lead-finder/export:
     post:
       summary: Export leads to CSV (async)
       deprecated: false
-      description: 'Submit an async CSV export job. Returns a `jobId` immediately — poll `GET /lead-finder/export-jobs/{jobId}`
-        for status. Once the job reaches `completed` status, download the file via `GET /lead-finder/export-jobs/{jobId}/download`.
+      description: 'Submit an async CSV export job. Returns a `jobId` immediately — poll `GET /lead-finder/export-jobs/{jobId}` for status. Once the job reaches `completed` status, download the file via `GET /lead-finder/export-jobs/{jobId}/download`.
 
 
-        Credits are estimated upfront and deducted during processing. Refunds are issued for leads where
-        the requested contact info was not found.
+        Credits are estimated upfront and deducted during processing. Refunds are issued for leads where the requested contact info was not found.
 
 
         **Pricing:**
@@ -327,8 +311,7 @@ paths:
                   status: pending
                   estimatedRows: 500
                   estimatedCredits: 25000
-                  message: Export job queued. Poll GET /lead-finder/export-jobs/ej_a1b2c3d4e5f6a7b8 for
-                    status.
+                  message: Export job queued. Poll GET /lead-finder/export-jobs/ej_a1b2c3d4e5f6a7b8 for status.
                 meta:
                   requestId: 665d2f8b9c5b2a0015d0bc0f
           headers:
@@ -347,12 +330,13 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
             application/json:
-              schema: &id003
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/validation-error
                 title: Validation Error
@@ -360,33 +344,39 @@ paths:
                 detail: body Invalid request
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id003
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/unauthorized
                 title: Unauthorized
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '402':
           description: You don't have enough credits for this request
           content:
             application/json:
-              schema: *id003
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/insufficient-credits
                 title: Insufficient Credits
                 status: 402
                 detail: 'Not enough credits. Required: 575, available: 100'
           headers: {}
+          x-apidog-name: Payment Required
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id003
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/rate-limit-exceeded
                 title: Too Many Requests
@@ -413,26 +403,46 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: Internal Server Error
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id003
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/internal-error
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: Forbidden
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: Y6K9PlcjfHlz2bOxn4MBq
+            schemeIds:
+            - ApiKeyHeader
+          - id: _q_cwt5jzOjtq8CNwKow0
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: Y6K9PlcjfHlz2bOxn4MBq
+          scopes:
+            _q_cwt5jzOjtq8CNwKow0: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165855-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
   /lead-finder/export-jobs:
     get:
       summary: List export jobs
       deprecated: false
-      description: List recent CSV export jobs for your team (last 30 days). Paginated, optionally filtered
-        by status.
+      description: List recent CSV export jobs for your team (last 30 days). Paginated, optionally filtered by status.
       operationId: listExportJobs
       tags:
       - Lead Finder
@@ -503,38 +513,62 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: ''
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: &id004
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/unauthorized
                 title: Unauthorized
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: ''
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id004
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
           headers:
             Retry-After:
               required: false
               description: ''
               schema:
                 type: string
+          x-apidog-name: ''
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id004
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
           headers: {}
+          x-apidog-name: ''
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: 2HfKtAee7F00g0H_KKpoJ
+            schemeIds:
+            - ApiKeyHeader
+          - id: QpoVpD3to-KzwpYEkxI6e
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: 2HfKtAee7F00g0H_KKpoJ
+          scopes:
+            QpoVpD3to-KzwpYEkxI6e: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-29249239-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
   /lead-finder/export-jobs/{jobId}:
     get:
       summary: Poll export job status
@@ -546,8 +580,7 @@ paths:
 
         - **`processing`** — Job is actively running. Check `progress` for completion percentage.
 
-        - **`completed`** — Job finished successfully. Includes `results` with final credit usage. Download
-        the file via `GET /lead-finder/export-jobs/{jobId}/download`.
+        - **`completed`** — Job finished successfully. Includes `results` with final credit usage. Download the file via `GET /lead-finder/export-jobs/{jobId}/download`.
 
         - **`failed`** — Job encountered an error. Includes `error` message and any `creditsRefunded`.'
       operationId: getExportJob
@@ -636,54 +669,78 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: ''
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: &id005
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
           headers: {}
+          x-apidog-name: ''
         '404':
           description: Export job not found or does not belong to your team
           content:
             application/json:
-              schema: *id005
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/not-found
                 title: Not Found
                 status: 404
                 detail: Export job not found
           headers: {}
+          x-apidog-name: ''
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id005
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
           headers:
             Retry-After:
               required: false
               description: ''
               schema:
                 type: string
+          x-apidog-name: ''
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id005
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
           headers: {}
+          x-apidog-name: ''
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: ykhjJrLHCi9fwDjeHILLI
+            schemeIds:
+            - ApiKeyHeader
+          - id: pa9DddcVcZ9y78Yqp-9Xh
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: ykhjJrLHCi9fwDjeHILLI
+          scopes:
+            pa9DddcVcZ9y78Yqp-9Xh: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-29249240-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
   /lead-finder/export-jobs/{jobId}/download:
     get:
       summary: Download export CSV
       deprecated: false
-      description: 'Stream the completed CSV file for an export job. Returns the file with `Content-Type:
-        text/csv`.
+      description: 'Stream the completed CSV file for an export job. Returns the file with `Content-Type: text/csv`.
 
 
-        Returns **409 Conflict** if the job has not yet reached `completed` status or has failed. Poll
-        `GET /lead-finder/export-jobs/{jobId}` first to confirm the job is complete before downloading.'
+        Returns **409 Conflict** if the job has not yet reached `completed` status or has failed. Poll `GET /lead-finder/export-jobs/{jobId}` first to confirm the job is complete before downloading.'
       operationId: downloadExportJob
       tags:
       - Lead Finder
@@ -724,61 +781,88 @@ paths:
               description: Credits refunded for leads where contact info was not found
               schema:
                 type: string
+          x-apidog-name: ''
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: &id006
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
           headers: {}
+          x-apidog-name: ''
         '404':
           description: Export job not found or does not belong to your team
           content:
             application/json:
-              schema: *id006
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/not-found
                 title: Not Found
                 status: 404
                 detail: Export job not found
           headers: {}
+          x-apidog-name: ''
         '409':
           description: Job is not yet completed or has failed — cannot download
           content:
             application/json:
-              schema: *id006
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/conflict
                 title: Conflict
                 status: 409
                 detail: 'Export job is not yet completed. Current status: processing'
           headers: {}
+          x-apidog-name: ''
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id006
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
           headers:
             Retry-After:
               required: false
               description: ''
               schema:
                 type: string
+          x-apidog-name: ''
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id006
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
           headers: {}
+          x-apidog-name: ''
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: Nr7vLrfqnouXstSg0i3w5
+            schemeIds:
+            - ApiKeyHeader
+          - id: LhyvfsecFcCO9Dx92pa0k
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: Nr7vLrfqnouXstSg0i3w5
+          scopes:
+            LhyvfsecFcCO9Dx92pa0k: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-29249241-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
   /lead-finder/filter-options:
     get:
       summary: Get filter options
       deprecated: false
-      description: Returns available values for multi-select filter fields (countries, departments, industries,
-        job functions, etc.). Values are fetched from the database and cached for performance. Free endpoint.
+      description: Returns available values for multi-select filter fields (countries, departments, industries, job functions, etc.). Values are fetched from the database and cached for performance. Free endpoint.
       operationId: getFilterOptions
       tags:
       - Lead Finder
@@ -830,12 +914,13 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
             application/json:
-              schema: &id007
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/validation-error
                 title: Validation Error
@@ -843,22 +928,26 @@ paths:
                 detail: body Invalid request
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id007
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/unauthorized
                 title: Unauthorized
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id007
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/rate-limit-exceeded
                 title: Too Many Requests
@@ -885,165 +974,46 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: Internal Server Error
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id007
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/internal-error
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: Forbidden
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: kmBfLlDBNhf9bjWX1yY6S
+            schemeIds:
+            - ApiKeyHeader
+          - id: FAHd6qLr3egH7sDadlyVQ
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: kmBfLlDBNhf9bjWX1yY6S
+          scopes:
+            FAHd6qLr3egH7sDadlyVQ: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165862-run
-  /lead-finder/reveal:
-    post:
-      summary: Reveal contact info
-      deprecated: false
-      description: 'Reveal contact info for up to 25 leads. Choose which fields to reveal via the optional
-        `fields` parameter:
-
-
-        - `["email"]` — 10 credits per lead
-
-        - `["phone"]` — 525 credits per lead
-
-        - `["email", "phone"]` — 535 credits per lead (default if omitted)
-
-
-        Previously revealed contacts are returned from cache at no cost.
-
-
-        **Async:** Returns a `jobId` immediately (< 100ms). Poll `GET /lead-finder/reveal-jobs/:jobId`
-        every 2 seconds until `status` is `completed` or `failed`. Credits are charged inside the worker
-        — insufficient credits cause the job to fail asynchronously (no synchronous 402).'
-      operationId: revealLeads
-      tags:
-      - Lead Finder
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LeadRevealRequest'
-            example:
-              leads:
-              - id: enc_abc123def456
-              fields:
-              - email
-      responses:
-        '200':
-          description: Reveal job submitted — poll the returned jobId for results
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RevealJobSubmitResponse'
-              example:
-                success: true
-                data:
-                  jobId: rj_a1b2c3d4e5f6g7h8
-                  status: pending
-                  totalLeads: 1
-                  fields:
-                  - email
-                  message: Reveal job submitted. Poll GET /api/v3/lead-finder/reveal-jobs/rj_a1b2c3d4e5f6g7h8
-                    for results.
-                meta:
-                  requestId: req_664f2b3c9a1e4d0012abcdf2
-          headers:
-            X-RateLimit-Limit:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Remaining:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Reset:
-              required: false
-              description: ''
-              schema:
-                type: string
-        '400':
-          description: Something is wrong with the request — check the `detail` field for specifics
-          content:
-            application/json:
-              schema: &id008
-                $ref: '#/components/schemas/ErrorEnvelope'
-              example:
-                type: https://dev.enrich.so/errors/validation-error
-                title: Validation Error
-                status: 400
-                detail: body Invalid request
-                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-          headers: {}
-        '401':
-          description: Your API key is missing or invalid
-          content:
-            application/json:
-              schema: *id008
-              example:
-                type: https://dev.enrich.so/errors/unauthorized
-                title: Unauthorized
-                status: 401
-                detail: The API key provided is invalid or has been revoked
-          headers: {}
-        '429':
-          description: You've sent too many requests — wait and try again
-          content:
-            application/json:
-              schema: *id008
-              example:
-                type: https://dev.enrich.so/errors/rate-limit-exceeded
-                title: Too Many Requests
-                status: 429
-                detail: Rate limit exceeded. Please retry after 30 seconds.
-          headers:
-            Retry-After:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Limit:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Remaining:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Reset:
-              required: false
-              description: ''
-              schema:
-                type: string
-        '500':
-          description: Something went wrong on our end — try again in a moment
-          content:
-            application/json:
-              schema: *id008
-              example:
-                type: https://dev.enrich.so/errors/internal-error
-                title: Internal Server Error
-                status: 500
-                detail: An unexpected error occurred. Please try again later.
-          headers: {}
-      security:
-      - ApiKeyHeader: []
-      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165856-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
   /lead-finder/reveal-jobs:
     get:
       summary: List reveal/enrich jobs
       deprecated: false
-      description: List recent reveal/enrich jobs for the team (last 30 days). Free endpoint — polling
-        is always free.
+      description: List recent reveal/enrich jobs for the team (last 30 days). Free endpoint — polling is always free.
       operationId: listRevealJobs
       tags:
       - Lead Finder
@@ -1118,12 +1088,13 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: ''
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
             application/json:
-              schema: &id009
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/validation-error
                 title: Validation Error
@@ -1131,22 +1102,26 @@ paths:
                 detail: body Invalid request
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: ''
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id009
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/unauthorized
                 title: Unauthorized
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: ''
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id009
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/rate-limit-exceeded
                 title: Too Many Requests
@@ -1173,26 +1148,46 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: ''
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id009
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/internal-error
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: ''
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: yZ2HsROJM73I6KWT1owyW
+            schemeIds:
+            - ApiKeyHeader
+          - id: 5BOA0REKAd37gP1XMc6Q6
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: yZ2HsROJM73I6KWT1owyW
+          scopes:
+            5BOA0REKAd37gP1XMc6Q6: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-29163792-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
   /lead-finder/reveal-jobs/{jobId}:
     get:
       summary: Poll reveal/enrich job
       deprecated: false
-      description: 'Poll the status of a reveal or enrich job. Call repeatedly until `status` is `"completed"`
-        or `"failed"`. Polling is always free.
+      description: 'Poll the status of a reveal or enrich job. Call repeatedly until `status` is `"completed"` or `"failed"`. Polling is always free.
 
 
         **Recommended interval:** 2 seconds.'
@@ -1290,12 +1285,13 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: ''
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
             application/json:
-              schema: &id010
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/validation-error
                 title: Validation Error
@@ -1303,33 +1299,39 @@ paths:
                 detail: body Invalid request
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: ''
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id010
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/unauthorized
                 title: Unauthorized
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: ''
         '404':
           description: Job not found or belongs to another team
           content:
             application/json:
-              schema: *id010
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/not-found
                 title: Not Found
                 status: 404
                 detail: Reveal job not found
           headers: {}
+          x-apidog-name: ''
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id010
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/rate-limit-exceeded
                 title: Too Many Requests
@@ -1356,20 +1358,41 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: ''
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id010
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/internal-error
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: ''
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: 57ncvY9TKgptj4dELCtPZ
+            schemeIds:
+            - ApiKeyHeader
+          - id: DZ0kd9pj2W3MEjUugSM64
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: 57ncvY9TKgptj4dELCtPZ
+          scopes:
+            DZ0kd9pj2W3MEjUugSM64: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-29163791-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
   /lead-finder/saved:
     get:
       summary: List saved searches
@@ -1417,12 +1440,13 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
             application/json:
-              schema: &id011
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/validation-error
                 title: Validation Error
@@ -1430,22 +1454,26 @@ paths:
                 detail: body Invalid request
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id011
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/unauthorized
                 title: Unauthorized
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id011
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/rate-limit-exceeded
                 title: Too Many Requests
@@ -1472,19 +1500,37 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: Internal Server Error
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id011
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/internal-error
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: Forbidden
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: 8_SlzsptPRfI6-5GlcqZj
+            schemeIds:
+            - ApiKeyHeader
+          - id: OWnHCn8hnvHpExRpo2YmK
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: 8_SlzsptPRfI6-5GlcqZj
+          scopes:
+            OWnHCn8hnvHpExRpo2YmK: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165859-run
     post:
       summary: Save a search
@@ -1536,12 +1582,13 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
             application/json:
-              schema: &id012
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/validation-error
                 title: Validation Error
@@ -1549,22 +1596,26 @@ paths:
                 detail: body Invalid request
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id012
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/unauthorized
                 title: Unauthorized
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id012
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/rate-limit-exceeded
                 title: Too Many Requests
@@ -1591,20 +1642,41 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: Internal Server Error
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id012
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/internal-error
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: Forbidden
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: C4EGRQihsJD4K_lAFvnpQ
+            schemeIds:
+            - ApiKeyHeader
+          - id: pw0YdVg9MS3I5jJ4VwlYz
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: C4EGRQihsJD4K_lAFvnpQ
+          scopes:
+            pw0YdVg9MS3I5jJ4VwlYz: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165860-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
   /lead-finder/saved/{id}:
     delete:
       summary: Delete a saved search
@@ -1650,12 +1722,13 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
             application/json:
-              schema: &id013
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/validation-error
                 title: Validation Error
@@ -1663,22 +1736,26 @@ paths:
                 detail: body Invalid request
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id013
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/unauthorized
                 title: Unauthorized
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id013
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/rate-limit-exceeded
                 title: Too Many Requests
@@ -1705,208 +1782,46 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: Internal Server Error
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id013
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/internal-error
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: Forbidden
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: pPm873Mv7OWyoDnpV_7y7
+            schemeIds:
+            - ApiKeyHeader
+          - id: W2sViS1paHIsYpKmvHk5Y
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: pPm873Mv7OWyoDnpV_7y7
+          scopes:
+            W2sViS1paHIsYpKmvHk5Y: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165861-run
-  /lead-finder/search:
-    post:
-      summary: Search leads
-      deprecated: false
-      description: 'Search across people, companies, and insights dimensions with comprehensive filters.
-        Returns combined person + org + insights data.
-
-
-        **Free tier:**
-
-        - First 3 pages OR 75 results free per search, whichever comes first (at the default page size
-        of 25 these match; with a larger page size the 75-result cap applies first)
-
-        - 50 free searches per month, where a search = a unique filter combination. Paging through results
-        or re-running the same search does not consume additional free searches.
-
-
-        **Paid tier (page 4+):**
-
-        - 1 credit per result returned
-
-        - Max 40 pages
-
-
-        Results include preview fields only. Use the **Reveal** or **Enrich** endpoints to get email and
-        phone.'
-      operationId: searchLeads
-      tags:
-      - Lead Finder
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LeadSearchRequest'
-      responses:
-        '200':
-          description: Search results returned successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LeadSearchResponse'
-              example:
-                success: true
-                data:
-                  results:
-                  - id: enc_abc123def456
-                    firstName: Sarah
-                    lastName: C.
-                    logoUrl: https://media.licdn.com/dms/image/stripe-logo.jpg
-                    emailDomain: stripe.com
-                    linkedinUrl: https://linkedin.com/in/sarahc
-                    linkedinHeadline: VP of Engineering at Stripe
-                    jobTitle: VP of Engineering
-                    jobFunction: Engineering
-                    jobLevel: VP
-                    companyName: Stripe
-                    skills: Python, Distributed Systems, Cloud Architecture
-                    city: San Francisco
-                    stateName: California
-                    countryName: United States
-                    domain: stripe.com
-                    orgLinkedinUrl: https://linkedin.com/company/stripe
-                    employeeCount: 8000
-                    industrySicDescription: Computer Processing & Data Preparation
-                    industryNaicsDescription: Data Processing, Hosting, and Related Services
-                    revenue: $1B+
-                    specialties: Payments, Financial Infrastructure
-                    foundedOn: '2010'
-                    headquartersCity: San Francisco
-                    headquartersState: California
-                    headquartersCountry: United States
-                    employeeOnLinkedinGrowthRateOrg: 12
-                    totalMonthlyTrafficOrg: 5000000
-                    totalFundingAmountOrg: 8700000000
-                    lastFundingTypeOrg: Series I
-                    lastFundingDateOrg: '2023-03-15'
-                  pagination:
-                    page: 1
-                    pageSize: 25
-                    totalResults: 1842
-                    totalPages: 74
-                    hasMore: true
-                    searchedTotalResult: 1842
-                meta:
-                  requestId: req_664f2b3c9a1e4d0012abcdef
-          headers:
-            X-RateLimit-Limit:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Remaining:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Reset:
-              required: false
-              description: ''
-              schema:
-                type: string
-        '400':
-          description: Something is wrong with the request — check the `detail` field for specifics
-          content:
-            application/json:
-              schema: &id014
-                $ref: '#/components/schemas/ErrorEnvelope'
-              example:
-                type: https://dev.enrich.so/errors/validation-error
-                title: Validation Error
-                status: 400
-                detail: body Invalid request
-                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-          headers: {}
-        '401':
-          description: Your API key is missing or invalid
-          content:
-            application/json:
-              schema: *id014
-              example:
-                type: https://dev.enrich.so/errors/unauthorized
-                title: Unauthorized
-                status: 401
-                detail: The API key provided is invalid or has been revoked
-          headers: {}
-        '402':
-          description: You don't have enough credits for this request
-          content:
-            application/json:
-              schema: *id014
-              example:
-                type: https://dev.enrich.so/errors/insufficient-credits
-                title: Insufficient Credits
-                status: 402
-                detail: 'Not enough credits. Required: 575, available: 100'
-          headers: {}
-        '429':
-          description: You've sent too many requests — wait and try again
-          content:
-            application/json:
-              schema: *id014
-              example:
-                type: https://dev.enrich.so/errors/rate-limit-exceeded
-                title: Too Many Requests
-                status: 429
-                detail: Rate limit exceeded. Please retry after 30 seconds.
-          headers:
-            Retry-After:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Limit:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Remaining:
-              required: false
-              description: ''
-              schema:
-                type: string
-            X-RateLimit-Reset:
-              required: false
-              description: ''
-              schema:
-                type: string
-        '500':
-          description: Something went wrong on our end — try again in a moment
-          content:
-            application/json:
-              schema: *id014
-              example:
-                type: https://dev.enrich.so/errors/internal-error
-                title: Internal Server Error
-                status: 500
-                detail: An unexpected error occurred. Please try again later.
-          headers: {}
-      security:
-      - ApiKeyHeader: []
-      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165853-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
   /lead-finder/suggest:
     get:
       summary: Suggest company names
       deprecated: false
-      description: Prefix-based company name autocomplete. Returns matching company names for search typeahead.
-        Free endpoint.
+      description: Prefix-based company name autocomplete. Returns matching company names for search typeahead. Free endpoint.
       operationId: suggestCompanyNames
       tags:
       - Lead Finder
@@ -1957,12 +1872,13 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
             application/json:
-              schema: &id015
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/validation-error
                 title: Validation Error
@@ -1970,22 +1886,26 @@ paths:
                 detail: body Invalid request
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id015
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/unauthorized
                 title: Unauthorized
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id015
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/rate-limit-exceeded
                 title: Too Many Requests
@@ -2012,26 +1932,46 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: Internal Server Error
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id015
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/internal-error
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: Forbidden
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: b1jqteCOFmEQC2z-AkGAA
+            schemeIds:
+            - ApiKeyHeader
+          - id: zr1XMeN0H6f57c7Dp3qiv
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: b1jqteCOFmEQC2z-AkGAA
+          scopes:
+            zr1XMeN0H6f57c7Dp3qiv: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165863-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
   /lead-finder/unlock-names:
     post:
       summary: Unlock full last names
       deprecated: false
-      description: Pay 1 credit per lead to unlock full last names. Search results mask last names by
-        default; this endpoint reveals them.
+      description: Pay 1 credit per lead to unlock full last names. Search results mask last names by default; this endpoint reveals them.
       operationId: unlockNames
       tags:
       - Lead Finder
@@ -2075,12 +2015,13 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
             application/json:
-              schema: &id016
-                $ref: '#/components/schemas/ErrorEnvelope'
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/validation-error
                 title: Validation Error
@@ -2088,33 +2029,39 @@ paths:
                 detail: body Invalid request
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id016
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/unauthorized
                 title: Unauthorized
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '402':
           description: You don't have enough credits for this request
           content:
             application/json:
-              schema: *id016
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/insufficient-credits
                 title: Insufficient Credits
                 status: 402
                 detail: 'Not enough credits. Required: 575, available: 100'
           headers: {}
+          x-apidog-name: Payment Required
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id016
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/rate-limit-exceeded
                 title: Too Many Requests
@@ -2141,22 +2088,260 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: Internal Server Error
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id016
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope_2'
               example:
                 type: https://dev.enrich.so/errors/internal-error
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: Forbidden
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: 0myThzFf_c6a7gtDcx0gY
+            schemeIds:
+            - ApiKeyHeader
+          - id: yzq_EzBL5HOUodiFwvayw
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: 0myThzFf_c6a7gtDcx0gY
+          scopes:
+            yzq_EzBL5HOUodiFwvayw: {}
+      x-apidog-folder: Lead Finder
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28165858-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
 components:
   schemas:
+    LeadCountRequest:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          type: object
+    LeadSearchRequest:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          type: object
+          description: LeadFinderSearchFilters - person, organization, and technology filters.
+        page:
+          type: integer
+          default: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+        excludeFilters:
+          type: object
+    ErrorEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    LeadRevealRequest:
+      type: object
+      required:
+      - leads
+      properties:
+        leads:
+          type: array
+          maxItems: 25
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+        fields:
+          type: array
+          items:
+            type: string
+            enum:
+            - email
+            - phone
+    LeadSearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            pageSize:
+              type: integer
+            total:
+              type: integer
+        data:
+          type: array
+          items:
+            type: object
+    LeadCountResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        count:
+          type: integer
+    LeadRevealResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            jobId:
+              type: string
+    LeadCountRequest_2:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+        excludeFilters:
+          type: object
+          additionalProperties: false
+          description: Filters to exclude from count. Only personHeadline, companyHeadline, aboutUs, domain, and jobTitle are supported.
+          properties:
+            personHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Person LinkedIn headline to exclude (keyword/contains match)
+            companyHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company headline to exclude (keyword/contains match)
+            aboutUs:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company overview/about us to exclude (keyword/contains match)
+            domain:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 5000
+              description: Company domain to exclude (exact match)
+            jobTitle:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 25
+              description: Job title to exclude (keyword/contains match)
+          x-apidog-orders:
+          - personHeadline
+          - companyHeadline
+          - aboutUs
+          - domain
+          - jobTitle
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - filters
+      - excludeFilters
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    SavedSearchCreateRequest:
+      type: object
+      required:
+      - name
+      - filters
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Search name
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+      x-apidog-orders:
+      - name
+      - filters
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    ErrorEnvelope_2:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+      x-apidog-orders:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     AsyncExportResponse:
       type: object
       description: Response returned immediately when an async export job is submitted
@@ -2201,100 +2386,30 @@ components:
               description: Human-readable confirmation message
               examples:
               - Export job queued. Poll GET /lead-finder/export-jobs/ej_a1b2c3d4e5f6a7b8 for status.
+          x-apidog-orders:
+          - jobId
+          - status
+          - estimatedRows
+          - estimatedCredits
+          - creditsReserved
+          - message
+          x-apidog-ignore-properties: []
         meta:
           type: object
           properties:
             requestId:
               type: string
               description: Unique request tracking ID
-    ErrorEnvelope:
-      type: object
-      description: RFC 9457 Problem Details error response.
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          type: string
-          format: uri
-          description: URI reference that identifies the problem type.
-          examples:
-          - https://dev.enrich.so/errors/validation-error
-        title:
-          type: string
-          description: Short, human-readable summary of the problem.
-          examples:
-          - Validation Error
-        status:
-          type: integer
-          description: HTTP status code.
-          examples:
-          - 400
-        detail:
-          type: string
-          description: Human-readable explanation specific to this occurrence.
-          examples:
-          - body/email Invalid email
-        instance:
-          type: string
-          description: URI reference that identifies the specific occurrence.
-          examples:
-          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-    LeadCountRequest:
-      type: object
-      required:
-      - filters
-      properties:
-        filters:
-          $ref: '#/components/schemas/LeadFinderSearchFilters'
-        excludeFilters:
-          type: object
-          additionalProperties: false
-          description: Filters to exclude from count. Only personHeadline, companyHeadline, aboutUs, domain,
-            and jobTitle are supported.
-          properties:
-            personHeadline:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Person LinkedIn headline to exclude (keyword/contains match)
-            companyHeadline:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Company headline to exclude (keyword/contains match)
-            aboutUs:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Company overview/about us to exclude (keyword/contains match)
-            domain:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 5000
-              description: Company domain to exclude (exact match)
-            jobTitle:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 25
-              description: Job title to exclude (keyword/contains match)
-    LeadCountResponse:
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadSearchResponse_2:
       type: object
       required:
       - success
@@ -2306,428 +2421,40 @@ components:
         data:
           type: object
           required:
-          - count
-          - searchType
-          - isApproximate
+          - results
+          - pagination
           properties:
-            count:
-              type: integer
-              description: 'Maximum pageable results. For <=10k: exact deduped count. For >10k: approximate
-                count with 25% dedup discount. Capped at 500,000 to prevent excessive pagination. Equals
-                searchedTotalResult when under 500k.'
-            searchType:
-              type: string
-              enum:
-              - people
-              - company
-              - unified
-              description: Type of search performed
-            isApproximate:
-              type: boolean
-              description: True when results exceed 10,000 — count is estimated with a 25% dedup discount
-                instead of running an exact dedup query
-            searchedTotalResult:
-              type: integer
-              description: Total leads matching your search. Same as count when under 500k. When count
-                hits the 500k pagination cap, this field shows the raw total count without any discount
-                or cap applied.
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-    LeadEnrichRequest:
-      type: object
-      required:
-      - leads
-      - fields
-      properties:
-        leads:
-          type: array
-          minItems: 1
-          maxItems: 25
-          items:
-            type: object
-            required:
-            - id
-            properties:
-              id:
-                type: string
-                description: Lead ID from search results
-          description: Leads to enrich (max 25)
-        fields:
-          type: array
-          minItems: 1
-          items:
-            type: string
-            enum:
-            - email
-            - phone
-          description: Which contact fields to reveal
-    LeadExportJobListResponse:
-      type: object
-      description: Paginated list of export jobs for the team
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - jobs
-          - total
-          - page
-          - limit
-          properties:
-            jobs:
+            results:
               type: array
               items:
-                $ref: '#/components/schemas/LeadExportJobSummary'
-              description: List of export job summaries
-            total:
-              type: number
-              description: Total number of jobs matching the query
-            page:
-              type: number
-              description: Current page number
-            limit:
-              type: number
-              description: Results per page
-    LeadExportJobStatusResponse:
-      type: object
-      description: Export job status response. Single flat object — all fields always present.
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - jobId
-          - name
-          - status
-          - phase
-          - progress
-          - totalRows
-          - processedRows
-          - creditsUsed
-          - creditsRefunded
-          - error
-          - downloadUrl
-          - createdAt
-          - completedAt
-          properties:
-            jobId:
-              type: string
-              description: Export job ID
-              examples:
-              - ej_a1b2c3d4e5f6a7b8
-            name:
-              type: string
-              description: Display name for the export job
-            status:
-              type: string
-              enum:
-              - pending
-              - processing
-              - completed
-              - failed
-              description: Current job status
-            phase:
-              type: string
-              enum:
-              - queued
-              - fetching
-              - enriching
-              - generating
-              - uploading
-              description: Current processing phase
-            progress:
-              type: number
-              description: Progress percentage 0-100
-            totalRows:
-              type: number
-              description: Total rows (actual if available, otherwise estimated)
-            processedRows:
-              type: number
-              description: Rows processed so far
-            creditsUsed:
-              type: number
-              description: Credits consumed
-            creditsRefunded:
-              type: number
-              description: Credits refunded
-            error:
-              type: string
-              description: Error message (null unless failed)
-              nullable: true
-            downloadUrl:
-              type: string
-              description: Pre-signed download URL (only for completed jobs)
-              nullable: true
-            createdAt:
-              type: string
-              format: date-time
-              description: Job creation timestamp (ISO 8601)
-            completedAt:
-              type: string
-              format: date-time
-              description: Job completion timestamp (ISO 8601), null if not yet complete
-              nullable: true
-    LeadExportJobSummary:
-      type: object
-      description: Summary of an export job as returned in the list endpoint
-      required:
-      - jobId
-      - name
-      - status
-      - phase
-      - totalRows
-      - processedRows
-      - progress
-      - creditsUsed
-      - creditsRefunded
-      - createdAt
-      - completedAt
-      - error
-      properties:
-        jobId:
-          type: string
-          description: Export job ID
-          examples:
-          - ej_a1b2c3d4e5f6a7b8
-        name:
-          type: string
-          description: Display name for the export job
-        status:
-          type: string
-          enum:
-          - pending
-          - processing
-          - completed
-          - failed
-          description: Current job status
-        phase:
-          type: string
-          enum:
-          - queued
-          - fetching
-          - enriching
-          - generating
-          - uploading
-          description: Current processing phase
-        totalRows:
-          type: number
-          description: Total rows (actual if available, otherwise estimated)
-        processedRows:
-          type: number
-          description: Rows processed so far
-        progress:
-          type: number
-          description: Progress percentage 0-100
-        creditsUsed:
-          type: number
-          description: Credits consumed
-        creditsRefunded:
-          type: number
-          description: Credits refunded
-        createdAt:
-          type: string
-          format: date-time
-          description: Job creation timestamp (ISO 8601)
-        completedAt:
-          type: string
-          format: date-time
-          description: Job completion timestamp (ISO 8601), null if not yet complete
-          nullable: true
-        error:
-          type: string
-          description: Error message (only for failed jobs)
-          nullable: true
-    LeadExportRequest:
-      type: object
-      required:
-      - filters
-      properties:
-        filters:
-          $ref: '#/components/schemas/LeadFinderSearchFilters'
-        excludeFilters:
-          type: object
-          additionalProperties: false
-          description: Filters to exclude from export. Only personHeadline, companyHeadline, aboutUs,
-            domain, and jobTitle are supported.
-          properties:
-            personHeadline:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Person LinkedIn headline to exclude (keyword/contains match)
-            companyHeadline:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Company headline to exclude (keyword/contains match)
-            aboutUs:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Company overview/about us to exclude (keyword/contains match)
-            domain:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 5000
-              description: Company domain to exclude (exact match)
-            jobTitle:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 25
-              description: Job title to exclude (keyword/contains match)
-        name:
-          type: string
-          maxLength: 200
-          description: Display name for the export (shown in export history). Auto-generated if omitted.
-        maxResults:
-          type: integer
-          minimum: 1
-          maximum: 100000
-          default: 1000
-          description: Maximum rows to export
-        includeContactInfo:
-          type: boolean
-          default: false
-          description: 'Shorthand: include both email and phone (costs credits per lead)'
-        includeEmail:
-          type: boolean
-          default: false
-          description: Include email addresses (10 credits per lead)
-        includePhone:
-          type: boolean
-          default: false
-          description: Include phone numbers (525 credits per lead)
-        includeNames:
-          type: boolean
-          default: false
-          description: Include full last names (1 credit per lead)
-        leadIds:
-          type: array
-          items:
-            type: string
-          maxItems: 100000
-          description: Export specific leads by encrypted ID (selected rows mode)
-        page:
-          type: integer
-          minimum: 1
-          description: Export a specific page of results (current page mode)
-        pageSize:
-          type: integer
-          minimum: 1
-          maximum: 100
-          description: Page size when exporting a specific page
-    LeadFinderDeletedResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - deleted
-          properties:
-            deleted:
-              type: boolean
-              const: true
+                $ref: '#/components/schemas/LeadSearchPreviewResult'
+              description: Array of search results
+            pagination:
+              $ref: '#/components/schemas/LeadFinderPagination'
+              description: Pagination metadata
+          x-apidog-orders:
+          - results
+          - pagination
+          x-apidog-ignore-properties: []
         meta:
           type: object
           properties:
             requestId:
               type: string
-    LeadFinderFilterOptionsResponse:
-      type: object
-      required:
+              description: Request tracking ID
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
       - success
       - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          description: Object keyed by filter field name, each containing an array of available values
-          additionalProperties:
-            type: array
-            items:
-              type: string
-          properties: {}
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-    LeadFinderPagination:
-      type: object
-      required:
-      - page
-      - pageSize
-      - totalResults
-      - totalPages
-      - hasMore
-      properties:
-        page:
-          type: integer
-          description: Current page number
-        pageSize:
-          type: integer
-          description: Results per page
-        totalResults:
-          type: integer
-          description: 'Maximum number of results you can paginate through. For <=10k: exact deduped count.
-            For >10k: approximate count with 25% dedup discount. Capped at 500,000 to prevent excessive
-            pagination. Equals searchedTotalResult when under 500k.'
-        totalPages:
-          type: integer
-          description: Total navigable pages based on totalResults (capped at 500,000)
-        hasMore:
-          type: boolean
-          description: Whether more pages exist beyond the current page
-        isApproximate:
-          type: boolean
-          description: True when results exceed 10,000 — count is estimated with a 25% dedup discount
-            instead of running an exact dedup query
-        searchedTotalResult:
-          type: integer
-          description: Total leads matching your search. Same as totalResults when under 500k. When totalResults
-            hits the 500k pagination cap, this field shows the raw total count without any discount or
-            cap applied.
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     LeadFinderSearchFilters:
       type: object
       additionalProperties: false
-      description: Comprehensive search filters for unified lead finder. All fields are optional. Supports
-        ~135 filter fields across person, organization, and insights dimensions.
+      description: Comprehensive search filters for unified lead finder. All fields are optional. Supports ~135 filter fields across person, organization, and insights dimensions.
       properties:
         firstName:
           type: string
@@ -3414,7 +3141,148 @@ components:
           type: number
           minimum: 0
           description: Min total funding amount
-    LeadFinderSuggestResponse:
+      x-apidog-orders:
+      - firstName
+      - lastName
+      - middleName
+      - city
+      - stateName
+      - stateCode
+      - countryName
+      - countryCode
+      - continent
+      - countryRegion
+      - linkedinUrl
+      - linkedinHeadline
+      - personHeadline
+      - companyHeadline
+      - linkedinIndustry
+      - logoUrl
+      - emailDomain
+      - emailAddress
+      - jobTitle
+      - jobFunction
+      - jobLevel
+      - jobDescription
+      - jobLocationCity
+      - jobLocationState
+      - jobLocationCountry
+      - jobIsCurrent
+      - jobStartDate
+      - jobCount
+      - companyName
+      - companyNameMode
+      - persona
+      - languages
+      - skills
+      - certifications
+      - patents
+      - publications
+      - websites
+      - education
+      - phone
+      - cellphone
+      - orgName
+      - domain
+      - aboutUs
+      - companyEntityType
+      - companyLegalType
+      - employeeCount
+      - employeeCountMax
+      - employeeCountMin
+      - foundedOn
+      - headquartersCity
+      - headquartersState
+      - headquartersCountry
+      - industrySicCode
+      - industrySicDescription
+      - industryNaicsCode
+      - industryNaicsDescription
+      - orgLinkedinUrl
+      - locationCity
+      - locationState
+      - locationCountry
+      - revenueMax
+      - revenueMin
+      - revenueBuckets
+      - specialties
+      - crmTechOrg
+      - marketingAutomationTechOrg
+      - abmTechOrg
+      - salesAutomationTechOrg
+      - analyticsTechOrg
+      - cmsTechOrg
+      - martechCategoriesOrg
+      - conversationIntelligenceTechOrg
+      - cloudProviderTechOrg
+      - emailHostingTechOrg
+      - emailSecurityTechOrg
+      - applicationSecurityTechOrg
+      - cloudSecurityTechOrg
+      - developmentTechOrg
+      - eCommercePlatformTechOrg
+      - erpTechOrg
+      - hasMobileAppOrg
+      - hasWebAppOrg
+      - hasCisoOrg
+      - hasCioOrg
+      - locationCountOrg
+      - isLinkedinUrlClaimedOrg
+      - marketingRoleCountOrg
+      - salesRoleCountOrg
+      - operationsRoleCountOrg
+      - businessDevelopmentRoleCountOrg
+      - customerSuccessRoleCountOrg
+      - itRoleCountOrg
+      - grcRoleCountOrg
+      - securityRoleCountOrg
+      - devopsRoleCountOrg
+      - networkInfrastructureRoleCountOrg
+      - mobileDevRoleCountOrg
+      - iosDevRoleCountOrg
+      - androidDevRoleCountOrg
+      - engineerRoleCountOrg
+      - qaRoleCountOrg
+      - marketingOpenRolesCountOrg
+      - operationsOpenRolesCountOrg
+      - salesOpenRolesCountOrg
+      - accountExecutiveOpenRolesCountOrg
+      - customerSuccessOpenRolesCountOrg
+      - demandGenerationOpenRolesCountOrg
+      - businessDevelopmentOpenRolesCountOrg
+      - itOpenRolesCountOrg
+      - securityOpenRolesCountOrg
+      - grcOpenRolesCountOrg
+      - devopsOpenRolesCountOrg
+      - networkInfrastructureOpenRolesCountOrg
+      - monthlyOrganicTrafficOrg
+      - monthlyPaidTrafficOrg
+      - totalMonthlyTrafficOrg
+      - monthlyGoogleAdspendOrg
+      - employeeOnLinkedinGrowthRateOrg
+      - isWebsiteForSaleOrg
+      - topAppleappstoreUrlOrg
+      - topAppstoreRatingOrg
+      - topAppstoreReviewCountOrg
+      - lastAppstoreUpdateOrg
+      - appstoreUpdateCountOrg
+      - appstoreAppCategoryOrg
+      - topPlaystoreUrlOrg
+      - topPlaystoreRatingOrg
+      - topPlaystoreReviewCountOrg
+      - lastPlaystoreUpdateOrg
+      - playstoreDownloadCountOrg
+      - playstoreAppCategoryOrg
+      - totalReviewsOrg
+      - lastFundingDateOrg
+      - lastFundingAmountOrg
+      - leadInvestorsOrg
+      - lastFundingTypeOrg
+      - fundingRoundNumberOfInvestorsOrg
+      - totalFundingAmountOrg
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadFinderDeletedResponse:
       type: object
       required:
       - success
@@ -3426,19 +3294,151 @@ components:
         data:
           type: object
           required:
-          - values
+          - deleted
           properties:
-            values:
-              type: array
-              items:
-                type: string
-              description: Matching company names
+            deleted:
+              type: boolean
+              const: true
+          x-apidog-orders:
+          - deleted
+          x-apidog-ignore-properties: []
         meta:
           type: object
           properties:
             requestId:
               type: string
-    LeadRevealRequest:
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    RevealJobPollResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - jobId
+          - status
+          - jobType
+          - fields
+          - createdAt
+          properties:
+            jobId:
+              type: string
+              description: Reveal/enrich job ID
+            status:
+              type: string
+              enum:
+              - pending
+              - processing
+              - completed
+              - failed
+              description: '`pending` — queued, `processing` — worker running, `completed` — results ready, `failed` — credits refunded'
+            jobType:
+              type: string
+              enum:
+              - reveal
+              - enrich
+              description: Whether this was a reveal or enrich job
+            fields:
+              type: array
+              items:
+                type: string
+                enum:
+                - email
+                - phone
+              description: Contact fields that were requested
+            progress:
+              type: object
+              description: Present for pending/processing/completed jobs
+              properties:
+                processed:
+                  type: integer
+                  description: Leads processed so far
+                total:
+                  type: integer
+                  description: Total leads in the job
+              x-apidog-orders:
+              - processed
+              - total
+              x-apidog-ignore-properties: []
+              nullable: true
+            results:
+              type: object
+              description: Present only when status is `completed`
+              properties:
+                revealed:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RevealedContact'
+                  description: Revealed contacts
+                alreadyRevealed:
+                  type: integer
+                  description: Leads returned from cache (not re-charged)
+                newlyRevealed:
+                  type: integer
+                  description: Leads newly revealed (charged)
+                creditsUsed:
+                  type: number
+                  description: Credits deducted for this job
+                creditsRefunded:
+                  type: number
+                  description: Credits refunded (e.g. for leads with no result)
+                  nullable: true
+              x-apidog-orders:
+              - revealed
+              - alreadyRevealed
+              - newlyRevealed
+              - creditsUsed
+              - creditsRefunded
+              x-apidog-ignore-properties: []
+              nullable: true
+            error:
+              type: string
+              description: Error message — present only when status is `failed`
+              nullable: true
+            creditsRefunded:
+              type: number
+              description: Credits refunded on failure — present only when status is `failed`
+              nullable: true
+            createdAt:
+              type: string
+              format: date-time
+              description: When the job was created
+            completedAt:
+              type: string
+              format: date-time
+              description: When the job finished — present when status is `completed`
+              nullable: true
+          x-apidog-orders:
+          - jobId
+          - status
+          - jobType
+          - fields
+          - progress
+          - results
+          - error
+          - creditsRefunded
+          - createdAt
+          - completedAt
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    UnlockNamesRequest:
       type: object
       required:
       - leads
@@ -3446,7 +3446,7 @@ components:
         leads:
           type: array
           minItems: 1
-          maxItems: 25
+          maxItems: 100
           items:
             type: object
             required:
@@ -3454,18 +3454,209 @@ components:
             properties:
               id:
                 type: string
-                description: Lead ID from search results
-          description: Leads to reveal (max 25)
-        fields:
+                description: Encrypted lead ID
+            x-apidog-orders:
+            - id
+            x-apidog-ignore-properties: []
+          description: Leads whose last names to unlock (max 100)
+      x-apidog-orders:
+      - leads
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    RevealedContact:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Encrypted lead identifier
+        firstName:
+          type: string
+          description: First name
+          nullable: true
+        lastName:
+          type: string
+          description: Last name
+          nullable: true
+        jobTitle:
+          type: string
+          description: Job title
+          nullable: true
+        companyName:
+          type: string
+          description: Company name
+          nullable: true
+        emailAddress:
+          type: string
+          description: Email address (revealed). Only present when email field was requested.
+          nullable: true
+        phone:
+          type: string
+          description: Phone number (revealed). Only present when phone field was requested.
+          nullable: true
+        cellphone:
+          type: string
+          description: Cellphone number (revealed). Only present when phone field was requested.
+          nullable: true
+        linkedinUrl:
+          type: string
+          description: LinkedIn profile URL
+          nullable: true
+        domain:
+          type: string
+          description: Company domain
+          nullable: true
+      x-apidog-orders:
+      - id
+      - firstName
+      - lastName
+      - jobTitle
+      - companyName
+      - emailAddress
+      - phone
+      - cellphone
+      - linkedinUrl
+      - domain
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    SavedSearchListResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
           type: array
           items:
-            type: string
-            enum:
-            - email
-            - phone
-          minItems: 1
-          description: 'Which contact fields to reveal: ''email'' (10 credits), ''phone'' (525 credits),
-            or both. Defaults to both if omitted.'
+            $ref: '#/components/schemas/SavedSearchItem'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadExportJobSummary:
+      type: object
+      description: Summary of an export job as returned in the list endpoint
+      required:
+      - jobId
+      - name
+      - status
+      - phase
+      - totalRows
+      - processedRows
+      - progress
+      - creditsUsed
+      - creditsRefunded
+      - createdAt
+      - completedAt
+      - error
+      properties:
+        jobId:
+          type: string
+          description: Export job ID
+          examples:
+          - ej_a1b2c3d4e5f6a7b8
+        name:
+          type: string
+          description: Display name for the export job
+        status:
+          type: string
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          description: Current job status
+        phase:
+          type: string
+          enum:
+          - queued
+          - fetching
+          - enriching
+          - generating
+          - uploading
+          description: Current processing phase
+        totalRows:
+          type: number
+          description: Total rows (actual if available, otherwise estimated)
+        processedRows:
+          type: number
+          description: Rows processed so far
+        progress:
+          type: number
+          description: Progress percentage 0-100
+        creditsUsed:
+          type: number
+          description: Credits consumed
+        creditsRefunded:
+          type: number
+          description: Credits refunded
+        createdAt:
+          type: string
+          format: date-time
+          description: Job creation timestamp (ISO 8601)
+        completedAt:
+          type: string
+          format: date-time
+          description: Job completion timestamp (ISO 8601), null if not yet complete
+          nullable: true
+        error:
+          type: string
+          description: Error message (only for failed jobs)
+          nullable: true
+      x-apidog-orders:
+      - jobId
+      - name
+      - status
+      - phase
+      - totalRows
+      - processedRows
+      - progress
+      - creditsUsed
+      - creditsRefunded
+      - createdAt
+      - completedAt
+      - error
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    SavedSearchResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/SavedSearchItem'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     LeadSearchPreviewResult:
       type: object
       required:
@@ -3606,7 +3797,162 @@ components:
           type: string
           description: Company headline
           nullable: true
-    LeadSearchRequest:
+      x-apidog-orders:
+      - id
+      - firstName
+      - lastName
+      - logoUrl
+      - emailDomain
+      - linkedinUrl
+      - linkedinHeadline
+      - jobTitle
+      - jobFunction
+      - jobLevel
+      - companyName
+      - skills
+      - city
+      - stateName
+      - countryName
+      - domain
+      - orgLinkedinUrl
+      - employeeCount
+      - industrySicDescription
+      - industryNaicsDescription
+      - revenue
+      - specialties
+      - foundedOn
+      - headquartersCity
+      - headquartersState
+      - headquartersCountry
+      - employeeOnLinkedinGrowthRateOrg
+      - totalMonthlyTrafficOrg
+      - totalFundingAmountOrg
+      - lastFundingTypeOrg
+      - lastFundingDateOrg
+      - linkedinConnectionsCount
+      - logoUrlOrg
+      - companyHeadline
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadFinderFilterOptionsResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          description: Object keyed by filter field name, each containing an array of available values
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          properties: {}
+          x-apidog-orders: []
+          x-apidog-ignore-properties: []
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    UnlockNamesResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - results
+          properties:
+            results:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Lead ID
+                  lastName:
+                    type: string
+                    description: Full last name
+                x-apidog-orders:
+                - id
+                - lastName
+                x-apidog-ignore-properties: []
+          x-apidog-orders:
+          - results
+          x-apidog-ignore-properties: []
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsUsed:
+              type: number
+          x-apidog-orders:
+          - requestId
+          - creditsUsed
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadFinderSuggestResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - values
+          properties:
+            values:
+              type: array
+              items:
+                type: string
+              description: Matching company names
+          x-apidog-orders:
+          - values
+          x-apidog-ignore-properties: []
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadSearchRequest_2:
       type: object
       required:
       - filters
@@ -3617,8 +3963,7 @@ components:
         excludeFilters:
           type: object
           additionalProperties: false
-          description: Filters to exclude from results. Only personHeadline, companyHeadline, aboutUs,
-            domain, and jobTitle are supported.
+          description: Filters to exclude from results. Only personHeadline, companyHeadline, aboutUs, domain, and jobTitle are supported.
           properties:
             personHeadline:
               oneOf:
@@ -3660,20 +4005,34 @@ components:
                   type: string
                 maxItems: 25
               description: Job title to exclude (keyword/contains match)
+          x-apidog-orders:
+          - personHeadline
+          - companyHeadline
+          - aboutUs
+          - domain
+          - jobTitle
+          x-apidog-ignore-properties: []
         page:
           type: integer
           minimum: 1
           default: 1
-          description: 'Page number (starts at 1). Offset-based cap: (page - 1) × pageSize must be < 500,000.
-            Pages 1–3 are free.'
+          description: 'Page number (starts at 1). Offset-based cap: (page - 1) × pageSize must be < 500,000. Pages 1–3 are free.'
         pageSize:
           type: integer
           minimum: 1
           maximum: 100
           default: 25
           description: Results per page (1–100)
-    LeadSearchResponse:
+      x-apidog-orders:
+      - filters
+      - excludeFilters
+      - page
+      - pageSize
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadExportJobStatusResponse:
       type: object
+      description: Export job status response. Single flat object — all fields always present.
       required:
       - success
       - data
@@ -3684,23 +4043,247 @@ components:
         data:
           type: object
           required:
-          - results
-          - pagination
+          - jobId
+          - name
+          - status
+          - phase
+          - progress
+          - totalRows
+          - processedRows
+          - creditsUsed
+          - creditsRefunded
+          - error
+          - downloadUrl
+          - createdAt
+          - completedAt
           properties:
-            results:
-              type: array
-              items:
-                $ref: '#/components/schemas/LeadSearchPreviewResult'
-              description: Array of search results
-            pagination:
-              $ref: '#/components/schemas/LeadFinderPagination'
-              description: Pagination metadata
-        meta:
-          type: object
-          properties:
-            requestId:
+            jobId:
               type: string
-              description: Request tracking ID
+              description: Export job ID
+              examples:
+              - ej_a1b2c3d4e5f6a7b8
+            name:
+              type: string
+              description: Display name for the export job
+            status:
+              type: string
+              enum:
+              - pending
+              - processing
+              - completed
+              - failed
+              description: Current job status
+            phase:
+              type: string
+              enum:
+              - queued
+              - fetching
+              - enriching
+              - generating
+              - uploading
+              description: Current processing phase
+            progress:
+              type: number
+              description: Progress percentage 0-100
+            totalRows:
+              type: number
+              description: Total rows (actual if available, otherwise estimated)
+            processedRows:
+              type: number
+              description: Rows processed so far
+            creditsUsed:
+              type: number
+              description: Credits consumed
+            creditsRefunded:
+              type: number
+              description: Credits refunded
+            error:
+              type: string
+              description: Error message (null unless failed)
+              nullable: true
+            downloadUrl:
+              type: string
+              description: Pre-signed download URL (only for completed jobs)
+              nullable: true
+            createdAt:
+              type: string
+              format: date-time
+              description: Job creation timestamp (ISO 8601)
+            completedAt:
+              type: string
+              format: date-time
+              description: Job completion timestamp (ISO 8601), null if not yet complete
+              nullable: true
+          x-apidog-orders:
+          - jobId
+          - name
+          - status
+          - phase
+          - progress
+          - totalRows
+          - processedRows
+          - creditsUsed
+          - creditsRefunded
+          - error
+          - downloadUrl
+          - createdAt
+          - completedAt
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadEnrichRequest:
+      type: object
+      required:
+      - leads
+      - fields
+      properties:
+        leads:
+          type: array
+          minItems: 1
+          maxItems: 25
+          items:
+            type: object
+            required:
+            - id
+            properties:
+              id:
+                type: string
+                description: Lead ID from search results
+            x-apidog-orders:
+            - id
+            x-apidog-ignore-properties: []
+          description: Leads to enrich (max 25)
+        fields:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum:
+            - email
+            - phone
+          description: Which contact fields to reveal
+      x-apidog-orders:
+      - leads
+      - fields
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadExportRequest:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+        excludeFilters:
+          type: object
+          additionalProperties: false
+          description: Filters to exclude from export. Only personHeadline, companyHeadline, aboutUs, domain, and jobTitle are supported.
+          properties:
+            personHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Person LinkedIn headline to exclude (keyword/contains match)
+            companyHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company headline to exclude (keyword/contains match)
+            aboutUs:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company overview/about us to exclude (keyword/contains match)
+            domain:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 5000
+              description: Company domain to exclude (exact match)
+            jobTitle:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 25
+              description: Job title to exclude (keyword/contains match)
+          x-apidog-orders:
+          - personHeadline
+          - companyHeadline
+          - aboutUs
+          - domain
+          - jobTitle
+          x-apidog-ignore-properties: []
+        name:
+          type: string
+          maxLength: 200
+          description: Display name for the export (shown in export history). Auto-generated if omitted.
+        maxResults:
+          type: integer
+          minimum: 1
+          maximum: 100000
+          default: 1000
+          description: Maximum rows to export
+        includeContactInfo:
+          type: boolean
+          default: false
+          description: 'Shorthand: include both email and phone (costs credits per lead)'
+        includeEmail:
+          type: boolean
+          default: false
+          description: Include email addresses (10 credits per lead)
+        includePhone:
+          type: boolean
+          default: false
+          description: Include phone numbers (525 credits per lead)
+        includeNames:
+          type: boolean
+          default: false
+          description: Include full last names (1 credit per lead)
+        leadIds:
+          type: array
+          items:
+            type: string
+          maxItems: 100000
+          description: Export specific leads by encrypted ID (selected rows mode)
+        page:
+          type: integer
+          minimum: 1
+          description: Export a specific page of results (current page mode)
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Page size when exporting a specific page
+      x-apidog-orders:
+      - filters
+      - excludeFilters
+      - name
+      - maxResults
+      - includeContactInfo
+      - includeEmail
+      - includePhone
+      - includeNames
+      - leadIds
+      - page
+      - pageSize
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     RevealJobListResponse:
       type: object
       required:
@@ -3729,101 +4312,92 @@ components:
               type: integer
             limit:
               type: integer
-    RevealJobPollResponse:
-      type: object
-      required:
+          x-apidog-orders:
+          - jobs
+          - total
+          - page
+          - limit
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
       - success
       - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadRevealRequest_2:
+      type: object
+      required:
+      - leads
       properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - jobId
-          - status
-          - jobType
-          - fields
-          - createdAt
-          properties:
-            jobId:
-              type: string
-              description: Reveal/enrich job ID
-            status:
-              type: string
-              enum:
-              - pending
-              - processing
-              - completed
-              - failed
-              description: '`pending` — queued, `processing` — worker running, `completed` — results ready,
-                `failed` — credits refunded'
-            jobType:
-              type: string
-              enum:
-              - reveal
-              - enrich
-              description: Whether this was a reveal or enrich job
-            fields:
-              type: array
-              items:
+        leads:
+          type: array
+          minItems: 1
+          maxItems: 25
+          items:
+            type: object
+            required:
+            - id
+            properties:
+              id:
                 type: string
-                enum:
-                - email
-                - phone
-              description: Contact fields that were requested
-            progress:
-              type: object
-              description: Present for pending/processing/completed jobs
-              properties:
-                processed:
-                  type: integer
-                  description: Leads processed so far
-                total:
-                  type: integer
-                  description: Total leads in the job
-              nullable: true
-            results:
-              type: object
-              description: Present only when status is `completed`
-              properties:
-                revealed:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/RevealedContact'
-                  description: Revealed contacts
-                alreadyRevealed:
-                  type: integer
-                  description: Leads returned from cache (not re-charged)
-                newlyRevealed:
-                  type: integer
-                  description: Leads newly revealed (charged)
-                creditsUsed:
-                  type: number
-                  description: Credits deducted for this job
-                creditsRefunded:
-                  type: number
-                  description: Credits refunded (e.g. for leads with no result)
-                  nullable: true
-              nullable: true
-            error:
-              type: string
-              description: Error message — present only when status is `failed`
-              nullable: true
-            creditsRefunded:
-              type: number
-              description: Credits refunded on failure — present only when status is `failed`
-              nullable: true
-            createdAt:
-              type: string
-              format: date-time
-              description: When the job was created
-            completedAt:
-              type: string
-              format: date-time
-              description: When the job finished — present when status is `completed`
-              nullable: true
+                description: Lead ID from search results
+            x-apidog-orders:
+            - id
+            x-apidog-ignore-properties: []
+          description: Leads to reveal (max 25)
+        fields:
+          type: array
+          items:
+            type: string
+            enum:
+            - email
+            - phone
+          minItems: 1
+          description: 'Which contact fields to reveal: ''email'' (10 credits), ''phone'' (525 credits), or both. Defaults to both if omitted.'
+      x-apidog-orders:
+      - leads
+      - fields
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadFinderPagination:
+      type: object
+      required:
+      - page
+      - pageSize
+      - totalResults
+      - totalPages
+      - hasMore
+      properties:
+        page:
+          type: integer
+          description: Current page number
+        pageSize:
+          type: integer
+          description: Results per page
+        totalResults:
+          type: integer
+          description: 'Maximum number of results you can paginate through. For <=10k: exact deduped count. For >10k: approximate count with 25% dedup discount. Capped at 500,000 to prevent excessive pagination. Equals searchedTotalResult when under 500k.'
+        totalPages:
+          type: integer
+          description: Total navigable pages based on totalResults (capped at 500,000)
+        hasMore:
+          type: boolean
+          description: Whether more pages exist beyond the current page
+        isApproximate:
+          type: boolean
+          description: True when results exceed 10,000 — count is estimated with a 25% dedup discount instead of running an exact dedup query
+        searchedTotalResult:
+          type: integer
+          description: Total leads matching your search. Same as totalResults when under 500k. When totalResults hits the 500k pagination cap, this field shows the raw total count without any discount or cap applied.
+      x-apidog-orders:
+      - page
+      - pageSize
+      - totalResults
+      - totalPages
+      - hasMore
+      - isApproximate
+      - searchedTotalResult
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     RevealJobSubmitResponse:
       type: object
       required:
@@ -3870,11 +4444,157 @@ components:
             message:
               type: string
               description: Human-readable message with polling URL
+          x-apidog-orders:
+          - jobId
+          - status
+          - totalLeads
+          - fields
+          - creditsReserved
+          - message
+          x-apidog-ignore-properties: []
         meta:
           type: object
           properties:
             requestId:
               type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadCountResponse_2:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - count
+          - searchType
+          - isApproximate
+          properties:
+            count:
+              type: integer
+              description: 'Maximum pageable results. For <=10k: exact deduped count. For >10k: approximate count with 25% dedup discount. Capped at 500,000 to prevent excessive pagination. Equals searchedTotalResult when under 500k.'
+            searchType:
+              type: string
+              enum:
+              - people
+              - company
+              - unified
+              description: Type of search performed
+            isApproximate:
+              type: boolean
+              description: True when results exceed 10,000 — count is estimated with a 25% dedup discount instead of running an exact dedup query
+            searchedTotalResult:
+              type: integer
+              description: Total leads matching your search. Same as count when under 500k. When count hits the 500k pagination cap, this field shows the raw total count without any discount or cap applied.
+          x-apidog-orders:
+          - count
+          - searchType
+          - isApproximate
+          - searchedTotalResult
+          x-apidog-ignore-properties: []
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    SavedSearchItem:
+      type: object
+      required:
+      - id
+      - name
+      - filters
+      - createdAt
+      - updatedAt
+      properties:
+        id:
+          type: string
+          description: Saved search ID
+        name:
+          type: string
+          description: Search name
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+          description: Saved search filters
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+      x-apidog-orders:
+      - id
+      - name
+      - filters
+      - createdAt
+      - updatedAt
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadExportJobListResponse:
+      type: object
+      description: Paginated list of export jobs for the team
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - jobs
+          - total
+          - page
+          - limit
+          properties:
+            jobs:
+              type: array
+              items:
+                $ref: '#/components/schemas/LeadExportJobSummary'
+              description: List of export job summaries
+            total:
+              type: number
+              description: Total number of jobs matching the query
+            page:
+              type: number
+              description: Current page number
+            limit:
+              type: number
+              description: Results per page
+          x-apidog-orders:
+          - jobs
+          - total
+          - page
+          - limit
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     RevealJobSummary:
       type: object
       required:
@@ -3928,180 +4648,64 @@ components:
           type: string
           format: date-time
           nullable: true
-    RevealedContact:
-      type: object
-      required:
-      - id
-      properties:
-        id:
-          type: string
-          description: Encrypted lead identifier
-        firstName:
-          type: string
-          description: First name
-          nullable: true
-        lastName:
-          type: string
-          description: Last name
-          nullable: true
-        jobTitle:
-          type: string
-          description: Job title
-          nullable: true
-        companyName:
-          type: string
-          description: Company name
-          nullable: true
-        emailAddress:
-          type: string
-          description: Email address (revealed). Only present when email field was requested.
-          nullable: true
-        phone:
-          type: string
-          description: Phone number (revealed). Only present when phone field was requested.
-          nullable: true
-        cellphone:
-          type: string
-          description: Cellphone number (revealed). Only present when phone field was requested.
-          nullable: true
-        linkedinUrl:
-          type: string
-          description: LinkedIn profile URL
-          nullable: true
-        domain:
-          type: string
-          description: Company domain
-          nullable: true
-    SavedSearchCreateRequest:
-      type: object
-      required:
-      - name
-      - filters
-      properties:
-        name:
-          type: string
-          minLength: 1
-          maxLength: 100
-          description: Search name
-        filters:
-          $ref: '#/components/schemas/LeadFinderSearchFilters'
-    SavedSearchItem:
-      type: object
-      required:
-      - id
-      - name
-      - filters
+      x-apidog-orders:
+      - jobId
+      - status
+      - jobType
+      - fields
+      - total
+      - processed
+      - creditsUsed
+      - creditsRefunded
       - createdAt
-      - updatedAt
-      properties:
-        id:
-          type: string
-          description: Saved search ID
-        name:
-          type: string
-          description: Search name
-        filters:
-          $ref: '#/components/schemas/LeadFinderSearchFilters'
-          description: Saved search filters
-        createdAt:
-          type: string
-          format: date-time
-          description: Creation timestamp
-        updatedAt:
-          type: string
-          format: date-time
-          description: Last update timestamp
-    SavedSearchListResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/SavedSearchItem'
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-    SavedSearchResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/SavedSearchItem'
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-    UnlockNamesRequest:
-      type: object
-      required:
-      - leads
-      properties:
-        leads:
-          type: array
-          minItems: 1
-          maxItems: 100
-          items:
-            type: object
-            required:
-            - id
-            properties:
-              id:
-                type: string
-                description: Encrypted lead ID
-          description: Leads whose last names to unlock (max 100)
-    UnlockNamesResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - results
-          properties:
-            results:
-              type: array
-              items:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    description: Lead ID
-                  lastName:
-                    type: string
-                    description: Full last name
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-            creditsUsed:
-              type: number
+      - completedAt
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+  responses:
+    InsufficientCredits:
+      description: Not enough credits to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    RateLimited:
+      description: Rate limit exceeded. Includes a Retry-After header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
   securitySchemes:
-    ApiKeyHeader:
+    apiKeyHeader:
       type: apiKey
       in: header
       name: x-api-key
-      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
-    BearerToken:
+      description: API key (prefixed sk_) passed in the x-api-key header.
+    bearerAuth:
       type: http
       scheme: bearer
-      description: 'The same API key sent as an Authorization: Bearer token.'
+      description: API key passed as Authorization Bearer token.
+    apiKey:
+      type: apikey
+      name: x-api-key
+      in: header
+      description: 'Your API key. Keys start with `sk_live_` and are 64 characters long.
+
+        '
+    ApiKeyHeader:
+      type: apikey
+      in: header
+      name: x-api-key
+      description: API key starting with `sk_live_` (64 characters). Get yours from the [Enrich Dashboard](https://sendkit.ai/dashboard/api-keys).
+    BearerToken:
+      type: bearer
+      scheme: bearer
+      description: Same `sk_live_` key passed as a Bearer token in the Authorization header.
+x-refined-from:
+- enrich-so-openapi.yml
+- enrich-so-v3-harvested-openapi.yml

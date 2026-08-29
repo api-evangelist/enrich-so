@@ -1,0 +1,391 @@
+openapi: 3.1.0
+info:
+  title: Enrich Account API
+  description: 'Credit balance and transaction history for the organization behind the API key.
+
+
+    Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so
+    — every documentation page embeds its own OpenAPI fragment, and this document is the union of the
+    fragments carrying these tags, with only the components they reference.'
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms-of-service
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+security:
+- ApiKeyHeader: []
+- BearerToken: []
+tags:
+- name: Wallets
+paths:
+  /wallets/balance:
+    get:
+      summary: Get your credit balance
+      deprecated: false
+      description: 'Returns the current credit balance for your organization.
+
+        '
+      operationId: getWalletBalance
+      tags:
+      - Wallets
+      parameters: []
+      responses:
+        '200':
+          description: Current credit balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletBalanceResponse'
+              example:
+                success: true
+                data:
+                  organizationId: 665e0b2f4a6d8c001abc1234
+                  balance: 25000
+                  currency: credits
+                  asOf: '2025-06-03T14:22:10.000Z'
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id001
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id001
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483207-run
+  /wallets/transactions:
+    get:
+      summary: Get transaction history
+      deprecated: false
+      description: 'Browse your credit transactions — top-ups, deductions, refunds, and
+
+        adjustments. Use the `type` parameter to filter by transaction type.
+
+        Results are paginated.
+
+        '
+      operationId: getWalletTransactions
+      tags:
+      - Wallets
+      parameters:
+      - name: page
+        in: query
+        description: 'Page number (default: 1)'
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: limit
+        in: query
+        description: 'Items per page (default: 50, max: 100)'
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+      - name: type
+        in: query
+        description: 'Filter by type: `deduction`, `topup`, `adjustment`, or `refund`'
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Paginated transaction list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransactionsResponse'
+              example:
+                success: true
+                data:
+                  transactions:
+                  - id: 665e10a14a6d8c001abc2001
+                    organizationId: 665e0b2f4a6d8c001abc1234
+                    type: deduction
+                    amount: -10
+                    balanceAfter: 24990
+                    description: 'Email finder: emily.zhang@figma.com'
+                    createdAt: '2025-06-03T14:35:00.000Z'
+                  - id: 665e10a14a6d8c001abc2002
+                    organizationId: 665e0b2f4a6d8c001abc1234
+                    type: refund
+                    amount: 10
+                    balanceAfter: 25000
+                    description: Batch refund — 1 unfound lead in batch 665b12cf3e4c9200138eaf10
+                    createdAt: '2025-06-03T14:30:00.000Z'
+                  - id: 665e10a14a6d8c001abc2003
+                    organizationId: 665e0b2f4a6d8c001abc1234
+                    type: topup
+                    amount: 25000
+                    balanceAfter: 25000
+                    description: Credit purchase — Pro plan (monthly)
+                    createdAt: '2025-06-01T00:00:00.000Z'
+                  pagination:
+                    page: 1
+                    limit: 50
+                    total: 3
+                    totalPages: 1
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema: &id002
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: The API key provided is invalid or has been revoked
+          headers: {}
+        '429':
+          description: You've sent too many requests — wait and try again
+          content:
+            application/json:
+              schema: *id002
+              example:
+                type: https://dev.enrich.so/errors/rate-limit-exceeded
+                title: Too Many Requests
+                status: 429
+                detail: Rate limit exceeded. Please retry after 30 seconds.
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483208-run
+components:
+  schemas:
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+    Pagination:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - totalPages
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: The page you're on
+          examples:
+          - 1
+        limit:
+          type: integer
+          minimum: 1
+          description: Items per page
+          examples:
+          - 50
+        total:
+          type: integer
+          minimum: 0
+          description: Total items across all pages
+          examples:
+          - 3
+        totalPages:
+          type: integer
+          minimum: 0
+          description: Total number of pages
+          examples:
+          - 1
+    WalletBalance:
+      type: object
+      required:
+      - organizationId
+      - balance
+      - currency
+      - asOf
+      properties:
+        organizationId:
+          type: string
+          description: Your organization ID
+          examples:
+          - 665e0b2f4a6d8c001abc1234
+        balance:
+          type: number
+          description: Your current credit balance
+          examples:
+          - 25000
+        currency:
+          type: string
+          const: credits
+          examples:
+          - credits
+        asOf:
+          type: string
+          format: date-time
+          description: When this balance was last calculated
+          examples:
+          - '2025-06-03T14:22:10.000Z'
+    WalletBalanceResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/WalletBalance'
+    WalletTransaction:
+      type: object
+      required:
+      - id
+      - organizationId
+      - type
+      - amount
+      - balanceAfter
+      - description
+      - createdAt
+      properties:
+        id:
+          type: string
+          description: Transaction ID
+          examples:
+          - 665e10a14a6d8c001abc2001
+        organizationId:
+          type: string
+          examples:
+          - 665e0b2f4a6d8c001abc1234
+        type:
+          type: string
+          description: 'One of: `deduction`, `topup`, `adjustment`, or `refund`'
+          examples:
+          - deduction
+        amount:
+          type: number
+          description: The credit amount (negative for deductions, positive for top-ups and refunds)
+          examples:
+          - -10
+        balanceAfter:
+          type: number
+          description: Your balance after this transaction
+          examples:
+          - 24990
+        description:
+          type: string
+          description: A short note about what happened
+          examples:
+          - 'Email finder: emily.zhang@figma.com'
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional context (varies by transaction type)
+          properties: {}
+        createdAt:
+          type: string
+          format: date-time
+          description: When this transaction happened
+          examples:
+          - '2025-06-03T14:35:00.000Z'
+    WalletTransactionsResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - transactions
+          - pagination
+          properties:
+            transactions:
+              type: array
+              items:
+                $ref: '#/components/schemas/WalletTransaction'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+  securitySchemes:
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
+    BearerToken:
+      type: http
+      scheme: bearer
+      description: 'The same API key sent as an Authorization: Bearer token.'

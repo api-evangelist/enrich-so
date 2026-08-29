@@ -1,0 +1,888 @@
+openapi: 3.2.0
+info:
+  title: Enrich So IP to Company API
+  version: '3.0'
+  contact:
+    name: Enrich
+    url: https://www.enrich.so
+  termsOfService: https://www.enrich.so/terms-of-service
+  description: 'Operations tagged IP to Company across 2 of this provider''s published API definitions: enrich-so-company-intelligence-api-openapi.yml, enrich-so-v3-harvested-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://dev.enrich.so/api/v3
+  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+tags:
+- name: IP to Company
+paths:
+  /ip-to-company:
+    post:
+      summary: Resolve company from IP
+      deprecated: false
+      description: 'Resolves company, organization, and geolocation info from an IP address. Results are cached for 7 days.
+
+
+        **Cost:** 100 credits. You are **not** charged if no domain is found (i.e. `ipDomain` is absent from the response).
+
+        '
+      operationId: ipToCompany
+      tags:
+      - IP to Company
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - ip
+              properties:
+                ip:
+                  type: string
+                  minLength: 1
+                  maxLength: 45
+                  description: IPv4 or IPv6 address to look up
+            example:
+              ip: 8.8.8.8
+      responses:
+        '200':
+          description: Domain resolved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      searchIp:
+                        type: string
+                      ipDomain:
+                        type: string
+                      ipOrganization:
+                        type: string
+                      ipCountryName:
+                        type: string
+                      ipCountryCode:
+                        type: string
+                      ipRegionName:
+                        type: string
+                      ipCity:
+                        type: string
+                      ipSubContinent:
+                        type: string
+                      ipLatitude:
+                        type: number
+                      ipLongitude:
+                        type: number
+                      ipTimezone:
+                        type: string
+                      ipIsp:
+                        type: string
+                      ipRange:
+                        type: string
+                      ipUsageType:
+                        type: string
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                      creditsUsed:
+                        type: integer
+                      creditsRemaining:
+                        type: integer
+              example:
+                success: true
+                data:
+                  searchIp: 8.8.8.8
+                  ipDomain: google.com
+                  ipOrganization: Google LLC
+                  ipCountryName: United States
+                  ipCountryCode: US
+                  ipRegionName: California
+                  ipCity: Mountain View
+                  ipSubContinent: Northern America
+                  ipLatitude: 37.386
+                  ipLongitude: -122.0838
+                  ipTimezone: America/Los_Angeles
+                  ipIsp: Google LLC
+                  ipRange: 8.8.8.0/24
+                  ipUsageType: DCH
+                meta:
+                  requestId: 664f2b3c9a1e4d0012abcdef
+                  creditsUsed: 100
+                  creditsRemaining: 4900
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: '"ip" must be a non-empty string'
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Unauthorized
+                message: The API key provided is invalid or has been revoked
+                statusCode: 401
+          headers: {}
+        '402':
+          description: You don’t have enough credits for this request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Payment Required
+                message: 'Not enough credits. Required: 100, available: 0'
+                statusCode: 402
+          headers: {}
+        '429':
+          description: You’ve sent too many requests — wait and try again
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Too Many Requests
+                message: Rate limit exceeded. Please retry after 30 seconds.
+                statusCode: 429
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Internal Server Error
+                message: An unexpected error occurred. Please try again later.
+                statusCode: 500
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511038-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+  /ip-to-company/batch:
+    post:
+      summary: Submit batch IP to company lookup
+      deprecated: false
+      description: 'Submit up to **500 000 IPs** in a single request for async company lookup. Duplicates are removed automatically before processing.
+
+
+        **Cost:** 100 credits per unique IP, reserved when you submit. Credits are charged based on found domains when you fetch results — any excess is refunded automatically.
+
+        '
+      operationId: batchIpToCompany
+      tags:
+      - IP to Company
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - ips
+              properties:
+                ips:
+                  type: array
+                  minItems: 1
+                  maxItems: 500000
+                  items:
+                    type: object
+                    required:
+                    - ip
+                    properties:
+                      ip:
+                        type: string
+                        minLength: 1
+                        maxLength: 45
+                  description: Array of IP addresses to look up
+            example:
+              ips:
+              - ip: 8.8.8.8
+              - ip: 1.1.1.1
+              - ip: 104.16.132.229
+      responses:
+        '200':
+          description: Batch submitted — credits have been reserved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      batchId:
+                        type: string
+                      status:
+                        type: string
+                      itemCount:
+                        type: integer
+                      originalCount:
+                        type: integer
+                      duplicatesRemoved:
+                        type: integer
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                      creditsReserved:
+                        type: integer
+                      creditsPerItem:
+                        type: integer
+                      estimatedCredits:
+                        type: integer
+              example:
+                success: true
+                data:
+                  batchId: 550e8400-e29b-41d4-a716-446655440000
+                  status: processing
+                  itemCount: 3
+                  originalCount: 3
+                  duplicatesRemoved: 0
+                meta:
+                  requestId: 665a1f4e2c3b7800129dce00
+                  creditsReserved: 300
+                  creditsPerItem: 100
+                  estimatedCredits: 300
+          headers: {}
+        '400':
+          description: Something is wrong with the request — check the `detail` field for specifics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                type: https://dev.enrich.so/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: '"ips" must be a non-empty array'
+                instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Unauthorized
+                message: The API key provided is invalid or has been revoked
+                statusCode: 401
+          headers: {}
+        '402':
+          description: You don’t have enough credits — `detail.required` shows how many are needed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  detail:
+                    type: object
+                    properties:
+                      required:
+                        type: integer
+                      itemCount:
+                        type: integer
+                      creditCostPerItem:
+                        type: integer
+              example:
+                error: Payment Required
+                message: Insufficient credits for batch operation
+                detail:
+                  required: 50000
+                  itemCount: 500
+                  creditCostPerItem: 100
+                statusCode: 402
+          headers: {}
+        '409':
+          description: Duplicate batch submission
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Conflict
+                message: Duplicate batch submission detected
+                statusCode: 409
+          headers: {}
+        '429':
+          description: You’ve sent too many requests — wait and try again
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Too Many Requests
+                message: Rate limit exceeded. Please retry after 30 seconds.
+                statusCode: 429
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+        '500':
+          description: Something went wrong on our end — try again in a moment
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Internal Server Error
+                message: An unexpected error occurred. Please try again later.
+                statusCode: 500
+          headers: {}
+        '503':
+          description: Database or credit service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Service Unavailable
+                message: The service is temporarily unavailable. Please try again later.
+                statusCode: 503
+          headers: {}
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511039-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+  /ip-to-company/batch/{batchId}:
+    get:
+      summary: Check batch progress
+      deprecated: false
+      description: 'Poll this endpoint to track your batch. `progress` is a percentage (0–100) and `status` will be `processing`, `completed`, or `failed`.
+
+
+        **Cost:** Free — polling never costs credits.
+
+        '
+      operationId: getIpToCompanyBatchStatus
+      tags:
+      - IP to Company
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch identifier returned when you submitted the job
+        required: true
+        example: 550e8400-e29b-41d4-a716-446655440000
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: Current batch status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      batchId:
+                        type: string
+                      status:
+                        type: string
+                      totalItems:
+                        type: integer
+                      processedItems:
+                        type: integer
+                      foundCount:
+                        type: integer
+                      progress:
+                        type: integer
+                      createdAt:
+                        type: string
+                      completedAt:
+                        type: string
+                        nullable: true
+              example:
+                success: true
+                data:
+                  batchId: 550e8400-e29b-41d4-a716-446655440000
+                  status: processing
+                  totalItems: 3
+                  processedItems: 1
+                  foundCount: 1
+                  progress: 33
+                  createdAt: '2026-05-13T10:00:00.000Z'
+                  completedAt: null
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Unauthorized
+                message: The API key provided is invalid or has been revoked
+                statusCode: 401
+          headers: {}
+        '404':
+          description: The resource you requested doesn’t exist or doesn’t belong to your organization
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Not Found
+                message: No batch found with that ID
+                statusCode: 404
+          headers: {}
+        '429':
+          description: You’ve sent too many requests — wait and try again
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Too Many Requests
+                message: Rate limit exceeded. Please retry after 30 seconds.
+                statusCode: 429
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511040-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+  /ip-to-company/batch/{batchId}/results:
+    get:
+      summary: Get batch results
+      deprecated: false
+      description: 'Fetch results once your batch has finished. Results are paginated — use `page` and `limit` to walk through them.
+
+
+        **Credit settlement:** The first time you call this after the batch reaches `completed` or `failed`, we calculate the final cost (100 credits per IP where a domain was found) and refund any excess. Subsequent calls return the cached settlement — you are never double-charged.
+
+        '
+      operationId: getIpToCompanyBatchResults
+      tags:
+      - IP to Company
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch identifier returned when you submitted the job
+        required: true
+        example: 550e8400-e29b-41d4-a716-446655440000
+        schema:
+          type: string
+          minLength: 1
+      - name: page
+        in: query
+        description: 'Page number (default: 1)'
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: limit
+        in: query
+        description: 'Results per page (default: 100, max: 1 000)'
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      responses:
+        '200':
+          description: Paginated IP to Company results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      batchId:
+                        type: string
+                      status:
+                        type: string
+                      totalItems:
+                        type: integer
+                      processedCount:
+                        type: integer
+                      foundCount:
+                        type: integer
+                      results:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            searchIp:
+                              type: string
+                            ipDomain:
+                              type: string
+                              nullable: true
+                            ipOrganization:
+                              type: string
+                            ipCountryName:
+                              type: string
+                            ipCountryCode:
+                              type: string
+                            ipCity:
+                              type: string
+                            ipTimezone:
+                              type: string
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                      creditsUsed:
+                        type: integer
+                      creditsRefunded:
+                        type: integer
+                      creditsRemaining:
+                        type: integer
+                      totalItems:
+                        type: integer
+                      processedItems:
+                        type: integer
+              example:
+                success: true
+                data:
+                  batchId: 550e8400-e29b-41d4-a716-446655440000
+                  status: completed
+                  totalItems: 3
+                  processedCount: 3
+                  foundCount: 2
+                  results:
+                  - searchIp: 8.8.8.8
+                    ipDomain: google.com
+                    ipOrganization: Google LLC
+                    ipCountryName: United States
+                    ipCountryCode: US
+                    ipCity: Mountain View
+                    ipTimezone: America/Los_Angeles
+                  - searchIp: 1.1.1.1
+                    ipDomain: cloudflare.com
+                    ipOrganization: Cloudflare Inc
+                    ipCountryName: Australia
+                    ipCountryCode: AU
+                    ipCity: Sydney
+                    ipTimezone: Australia/Sydney
+                  - searchIp: 104.16.132.229
+                    ipDomain: null
+                    ipOrganization: Cloudflare Inc
+                  page: 1
+                  limit: 100
+                meta:
+                  requestId: 665a23bc2c3b7800129dce10
+                  creditsUsed: 200
+                  creditsRefunded: 100
+                  creditsRemaining: 4700
+                  totalItems: 3
+                  processedItems: 3
+          headers: {}
+        '401':
+          description: Your API key is missing or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Unauthorized
+                message: The API key provided is invalid or has been revoked
+                statusCode: 401
+          headers: {}
+        '404':
+          description: The resource you requested doesn’t exist or doesn’t belong to your organization
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Not Found
+                message: No batch found with that ID
+                statusCode: 404
+          headers: {}
+        '429':
+          description: You’ve sent too many requests — wait and try again
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+              example:
+                error: Too Many Requests
+                message: Rate limit exceeded. Please retry after 30 seconds.
+                statusCode: 429
+          headers:
+            Retry-After:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+      security:
+      - ApiKeyHeader: []
+      x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511041-run
+    servers:
+    - url: https://dev.enrich.so/api/v3
+      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+components:
+  schemas:
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+    ErrorEnvelope_2:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+      x-apidog-orders:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+  securitySchemes:
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
+    BearerToken:
+      type: http
+      scheme: bearer
+      description: 'The same API key sent as an Authorization: Bearer token.'
+    apiKey:
+      type: apikey
+      name: x-api-key
+      in: header
+      description: 'Your API key. Keys start with `sk_live_` and are 64 characters long.
+
+        '
+    bearerAuth:
+      type: bearer
+      scheme: bearer
+      description: 'Alternative — send the same key as a Bearer token:
+
+        `Authorization: Bearer sk_live_...`
+
+        '
+x-refined-from:
+- enrich-so-company-intelligence-api-openapi.yml
+- enrich-so-v3-harvested-openapi.yml

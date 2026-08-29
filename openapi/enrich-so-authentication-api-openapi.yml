@@ -1,0 +1,43 @@
+openapi: 3.2.0
+info:
+  title: Enrich Labs Authentication API
+  description: Enrich Labs API Documentation
+  version: 1.0.0
+servers:
+- url: https://api.enrich.so
+  description: Production server
+security:
+- bearerAuth: []
+tags:
+- name: Authentication
+paths:
+  /v1/api/auth:
+    get:
+      summary: Get authentication token
+      tags:
+      - Authentication
+      responses:
+        '200':
+          description: Authentication token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uid:
+                    type: string
+                  team:
+                    type: string
+                  total_credits:
+                    type: number
+                  credits_used:
+                    type: number
+                  credits_remaining:
+                    type: number
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'JWT Bearer token. Format: Bearer {token}'

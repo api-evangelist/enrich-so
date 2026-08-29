@@ -1,0 +1,56 @@
+openapi: 3.2.0
+info:
+  title: Labs Enrich API
+  description: Enrich Labs API Documentation
+  version: 1.0.0
+servers:
+- url: https://api.enrich.so
+  description: Production server
+security:
+- bearerAuth: []
+tags:
+- name: Enrich
+paths:
+  /v2/api/person:
+    get:
+      summary: Enrich a person
+      tags:
+      - Enrich
+      parameters:
+      - in: query
+        name: email
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: flatten
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '201':
+          description: Request accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request_id:
+                    type: string
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  total_credits:
+                    type: number
+                  credits_used:
+                    type: number
+                  credits_remaining:
+                    type: number
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'JWT Bearer token. Format: Bearer {token}'

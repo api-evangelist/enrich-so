@@ -1,23 +1,17 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
   title: Enrich People Search API
-  description: 'Find employees at a company and run cascading ICP (ideal customer profile) people searches.
-
-
-    Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on each page of https://doc.enrich.so
-    — every documentation page embeds its own OpenAPI fragment, and this document is the union of the
-    fragments carrying these tags, with only the components they reference.'
   version: '3.0'
+  description: Enrich (enrich.so) data enrichment API v3. Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on every page of https://doc.enrich.so (each documentation page embeds its own OpenAPI fragment; this document is the union of them).
   contact:
     name: Enrich
     url: https://www.enrich.so
   termsOfService: https://www.enrich.so/terms-of-service
 servers:
 - url: https://dev.enrich.so/api/v3
-  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+  description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
 security:
 - ApiKeyHeader: []
-- BearerToken: []
 tags:
 - name: People Search
 paths:
@@ -25,8 +19,7 @@ paths:
     post:
       summary: Find employees at a company
       deprecated: false
-      description: 'Find employees at a specific company by LinkedIn URL. Optionally filter by job level,
-        job function, country, continent, or sales region.
+      description: 'Find employees at a specific company by LinkedIn URL. Optionally filter by job level, job function, country, continent, or sales region.
 
 
         **Credits:** 1 credit per result returned. No charge if 0 results.
@@ -48,8 +41,7 @@ paths:
                 company_linkedin_url:
                   type: string
                   format: uri
-                  description: LinkedIn company profile URL (required). Must be a valid LinkedIn company
-                    URL.
+                  description: LinkedIn company profile URL (required). Must be a valid LinkedIn company URL.
                   examples:
                   - https://www.linkedin.com/company/google/
                 country:
@@ -101,6 +93,16 @@ paths:
                   minimum: 1
                   default: 1
                   description: Page number (starts at 1)
+              x-apidog-orders:
+              - company_linkedin_url
+              - country
+              - continent
+              - sales_region
+              - job_level
+              - job_function
+              - max_results
+              - page
+              x-apidog-ignore-properties: []
       responses:
         '200':
           description: Employees found successfully. Results sorted by lead quality.
@@ -201,6 +203,13 @@ paths:
                                   examples:
                                   - North America
                                   nullable: true
+                              x-apidog-orders:
+                              - city
+                              - state_code
+                              - country
+                              - country_code
+                              - continent
+                              x-apidog-ignore-properties: []
                             linkedin_url:
                               type: string
                               examples:
@@ -234,6 +243,31 @@ paths:
                             certifications:
                               type: string
                               nullable: true
+                          x-apidog-orders:
+                          - first_name
+                          - last_name
+                          - full_name
+                          - headline
+                          - about_me
+                          - location
+                          - linkedin_url
+                          - job_title
+                          - job_level
+                          - job_function
+                          - job_is_current
+                          - education
+                          - skills
+                          - certifications
+                          x-apidog-ignore-properties: []
+                    x-apidog-orders:
+                    - company_linkedin_url
+                    - max_results
+                    - results_length
+                    - page
+                    - total_pages
+                    - total_results
+                    - results
+                    x-apidog-ignore-properties: []
                   meta:
                     type: object
                     properties:
@@ -246,6 +280,16 @@ paths:
                       creditsRemaining:
                         type: integer
                         description: Remaining credit balance
+                    x-apidog-orders:
+                    - requestId
+                    - creditsUsed
+                    - creditsRemaining
+                    x-apidog-ignore-properties: []
+                x-apidog-orders:
+                - success
+                - data
+                - meta
+                x-apidog-ignore-properties: []
           headers:
             X-RateLimit-Limit:
               required: false
@@ -259,30 +303,37 @@ paths:
               required: false
               schema:
                 type: string
+          x-apidog-name: ''
         '400':
           description: Invalid request — check that company_linkedin_url is a valid LinkedIn company URL
           content:
             application/json:
-              schema: &id001
+              schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
           headers: {}
+          x-apidog-name: ''
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id001
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
           headers: {}
+          x-apidog-name: ''
         '402':
           description: You don't have enough credits for this request
           content:
             application/json:
-              schema: *id001
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
           headers: {}
+          x-apidog-name: ''
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id001
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
           headers:
             Retry-After:
               required: false
@@ -300,29 +351,45 @@ paths:
               required: false
               schema:
                 type: string
+          x-apidog-name: ''
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id001
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
           headers: {}
+          x-apidog-name: ''
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: 3dNu0pOytMdlp9cbPzBxt
+            schemeIds:
+            - ApiKeyHeader
+          - id: GLoLg2ssHZFbV6itnM7w7
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: 3dNu0pOytMdlp9cbPzBxt
+          scopes:
+            GLoLg2ssHZFbV6itnM7w7: {}
+      x-apidog-folder: People Search
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28537860-run
   /people-search/waterfall-icp-search:
     post:
       summary: Cascading ICP people search
       deprecated: false
-      description: 'Search for people at a specific company using cascading ICP (Ideal Customer Profile)
-        filter levels.
+      description: 'Search for people at a specific company using cascading ICP (Ideal Customer Profile) filter levels.
 
 
         **How it works:**
 
         1. Provide a company LinkedIn URL to target
 
-        2. Optionally define 1-10 cascade levels, each with independent ICP criteria. If omitted, a default
-        4-level cascade is used: CEO/Founder → C-Suite → VP → Director.
+        2. Optionally define 1-10 cascade levels, each with independent ICP criteria. If omitted, a default 4-level cascade is used: CEO/Founder → C-Suite → VP → Director.
 
         3. Levels are processed in order — results from earlier levels are excluded from later ones
 
@@ -331,10 +398,7 @@ paths:
         5. Results are returned sorted by score descending
 
 
-        **Scoring:** Each candidate gets a normalized 0-100 score based on title match (30pts), job level
-        (20pts), skills overlap (15pts), location match (15pts), current job status (10pts), profile completeness
-        (5pts), tenure (5pts), and optional seniority priority bonus (0-30pts). The score is normalized
-        against only the dimensions specified in the cascade level.
+        **Scoring:** Each candidate gets a normalized 0-100 score based on title match (30pts), job level (20pts), skills overlap (15pts), location match (15pts), current job status (10pts), profile completeness (5pts), tenure (5pts), and optional seniority priority bonus (0-30pts). The score is normalized against only the dimensions specified in the cascade level.
 
 
         **Credits:** 1 credit per profile returned. No charge if 0 results.'
@@ -353,17 +417,14 @@ paths:
                 company_linkedin_url:
                   type: string
                   format: uri
-                  description: Company LinkedIn URL to search employees for. Must be a valid LinkedIn
-                    company URL.
+                  description: Company LinkedIn URL to search employees for. Must be a valid LinkedIn company URL.
                   examples:
                   - https://www.linkedin.com/company/google/
                 cascade:
                   type: array
                   minItems: 1
                   maxItems: 10
-                  description: 'Cascading ICP filter levels, processed in order. Results from earlier
-                    levels are excluded from later ones (deduplication by RBID_PER). If omitted, uses
-                    a default 4-level cascade: CEO/Founder → C-Suite → VP → Director.'
+                  description: 'Cascading ICP filter levels, processed in order. Results from earlier levels are excluded from later ones (deduplication by RBID_PER). If omitted, uses a default 4-level cascade: CEO/Founder → C-Suite → VP → Director.'
                   items:
                     type: object
                     properties:
@@ -390,8 +451,7 @@ paths:
                         items:
                           type: string
                           minLength: 1
-                        description: Job seniority levels to filter (e.g. Owner, Founder, C-Level, Partner,
-                          VP, Director, Manager, Senior, Staff, Entry, Intern)
+                        description: Job seniority levels to filter (e.g. Owner, Founder, C-Level, Partner, VP, Director, Manager, Senior, Staff, Entry, Intern)
                         examples:
                         - - C-Level
                           - VP
@@ -400,8 +460,7 @@ paths:
                         items:
                           type: string
                           minLength: 1
-                        description: Job function areas to filter (e.g. Engineering, Marketing, Sales,
-                          Technology)
+                        description: Job function areas to filter (e.g. Engineering, Marketing, Sales, Technology)
                         examples:
                         - - Engineering
                           - Technology
@@ -419,23 +478,30 @@ paths:
                         items:
                           type: string
                           minLength: 1
-                        description: 'Location codes: ISO 3166-1 alpha-2 country codes (US, UK, DE, etc.),
-                          continent codes (NORTH_AMERICA, EUROPE, ASIA, etc.), or "WORLD" for any location'
+                        description: 'Location codes: ISO 3166-1 alpha-2 country codes (US, UK, DE, etc.), continent codes (NORTH_AMERICA, EUROPE, ASIA, etc.), or "WORLD" for any location'
                         examples:
                         - - US
                           - UK
                       include_headline_search:
                         type: boolean
                         default: false
-                        description: When true, also search LinkedIn headline for include_title terms
-                          (in addition to job title)
+                        description: When true, also search LinkedIn headline for include_title terms (in addition to job title)
                       priority_bonus:
                         type: integer
                         minimum: 0
                         maximum: 30
                         default: 0
-                        description: Seniority priority bonus (0-30). Higher = ranked above other cascade
-                          levels at equal match quality
+                        description: Seniority priority bonus (0-30). Higher = ranked above other cascade levels at equal match quality
+                    x-apidog-orders:
+                    - include_title
+                    - exclude_title
+                    - job_levels
+                    - job_functions
+                    - skills
+                    - location
+                    - include_headline_search
+                    - priority_bonus
+                    x-apidog-ignore-properties: []
                 max_results:
                   type: integer
                   minimum: 1
@@ -447,8 +513,13 @@ paths:
                   minimum: 0
                   maximum: 100
                   default: 0
-                  description: Minimum ICP score threshold (0-100). Candidates scoring below this are
-                    filtered out.
+                  description: Minimum ICP score threshold (0-100). Candidates scoring below this are filtered out.
+              x-apidog-orders:
+              - company_linkedin_url
+              - cascade
+              - max_results
+              - min_score
+              x-apidog-ignore-properties: []
       responses:
         '200':
           description: Search completed successfully. Results are sorted by ICP score descending.
@@ -525,6 +596,14 @@ paths:
                                   examples:
                                   - google.com
                                   nullable: true
+                              x-apidog-orders:
+                              - first_name
+                              - last_name
+                              - linkedin_url
+                              - linkedin_headline
+                              - location
+                              - email_domain
+                              x-apidog-ignore-properties: []
                             current_position:
                               type: object
                               description: Current job position details
@@ -560,6 +639,14 @@ paths:
                                   examples:
                                   - '2020-01-15'
                                   nullable: true
+                              x-apidog-orders:
+                              - title
+                              - company
+                              - level
+                              - function
+                              - is_current
+                              - start_date
+                              x-apidog-ignore-properties: []
                             skills:
                               type: array
                               items:
@@ -583,8 +670,7 @@ paths:
                               type: number
                               minimum: 0
                               maximum: 100
-                              description: Normalized ICP score (0-100). Normalized against only the scoring
-                                dimensions that were specified in the cascade level.
+                              description: Normalized ICP score (0-100). Normalized against only the scoring dimensions that were specified in the cascade level.
                               examples:
                               - 92
                             ranking:
@@ -605,52 +691,54 @@ paths:
                               properties:
                                 title_match:
                                   type: number
-                                  description: Points from title matching (max 30). 30=exact, 25=partial/substring,
-                                    20=headline, 10=function match
+                                  description: Points from title matching (max 30). 30=exact, 25=partial/substring, 20=headline, 10=function match
                                   examples:
                                   - 30
                                 job_level:
                                   type: number
-                                  description: Points from job level matching (max 20). 20=exact, 10=adjacent
-                                    ±1, 5=near ±2
+                                  description: Points from job level matching (max 20). 20=exact, 10=adjacent ±1, 5=near ±2
                                   examples:
                                   - 20
                                 skills_overlap:
                                   type: number
-                                  description: Points from skills overlap (max 15). Calculated as (matched/requested)
-                                    * 15
+                                  description: Points from skills overlap (max 15). Calculated as (matched/requested) * 15
                                   examples:
                                   - 10
                                 location_match:
                                   type: number
-                                  description: Points from location matching (max 15). 15=country/WORLD,
-                                    7=continent
+                                  description: Points from location matching (max 15). 15=country/WORLD, 7=continent
                                   examples:
                                   - 15
                                 current_job:
                                   type: number
-                                  description: Points from current job status (max 10). 10 if JOB_IS_CURRENT_PER
-                                    is true
+                                  description: Points from current job status (max 10). 10 if JOB_IS_CURRENT_PER is true
                                   examples:
                                   - 10
                                 profile_completeness:
                                   type: number
-                                  description: 'Points from profile completeness (max 5). 1 point each
-                                    for: linkedin_url, email_domain, skills, education, headline'
+                                  description: 'Points from profile completeness (max 5). 1 point each for: linkedin_url, email_domain, skills, education, headline'
                                   examples:
                                   - 5
                                 experience:
                                   type: number
-                                  description: Points from job tenure (max 5). 5=>5yr, 4=>3yr, 3=>2yr,
-                                    2=>1yr, 1=≤1yr
+                                  description: Points from job tenure (max 5). 5=>5yr, 4=>3yr, 3=>2yr, 2=>1yr, 1=≤1yr
                                   examples:
                                   - 5
                                 priority_bonus:
                                   type: number
-                                  description: Seniority priority bonus from cascade level (0-30). Higher
-                                    = ranked above other cascade levels at equal match quality
+                                  description: Seniority priority bonus from cascade level (0-30). Higher = ranked above other cascade levels at equal match quality
                                   examples:
                                   - 0
+                              x-apidog-orders:
+                              - title_match
+                              - job_level
+                              - skills_overlap
+                              - location_match
+                              - current_job
+                              - profile_completeness
+                              - experience
+                              - priority_bonus
+                              x-apidog-ignore-properties: []
                             what_matched:
                               type: array
                               items:
@@ -662,22 +750,31 @@ paths:
                                 - 'Skills: 2/3 matched'
                                 - 'Country match: United States'
                                 - Current position
+                          x-apidog-orders:
+                          - person
+                          - current_position
+                          - skills
+                          - education
+                          - certifications
+                          - score
+                          - ranking
+                          - cascade_level
+                          - ranking_factors
+                          - what_matched
+                          x-apidog-ignore-properties: []
                       total_found:
                         type: integer
-                        description: Total candidates found across all cascade levels (before min_score
-                          filtering)
+                        description: Total candidates found across all cascade levels (before min_score filtering)
                         examples:
                         - 47
                       total_returned:
                         type: integer
-                        description: Number of results actually returned after filtering and max_results
-                          cap
+                        description: Number of results actually returned after filtering and max_results cap
                         examples:
                         - 10
                       cascade_stats:
                         type: array
-                        description: Per-cascade-level statistics showing how many candidates were found
-                          and kept
+                        description: Per-cascade-level statistics showing how many candidates were found and kept
                         items:
                           type: object
                           required:
@@ -700,6 +797,17 @@ paths:
                               description: Candidates that passed min_score and deduplication
                               examples:
                               - 8
+                          x-apidog-orders:
+                          - level
+                          - candidates_found
+                          - candidates_kept
+                          x-apidog-ignore-properties: []
+                    x-apidog-orders:
+                    - results
+                    - total_found
+                    - total_returned
+                    - cascade_stats
+                    x-apidog-ignore-properties: []
                   meta:
                     type: object
                     properties:
@@ -710,8 +818,7 @@ paths:
                         - 1123c535-e925-4224-b5fb-3d579b75b849
                       creditsUsed:
                         type: integer
-                        description: Credits charged for this request (1 per profile returned, 0 if no
-                          results)
+                        description: Credits charged for this request (1 per profile returned, 0 if no results)
                         examples:
                         - 10
                       creditsRemaining:
@@ -719,6 +826,16 @@ paths:
                         description: Remaining credit balance after this request
                         examples:
                         - 999990
+                    x-apidog-orders:
+                    - requestId
+                    - creditsUsed
+                    - creditsRemaining
+                    x-apidog-ignore-properties: []
+                x-apidog-orders:
+                - success
+                - data
+                - meta
+                x-apidog-ignore-properties: []
               examples:
                 '1':
                   summary: 'Basic: C-suite at Google'
@@ -809,12 +926,12 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: ''
         '400':
-          description: Invalid request — check that company_linkedin_url is a valid LinkedIn company URL,
-            cascade has 1-10 levels, max_results is 1-100, and min_score is 0-100
+          description: Invalid request — check that company_linkedin_url is a valid LinkedIn company URL, cascade has 1-10 levels, max_results is 1-100, and min_score is 0-100
           content:
             application/json:
-              schema: &id002
+              schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
               example:
                 type: https://dev.enrich.so/errors/validation-error
@@ -823,23 +940,29 @@ paths:
                 detail: 'company_linkedin_url: Must be a LinkedIn company URL (e.g. https://www.linkedin.com/company/google/)'
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: ''
         '401':
           description: Your API key is missing or invalid
           content:
             application/json:
-              schema: *id002
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
           headers: {}
+          x-apidog-name: ''
         '402':
           description: You don't have enough credits for this request
           content:
             application/json:
-              schema: *id002
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
           headers: {}
+          x-apidog-name: ''
         '429':
           description: You've sent too many requests — wait and try again
           content:
             application/json:
-              schema: *id002
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
           headers:
             Retry-After:
               required: false
@@ -861,14 +984,32 @@ paths:
               description: ''
               schema:
                 type: string
+          x-apidog-name: ''
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
             application/json:
-              schema: *id002
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
           headers: {}
+          x-apidog-name: ''
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: 2VAS6J_Zi8dnzip15gd-k
+            schemeIds:
+            - ApiKeyHeader
+          - id: -65AP8YGoT1O8ZIRXBUJn
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: 2VAS6J_Zi8dnzip15gd-k
+          scopes:
+            -65AP8YGoT1O8ZIRXBUJn: {}
+      x-apidog-folder: People Search
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-28537859-run
 components:
   schemas:
@@ -906,13 +1047,36 @@ components:
           description: URI reference that identifies the specific occurrence.
           examples:
           - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+      x-apidog-orders:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
   securitySchemes:
+    apiKey:
+      type: apikey
+      name: x-api-key
+      in: header
+      description: 'Your API key. Keys start with `sk_live_` and are 64 characters long.
+
+        '
+    bearerAuth:
+      type: bearer
+      scheme: bearer
+      description: 'Alternative — send the same key as a Bearer token:
+
+        `Authorization: Bearer sk_live_...`
+
+        '
     ApiKeyHeader:
-      type: apiKey
+      type: apikey
       in: header
       name: x-api-key
-      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
+      description: API key starting with `sk_live_` (64 characters). Get yours from the [Enrich Dashboard](https://sendkit.ai/dashboard/api-keys).
     BearerToken:
-      type: http
+      type: bearer
       scheme: bearer
-      description: 'The same API key sent as an Authorization: Bearer token.'
+      description: Same `sk_live_` key passed as a Bearer token in the Authorization header.
