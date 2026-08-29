@@ -12,6 +12,18 @@ description: Enrich (enrich.so), operated by Enrich Labs, is a person and compan
   product follows one submit/poll/results shape with reserve-and-settle billing, ten typed webhook callbacks,
   RFC 9457 problem details on every error, and official TypeScript and Go SDKs. Enrich also operates a
   first-party remote MCP server at mcp.enrich.so with OAuth 2.0 and dynamic client registration.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: freemium
   onboarding: self-serve
