@@ -56,14 +56,13 @@ tags:
 - Reference Data
 - MCP
 created: '2026-07-11'
-modified: '2026-08-14'
+modified: '2026-09-16'
 specificationVersion: '0.23'
 apis:
 - aid: enrich-so:enrich-so-email-finder-api
   name: Enrich Email Finder API
-  description: >-
-    Find a professional email from a first name, last name and company domain, single or in batches of
-    up to 500,000 leads.
+  description: Find a professional email from a first name, last name and company domain, single or in
+    batches of up to 500,000 leads.
   humanURL: https://doc.enrich.so/find-a-professional-email-27483195e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
@@ -83,9 +82,8 @@ apis:
     url: collections/enrich-so-email-finder-api.opencollection.json
 - aid: enrich-so:enrich-so-lead-finder-api
   name: Enrich Lead Finder API
-  description: >-
-    Search, count, reveal, enrich, unlock and export leads across people and organizations, with saved
-    searches and asynchronous reveal and export jobs.
+  description: Search, count, reveal, enrich, unlock and export leads across people and organizations,
+    with saved searches and asynchronous reveal and export jobs.
   humanURL: https://doc.enrich.so/search-leads-28165853e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
@@ -105,8 +103,8 @@ apis:
     url: collections/enrich-so-lead-finder-api.opencollection.json
 - aid: enrich-so:enrich-so-phone-finder-api
   name: Enrich Phone Finder API
-  description: >-
-    Find phone and mobile numbers for a person from an email address or profile URL, single or in bulk.
+  description: Find phone and mobile numbers for a person from an email address or profile URL, single
+    or in bulk.
   humanURL: https://doc.enrich.so/find-phone-numbers-27483199e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
@@ -126,8 +124,8 @@ apis:
     url: collections/enrich-so-phone-finder-api.opencollection.json
 - aid: enrich-so:enrich-so-teams-api
   name: Enrich Teams API
-  description: >-
-    List team members and manage pending team invitations for the organization behind the API key.
+  description: List team members and manage pending team invitations for the organization behind the API
+    key.
   humanURL: https://doc.enrich.so/list-team-members-27483209e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
@@ -151,8 +149,7 @@ apis:
     url: collections/enrich-so-teams-api.opencollection.json
 - aid: enrich-so:enrich-so-people-search-api
   name: Enrich People Search API
-  description: >-
-    Find employees at a company and run cascading ICP (ideal customer profile) people searches.
+  description: Find employees at a company and run cascading ICP (ideal customer profile) people searches.
   humanURL: https://doc.enrich.so/find-employees-at-a-company-28537860e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
@@ -248,8 +245,7 @@ apis:
     url: https://api.enrich.so/docs
 - aid: enrich-so:enrich-so-company-followers-count-estimation-api
   name: Enrich Company Followers/Count Estimation API
-  description: >-
-    The Company Followers/Count Estimation API from Enrich — 2 operation(s) for company followers/count
+  description: The Company Followers/Count Estimation API from Enrich — 2 operation(s) for company followers/count
     estimation.
   humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
   baseURL: https://dev.enrich.so/api/v3
@@ -325,7 +321,7 @@ apis:
   - type: APIReference
     url: https://api.enrich.so/docs
 - aid: enrich-so:enrich-so-enrich-api
-  name: Enrich Enrich API
+  name: Enrich API
   description: The Enrich API from Enrich — 1 operation(s) for enrich.
   humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
   baseURL: https://dev.enrich.so/api/v3
