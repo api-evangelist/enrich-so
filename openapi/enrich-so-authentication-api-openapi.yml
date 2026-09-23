@@ -34,6 +34,8 @@ paths:
                     type: number
                   credits_remaining:
                     type: number
+      operationId: getV1ApiAuth
+      x-operation-id-source: derived
 components:
   securitySchemes:
     bearerAuth:

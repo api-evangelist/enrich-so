@@ -47,6 +47,8 @@ paths:
                     type: number
                   credits_remaining:
                     type: number
+      operationId: getV2ApiPerson
+      x-operation-id-source: derived
 components:
   securitySchemes:
     bearerAuth:

@@ -1,15 +1,17 @@
 openapi: 3.2.0
 info:
-  title: Enrich So IP to Company API
+  title: Enrich IP to Company API
   version: '3.0'
+  description: Enrich (enrich.so) data enrichment API v3. Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on every page of https://doc.enrich.so (each documentation page embeds its own OpenAPI fragment; this document is the union of them).
   contact:
     name: Enrich
     url: https://www.enrich.so
   termsOfService: https://www.enrich.so/terms-of-service
-  description: 'Operations tagged IP to Company across 2 of this provider''s published API definitions: enrich-so-company-intelligence-api-openapi.yml, enrich-so-v3-harvested-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://dev.enrich.so/api/v3
-  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+  description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
+security:
+- ApiKeyHeader: []
 tags:
 - name: IP to Company
 paths:
@@ -20,9 +22,7 @@ paths:
       description: 'Resolves company, organization, and geolocation info from an IP address. Results are cached for 7 days.
 
 
-        **Cost:** 100 credits. You are **not** charged if no domain is found (i.e. `ipDomain` is absent from the response).
-
-        '
+        **Cost:** 100 credits. You are **not** charged if no domain is found (i.e. `ipDomain` is absent from the response).'
       operationId: ipToCompany
       tags:
       - IP to Company
@@ -40,6 +40,9 @@ paths:
                   minLength: 1
                   maxLength: 45
                   description: IPv4 or IPv6 address to look up
+              x-apidog-orders:
+              - ip
+              x-apidog-ignore-properties: []
             example:
               ip: 8.8.8.8
       responses:
@@ -83,6 +86,22 @@ paths:
                         type: string
                       ipUsageType:
                         type: string
+                    x-apidog-orders:
+                    - searchIp
+                    - ipDomain
+                    - ipOrganization
+                    - ipCountryName
+                    - ipCountryCode
+                    - ipRegionName
+                    - ipCity
+                    - ipSubContinent
+                    - ipLatitude
+                    - ipLongitude
+                    - ipTimezone
+                    - ipIsp
+                    - ipRange
+                    - ipUsageType
+                    x-apidog-ignore-properties: []
                   meta:
                     type: object
                     properties:
@@ -92,6 +111,16 @@ paths:
                         type: integer
                       creditsRemaining:
                         type: integer
+                    x-apidog-orders:
+                    - requestId
+                    - creditsUsed
+                    - creditsRemaining
+                    x-apidog-ignore-properties: []
+                x-apidog-orders:
+                - success
+                - data
+                - meta
+                x-apidog-ignore-properties: []
               example:
                 success: true
                 data:
@@ -123,6 +152,7 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
@@ -136,6 +166,7 @@ paths:
                 detail: '"ip" must be a non-empty string'
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
@@ -147,11 +178,16 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
+                x-apidog-ignore-properties: []
               example:
                 error: Unauthorized
                 message: The API key provided is invalid or has been revoked
                 statusCode: 401
           headers: {}
+          x-apidog-name: Unauthorized
         '402':
           description: You don’t have enough credits for this request
           content:
@@ -163,11 +199,16 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
+                x-apidog-ignore-properties: []
               example:
                 error: Payment Required
                 message: 'Not enough credits. Required: 100, available: 0'
                 statusCode: 402
           headers: {}
+          x-apidog-name: Payment Required
         '429':
           description: You’ve sent too many requests — wait and try again
           content:
@@ -179,6 +220,10 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
+                x-apidog-ignore-properties: []
               example:
                 error: Too Many Requests
                 message: Rate limit exceeded. Please retry after 30 seconds.
@@ -196,6 +241,7 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: Too Many Requests
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
@@ -207,17 +253,34 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
+                x-apidog-ignore-properties: []
               example:
                 error: Internal Server Error
                 message: An unexpected error occurred. Please try again later.
                 statusCode: 500
           headers: {}
+          x-apidog-name: Internal Server Error
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: ITulbGf-iaBy1jastxLFZ
+            schemeIds:
+            - ApiKeyHeader
+          - id: MRl9ot_U0Hi0CGtsoDsHI
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: ITulbGf-iaBy1jastxLFZ
+          scopes:
+            MRl9ot_U0Hi0CGtsoDsHI: {}
+      x-apidog-folder: IP to Company
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511038-run
-    servers:
-    - url: https://dev.enrich.so/api/v3
-      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
   /ip-to-company/batch:
     post:
       summary: Submit batch IP to company lookup
@@ -225,9 +288,7 @@ paths:
       description: 'Submit up to **500 000 IPs** in a single request for async company lookup. Duplicates are removed automatically before processing.
 
 
-        **Cost:** 100 credits per unique IP, reserved when you submit. Credits are charged based on found domains when you fetch results — any excess is refunded automatically.
-
-        '
+        **Cost:** 100 credits per unique IP, reserved when you submit. Credits are charged based on found domains when you fetch results — any excess is refunded automatically.'
       operationId: batchIpToCompany
       tags:
       - IP to Company
@@ -253,7 +314,13 @@ paths:
                         type: string
                         minLength: 1
                         maxLength: 45
+                    x-apidog-orders:
+                    - ip
+                    x-apidog-ignore-properties: []
                   description: Array of IP addresses to look up
+              x-apidog-orders:
+              - ips
+              x-apidog-ignore-properties: []
             example:
               ips:
               - ip: 8.8.8.8
@@ -282,6 +349,13 @@ paths:
                         type: integer
                       duplicatesRemoved:
                         type: integer
+                    x-apidog-orders:
+                    - batchId
+                    - status
+                    - itemCount
+                    - originalCount
+                    - duplicatesRemoved
+                    x-apidog-ignore-properties: []
                   meta:
                     type: object
                     properties:
@@ -293,6 +367,17 @@ paths:
                         type: integer
                       estimatedCredits:
                         type: integer
+                    x-apidog-orders:
+                    - requestId
+                    - creditsReserved
+                    - creditsPerItem
+                    - estimatedCredits
+                    x-apidog-ignore-properties: []
+                x-apidog-orders:
+                - success
+                - data
+                - meta
+                x-apidog-ignore-properties: []
               example:
                 success: true
                 data:
@@ -307,6 +392,7 @@ paths:
                   creditsPerItem: 100
                   estimatedCredits: 300
           headers: {}
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
@@ -320,6 +406,7 @@ paths:
                 detail: '"ips" must be a non-empty array'
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
@@ -331,11 +418,16 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
+                x-apidog-ignore-properties: []
               example:
                 error: Unauthorized
                 message: The API key provided is invalid or has been revoked
                 statusCode: 401
           headers: {}
+          x-apidog-name: Unauthorized
         '402':
           description: You don’t have enough credits — `detail.required` shows how many are needed
           content:
@@ -356,6 +448,16 @@ paths:
                         type: integer
                       creditCostPerItem:
                         type: integer
+                    x-apidog-orders:
+                    - required
+                    - itemCount
+                    - creditCostPerItem
+                    x-apidog-ignore-properties: []
+                x-apidog-orders:
+                - error
+                - message
+                - detail
+                x-apidog-ignore-properties: []
               example:
                 error: Payment Required
                 message: Insufficient credits for batch operation
@@ -365,6 +467,7 @@ paths:
                   creditCostPerItem: 100
                 statusCode: 402
           headers: {}
+          x-apidog-name: Payment Required
         '409':
           description: Duplicate batch submission
           content:
@@ -376,11 +479,16 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
+                x-apidog-ignore-properties: []
               example:
                 error: Conflict
                 message: Duplicate batch submission detected
                 statusCode: 409
           headers: {}
+          x-apidog-name: Conflict
         '429':
           description: You’ve sent too many requests — wait and try again
           content:
@@ -392,6 +500,10 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
+                x-apidog-ignore-properties: []
               example:
                 error: Too Many Requests
                 message: Rate limit exceeded. Please retry after 30 seconds.
@@ -409,6 +521,7 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: Too Many Requests
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
@@ -420,11 +533,16 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
+                x-apidog-ignore-properties: []
               example:
                 error: Internal Server Error
                 message: An unexpected error occurred. Please try again later.
                 statusCode: 500
           headers: {}
+          x-apidog-name: Internal Server Error
         '503':
           description: Database or credit service temporarily unavailable
           content:
@@ -436,17 +554,34 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
+                x-apidog-ignore-properties: []
               example:
                 error: Service Unavailable
                 message: The service is temporarily unavailable. Please try again later.
                 statusCode: 503
           headers: {}
+          x-apidog-name: Service Unavailable
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: ITulbGf-iaBy1jastxLFZ
+            schemeIds:
+            - ApiKeyHeader
+          - id: MRl9ot_U0Hi0CGtsoDsHI
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: ITulbGf-iaBy1jastxLFZ
+          scopes:
+            MRl9ot_U0Hi0CGtsoDsHI: {}
+      x-apidog-folder: IP to Company
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511039-run
-    servers:
-    - url: https://dev.enrich.so/api/v3
-      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
   /ip-to-company/batch/{batchId}:
     get:
       summary: Check batch progress
@@ -454,9 +589,7 @@ paths:
       description: 'Poll this endpoint to track your batch. `progress` is a percentage (0–100) and `status` will be `processing`, `completed`, or `failed`.
 
 
-        **Cost:** Free — polling never costs credits.
-
-        '
+        **Cost:** Free — polling never costs credits.'
       operationId: getIpToCompanyBatchStatus
       tags:
       - IP to Company
@@ -499,6 +632,18 @@ paths:
                       completedAt:
                         type: string
                         nullable: true
+                    x-apidog-orders:
+                    - batchId
+                    - status
+                    - totalItems
+                    - processedItems
+                    - foundCount
+                    - progress
+                    - createdAt
+                    - completedAt
+                x-apidog-orders:
+                - success
+                - data
               example:
                 success: true
                 data:
@@ -511,6 +656,7 @@ paths:
                   createdAt: '2026-05-13T10:00:00.000Z'
                   completedAt: null
           headers: {}
+          x-apidog-name: OK
         '401':
           description: Your API key is missing or invalid
           content:
@@ -522,11 +668,15 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
               example:
                 error: Unauthorized
                 message: The API key provided is invalid or has been revoked
                 statusCode: 401
           headers: {}
+          x-apidog-name: Unauthorized
         '404':
           description: The resource you requested doesn’t exist or doesn’t belong to your organization
           content:
@@ -538,11 +688,15 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
               example:
                 error: Not Found
                 message: No batch found with that ID
                 statusCode: 404
           headers: {}
+          x-apidog-name: Not Found
         '429':
           description: You’ve sent too many requests — wait and try again
           content:
@@ -554,6 +708,9 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
               example:
                 error: Too Many Requests
                 message: Rate limit exceeded. Please retry after 30 seconds.
@@ -571,12 +728,25 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: Too Many Requests
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: ITulbGf-iaBy1jastxLFZ
+            schemeIds:
+            - ApiKeyHeader
+          - id: MRl9ot_U0Hi0CGtsoDsHI
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: ITulbGf-iaBy1jastxLFZ
+          scopes:
+            MRl9ot_U0Hi0CGtsoDsHI: {}
+      x-apidog-folder: IP to Company
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511040-run
-    servers:
-    - url: https://dev.enrich.so/api/v3
-      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
   /ip-to-company/batch/{batchId}/results:
     get:
       summary: Get batch results
@@ -584,9 +754,7 @@ paths:
       description: 'Fetch results once your batch has finished. Results are paginated — use `page` and `limit` to walk through them.
 
 
-        **Credit settlement:** The first time you call this after the batch reaches `completed` or `failed`, we calculate the final cost (100 credits per IP where a domain was found) and refund any excess. Subsequent calls return the cached settlement — you are never double-charged.
-
-        '
+        **Credit settlement:** The first time you call this after the batch reaches `completed` or `failed`, we calculate the final cost (100 credits per IP where a domain was found) and refund any excess. Subsequent calls return the cached settlement — you are never double-charged.'
       operationId: getIpToCompanyBatchResults
       tags:
       - IP to Company
@@ -659,10 +827,27 @@ paths:
                               type: string
                             ipTimezone:
                               type: string
+                          x-apidog-orders:
+                          - searchIp
+                          - ipDomain
+                          - ipOrganization
+                          - ipCountryName
+                          - ipCountryCode
+                          - ipCity
+                          - ipTimezone
                       page:
                         type: integer
                       limit:
                         type: integer
+                    x-apidog-orders:
+                    - batchId
+                    - status
+                    - totalItems
+                    - processedCount
+                    - foundCount
+                    - results
+                    - page
+                    - limit
                   meta:
                     type: object
                     properties:
@@ -678,6 +863,17 @@ paths:
                         type: integer
                       processedItems:
                         type: integer
+                    x-apidog-orders:
+                    - requestId
+                    - creditsUsed
+                    - creditsRefunded
+                    - creditsRemaining
+                    - totalItems
+                    - processedItems
+                x-apidog-orders:
+                - success
+                - data
+                - meta
               example:
                 success: true
                 data:
@@ -714,6 +910,7 @@ paths:
                   totalItems: 3
                   processedItems: 3
           headers: {}
+          x-apidog-name: OK
         '401':
           description: Your API key is missing or invalid
           content:
@@ -725,11 +922,15 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
               example:
                 error: Unauthorized
                 message: The API key provided is invalid or has been revoked
                 statusCode: 401
           headers: {}
+          x-apidog-name: Unauthorized
         '404':
           description: The resource you requested doesn’t exist or doesn’t belong to your organization
           content:
@@ -741,11 +942,15 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
               example:
                 error: Not Found
                 message: No batch found with that ID
                 statusCode: 404
           headers: {}
+          x-apidog-name: Not Found
         '429':
           description: You’ve sent too many requests — wait and try again
           content:
@@ -757,6 +962,9 @@ paths:
                     type: string
                   message:
                     type: string
+                x-apidog-orders:
+                - error
+                - message
               example:
                 error: Too Many Requests
                 message: Rate limit exceeded. Please retry after 30 seconds.
@@ -774,49 +982,28 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: Too Many Requests
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: ITulbGf-iaBy1jastxLFZ
+            schemeIds:
+            - ApiKeyHeader
+          - id: MRl9ot_U0Hi0CGtsoDsHI
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: ITulbGf-iaBy1jastxLFZ
+          scopes:
+            MRl9ot_U0Hi0CGtsoDsHI: {}
+      x-apidog-folder: IP to Company
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-35511041-run
-    servers:
-    - url: https://dev.enrich.so/api/v3
-      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
 components:
   schemas:
     ErrorEnvelope:
-      type: object
-      description: RFC 9457 Problem Details error response.
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          type: string
-          format: uri
-          description: URI reference that identifies the problem type.
-          examples:
-          - https://dev.enrich.so/errors/validation-error
-        title:
-          type: string
-          description: Short, human-readable summary of the problem.
-          examples:
-          - Validation Error
-        status:
-          type: integer
-          description: HTTP status code.
-          examples:
-          - 400
-        detail:
-          type: string
-          description: Human-readable explanation specific to this occurrence.
-          examples:
-          - body/email Invalid email
-        instance:
-          type: string
-          description: URI reference that identifies the specific occurrence.
-          examples:
-          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-    ErrorEnvelope_2:
       type: object
       description: RFC 9457 Problem Details error response.
       required:
@@ -859,15 +1046,6 @@ components:
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
   securitySchemes:
-    ApiKeyHeader:
-      type: apiKey
-      in: header
-      name: x-api-key
-      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
-    BearerToken:
-      type: http
-      scheme: bearer
-      description: 'The same API key sent as an Authorization: Bearer token.'
     apiKey:
       type: apikey
       name: x-api-key
@@ -883,6 +1061,12 @@ components:
         `Authorization: Bearer sk_live_...`
 
         '
-x-refined-from:
-- enrich-so-company-intelligence-api-openapi.yml
-- enrich-so-v3-harvested-openapi.yml
+    ApiKeyHeader:
+      type: apikey
+      in: header
+      name: x-api-key
+      description: API key starting with `sk_live_` (64 characters). Get yours from the [Enrich Dashboard](https://sendkit.ai/dashboard/api-keys).
+    BearerToken:
+      type: bearer
+      scheme: bearer
+      description: Same `sk_live_` key passed as a Bearer token in the Authorization header.

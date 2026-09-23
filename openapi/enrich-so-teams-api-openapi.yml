@@ -23,9 +23,7 @@ paths:
 
         **owner** to invite people. The invitee can be assigned the role of `admin`
 
-        or `member`.
-
-        '
+        or `member`.'
       operationId: inviteTeamMember
       tags:
       - Teams
@@ -139,9 +137,7 @@ paths:
       deprecated: false
       description: 'See all outstanding invitations for your team. You must be an **admin** or
 
-        **owner**.
-
-        '
+        **owner**.'
       operationId: listTeamInvitations
       tags:
       - Teams
@@ -247,9 +243,7 @@ paths:
       deprecated: false
       description: 'Withdraws an invitation before the invitee accepts it. You must be an
 
-        **admin** or **owner**.
-
-        '
+        **admin** or **owner**.'
       operationId: cancelInvitation
       tags:
       - Teams
@@ -356,9 +350,7 @@ paths:
     get:
       summary: List team members
       deprecated: false
-      description: 'Returns everyone in your team along with their role (owner, admin, or member).
-
-        '
+      description: Returns everyone in your team along with their role (owner, admin, or member).
       operationId: listTeamMembers
       tags:
       - Teams
@@ -472,6 +464,195 @@ paths:
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483209-run
 components:
   schemas:
+    InvitationResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/Invitation'
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+      x-apidog-orders:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    InviteBody:
+      type: object
+      required:
+      - email
+      - role
+      properties:
+        email:
+          type: string
+          format: email
+          description: The email address of the person you want to invite
+          examples:
+          - marco.silva@yourcompany.com
+        role:
+          type: string
+          enum:
+          - admin
+          - member
+          description: The role to assign them
+          examples:
+          - member
+      x-apidog-orders:
+      - email
+      - role
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    SuccessOperationResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - success
+          properties:
+            success:
+              type: boolean
+          x-apidog-orders:
+          - success
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    TeamMember:
+      type: object
+      required:
+      - id
+      - userId
+      - email
+      - name
+      - role
+      - createdAt
+      properties:
+        id:
+          type: string
+          description: Membership ID
+          examples:
+          - 665e2a104a6d8c001abc4001
+        userId:
+          type: string
+          description: User ID
+          examples:
+          - 665e2a104a6d8c001abc4101
+        email:
+          type: string
+          format: email
+          description: The member's email address
+          examples:
+          - sarah.chen@yourcompany.com
+        name:
+          type: string
+          description: The member's display name
+          examples:
+          - Sarah Chen
+          nullable: true
+        role:
+          type: string
+          enum:
+          - owner
+          - admin
+          - member
+          description: 'Their role in the team:
+
+            - `owner` — full control, cannot be removed
+
+            - `admin` — can manage members and keys
+
+            - `member` — can use the API
+
+            '
+          examples:
+          - admin
+        createdAt:
+          type: string
+          format: date-time
+          description: When they joined the team
+          examples:
+          - '2025-01-15T09:00:00.000Z'
+      x-apidog-orders:
+      - id
+      - userId
+      - email
+      - name
+      - role
+      - createdAt
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    TeamMemberListResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     InvitationListResponse:
       type: object
       required:
@@ -541,195 +722,6 @@ components:
       - status
       - expiresAt
       - createdAt
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    InvitationResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/Invitation'
-      x-apidog-orders:
-      - success
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    ErrorEnvelope:
-      type: object
-      description: RFC 9457 Problem Details error response.
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          type: string
-          format: uri
-          description: URI reference that identifies the problem type.
-          examples:
-          - https://dev.enrich.so/errors/validation-error
-        title:
-          type: string
-          description: Short, human-readable summary of the problem.
-          examples:
-          - Validation Error
-        status:
-          type: integer
-          description: HTTP status code.
-          examples:
-          - 400
-        detail:
-          type: string
-          description: Human-readable explanation specific to this occurrence.
-          examples:
-          - body/email Invalid email
-        instance:
-          type: string
-          description: URI reference that identifies the specific occurrence.
-          examples:
-          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-      x-apidog-orders:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    TeamMember:
-      type: object
-      required:
-      - id
-      - userId
-      - email
-      - name
-      - role
-      - createdAt
-      properties:
-        id:
-          type: string
-          description: Membership ID
-          examples:
-          - 665e2a104a6d8c001abc4001
-        userId:
-          type: string
-          description: User ID
-          examples:
-          - 665e2a104a6d8c001abc4101
-        email:
-          type: string
-          format: email
-          description: The member's email address
-          examples:
-          - sarah.chen@yourcompany.com
-        name:
-          type: string
-          description: The member's display name
-          examples:
-          - Sarah Chen
-          nullable: true
-        role:
-          type: string
-          enum:
-          - owner
-          - admin
-          - member
-          description: 'Their role in the team:
-
-            - `owner` — full control, cannot be removed
-
-            - `admin` — can manage members and keys
-
-            - `member` — can use the API
-
-            '
-          examples:
-          - admin
-        createdAt:
-          type: string
-          format: date-time
-          description: When they joined the team
-          examples:
-          - '2025-01-15T09:00:00.000Z'
-      x-apidog-orders:
-      - id
-      - userId
-      - email
-      - name
-      - role
-      - createdAt
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    InviteBody:
-      type: object
-      required:
-      - email
-      - role
-      properties:
-        email:
-          type: string
-          format: email
-          description: The email address of the person you want to invite
-          examples:
-          - marco.silva@yourcompany.com
-        role:
-          type: string
-          enum:
-          - admin
-          - member
-          description: The role to assign them
-          examples:
-          - member
-      x-apidog-orders:
-      - email
-      - role
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    SuccessOperationResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - success
-          properties:
-            success:
-              type: boolean
-          x-apidog-orders:
-          - success
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    TeamMemberListResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/TeamMember'
-      x-apidog-orders:
-      - success
-      - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
   securitySchemes:

@@ -1,15 +1,17 @@
 openapi: 3.2.0
 info:
-  title: Enrich So Wallets API
+  title: Enrich Wallets API
   version: '3.0'
+  description: Enrich (enrich.so) data enrichment API v3. Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on every page of https://doc.enrich.so (each documentation page embeds its own OpenAPI fragment; this document is the union of them).
   contact:
     name: Enrich
     url: https://www.enrich.so
   termsOfService: https://www.enrich.so/terms-of-service
-  description: 'Operations tagged Wallets across 2 of this provider''s published API definitions: enrich-so-account-api-openapi.yml, enrich-so-v3-harvested-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://dev.enrich.so/api/v3
-  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+  description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
+security:
+- ApiKeyHeader: []
 tags:
 - name: Wallets
 paths:
@@ -17,9 +19,7 @@ paths:
     get:
       summary: Get your credit balance
       deprecated: false
-      description: 'Returns the current credit balance for your organization.
-
-        '
+      description: Returns the current credit balance for your organization.
       operationId: getWalletBalance
       tags:
       - Wallets
@@ -39,6 +39,7 @@ paths:
                   currency: credits
                   asOf: '2025-06-03T14:22:10.000Z'
           headers: {}
+          x-apidog-name: OK
         '401':
           description: Your API key is missing or invalid
           content:
@@ -51,6 +52,7 @@ paths:
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '429':
           description: You've sent too many requests — wait and try again
           content:
@@ -75,12 +77,25 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: Too Many Requests
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: ITulbGf-iaBy1jastxLFZ
+            schemeIds:
+            - ApiKeyHeader
+          - id: MRl9ot_U0Hi0CGtsoDsHI
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: ITulbGf-iaBy1jastxLFZ
+          scopes:
+            MRl9ot_U0Hi0CGtsoDsHI: {}
+      x-apidog-folder: Wallets
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483207-run
-    servers:
-    - url: https://dev.enrich.so/api/v3
-      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
   /wallets/transactions:
     get:
       summary: Get transaction history
@@ -89,9 +104,7 @@ paths:
 
         adjustments. Use the `type` parameter to filter by transaction type.
 
-        Results are paginated.
-
-        '
+        Results are paginated.'
       operationId: getWalletTransactions
       tags:
       - Wallets
@@ -157,6 +170,7 @@ paths:
                     total: 3
                     totalPages: 1
           headers: {}
+          x-apidog-name: OK
         '401':
           description: Your API key is missing or invalid
           content:
@@ -169,6 +183,7 @@ paths:
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '429':
           description: You've sent too many requests — wait and try again
           content:
@@ -193,12 +208,25 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: Too Many Requests
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: ITulbGf-iaBy1jastxLFZ
+            schemeIds:
+            - ApiKeyHeader
+          - id: MRl9ot_U0Hi0CGtsoDsHI
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: ITulbGf-iaBy1jastxLFZ
+          scopes:
+            MRl9ot_U0Hi0CGtsoDsHI: {}
+      x-apidog-folder: Wallets
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483208-run
-    servers:
-    - url: https://dev.enrich.so/api/v3
-      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
 components:
   schemas:
     WalletBalanceResponse:
@@ -212,265 +240,12 @@ components:
           const: true
         data:
           $ref: '#/components/schemas/WalletBalance'
-    WalletBalance:
-      type: object
-      required:
-      - organizationId
-      - balance
-      - currency
-      - asOf
-      properties:
-        organizationId:
-          type: string
-          description: Your organization ID
-          examples:
-          - 665e0b2f4a6d8c001abc1234
-        balance:
-          type: number
-          description: Your current credit balance
-          examples:
-          - 25000
-        currency:
-          type: string
-          const: credits
-          examples:
-          - credits
-        asOf:
-          type: string
-          format: date-time
-          description: When this balance was last calculated
-          examples:
-          - '2025-06-03T14:22:10.000Z'
-    Pagination:
-      type: object
-      required:
-      - page
-      - limit
-      - total
-      - totalPages
-      properties:
-        page:
-          type: integer
-          minimum: 1
-          description: The page you're on
-          examples:
-          - 1
-        limit:
-          type: integer
-          minimum: 1
-          description: Items per page
-          examples:
-          - 50
-        total:
-          type: integer
-          minimum: 0
-          description: Total items across all pages
-          examples:
-          - 3
-        totalPages:
-          type: integer
-          minimum: 0
-          description: Total number of pages
-          examples:
-          - 1
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     ErrorEnvelope:
-      type: object
-      description: RFC 9457 Problem Details error response.
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          type: string
-          format: uri
-          description: URI reference that identifies the problem type.
-          examples:
-          - https://dev.enrich.so/errors/validation-error
-        title:
-          type: string
-          description: Short, human-readable summary of the problem.
-          examples:
-          - Validation Error
-        status:
-          type: integer
-          description: HTTP status code.
-          examples:
-          - 400
-        detail:
-          type: string
-          description: Human-readable explanation specific to this occurrence.
-          examples:
-          - body/email Invalid email
-        instance:
-          type: string
-          description: URI reference that identifies the specific occurrence.
-          examples:
-          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-    WalletTransaction:
-      type: object
-      required:
-      - id
-      - organizationId
-      - type
-      - amount
-      - balanceAfter
-      - description
-      - createdAt
-      properties:
-        id:
-          type: string
-          description: Transaction ID
-          examples:
-          - 665e10a14a6d8c001abc2001
-        organizationId:
-          type: string
-          examples:
-          - 665e0b2f4a6d8c001abc1234
-        type:
-          type: string
-          description: 'One of: `deduction`, `topup`, `adjustment`, or `refund`'
-          examples:
-          - deduction
-        amount:
-          type: number
-          description: The credit amount (negative for deductions, positive for top-ups and refunds)
-          examples:
-          - -10
-        balanceAfter:
-          type: number
-          description: Your balance after this transaction
-          examples:
-          - 24990
-        description:
-          type: string
-          description: A short note about what happened
-          examples:
-          - 'Email finder: emily.zhang@figma.com'
-        metadata:
-          type: object
-          additionalProperties: true
-          description: Additional context (varies by transaction type)
-          properties: {}
-        createdAt:
-          type: string
-          format: date-time
-          description: When this transaction happened
-          examples:
-          - '2025-06-03T14:35:00.000Z'
-    WalletTransactionsResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - transactions
-          - pagination
-          properties:
-            transactions:
-              type: array
-              items:
-                $ref: '#/components/schemas/WalletTransaction'
-            pagination:
-              $ref: '#/components/schemas/Pagination'
-    WalletBalanceResponse_2:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/WalletBalance_2'
-      x-apidog-orders:
-      - success
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    WalletBalance_2:
-      type: object
-      required:
-      - organizationId
-      - balance
-      - currency
-      - asOf
-      properties:
-        organizationId:
-          type: string
-          description: Your organization ID
-          examples:
-          - 665e0b2f4a6d8c001abc1234
-        balance:
-          type: number
-          description: Your current credit balance
-          examples:
-          - 25000
-        currency:
-          type: string
-          const: credits
-          examples:
-          - credits
-        asOf:
-          type: string
-          format: date-time
-          description: When this balance was last calculated
-          examples:
-          - '2025-06-03T14:22:10.000Z'
-      x-apidog-orders:
-      - organizationId
-      - balance
-      - currency
-      - asOf
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    Pagination_2:
-      type: object
-      required:
-      - page
-      - limit
-      - total
-      - totalPages
-      properties:
-        page:
-          type: integer
-          minimum: 1
-          description: The page you're on
-          examples:
-          - 1
-        limit:
-          type: integer
-          minimum: 1
-          description: Items per page
-          examples:
-          - 50
-        total:
-          type: integer
-          minimum: 0
-          description: Total items across all pages
-          examples:
-          - 3
-        totalPages:
-          type: integer
-          minimum: 0
-          description: Total number of pages
-          examples:
-          - 1
-      x-apidog-orders:
-      - page
-      - limit
-      - total
-      - totalPages
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    ErrorEnvelope_2:
       type: object
       description: RFC 9457 Problem Details error response.
       required:
@@ -512,7 +287,46 @@ components:
       - instance
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    WalletTransaction_2:
+    Pagination:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - totalPages
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: The page you're on
+          examples:
+          - 1
+        limit:
+          type: integer
+          minimum: 1
+          description: Items per page
+          examples:
+          - 50
+        total:
+          type: integer
+          minimum: 0
+          description: Total items across all pages
+          examples:
+          - 3
+        totalPages:
+          type: integer
+          minimum: 0
+          description: Total number of pages
+          examples:
+          - 1
+      x-apidog-orders:
+      - page
+      - limit
+      - total
+      - totalPages
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    WalletTransaction:
       type: object
       required:
       - id
@@ -576,7 +390,7 @@ components:
       - createdAt
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    WalletTransactionsResponse_2:
+    WalletTransactionsResponse:
       type: object
       required:
       - success
@@ -594,9 +408,9 @@ components:
             transactions:
               type: array
               items:
-                $ref: '#/components/schemas/WalletTransaction_2'
+                $ref: '#/components/schemas/WalletTransaction'
             pagination:
-              $ref: '#/components/schemas/Pagination_2'
+              $ref: '#/components/schemas/Pagination'
           x-apidog-orders:
           - transactions
           - pagination
@@ -606,16 +420,43 @@ components:
       - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
+    WalletBalance:
+      type: object
+      required:
+      - organizationId
+      - balance
+      - currency
+      - asOf
+      properties:
+        organizationId:
+          type: string
+          description: Your organization ID
+          examples:
+          - 665e0b2f4a6d8c001abc1234
+        balance:
+          type: number
+          description: Your current credit balance
+          examples:
+          - 25000
+        currency:
+          type: string
+          const: credits
+          examples:
+          - credits
+        asOf:
+          type: string
+          format: date-time
+          description: When this balance was last calculated
+          examples:
+          - '2025-06-03T14:22:10.000Z'
+      x-apidog-orders:
+      - organizationId
+      - balance
+      - currency
+      - asOf
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
   securitySchemes:
-    ApiKeyHeader:
-      type: apiKey
-      in: header
-      name: x-api-key
-      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
-    BearerToken:
-      type: http
-      scheme: bearer
-      description: 'The same API key sent as an Authorization: Bearer token.'
     apiKey:
       type: apikey
       name: x-api-key
@@ -631,6 +472,12 @@ components:
         `Authorization: Bearer sk_live_...`
 
         '
-x-refined-from:
-- enrich-so-account-api-openapi.yml
-- enrich-so-v3-harvested-openapi.yml
+    ApiKeyHeader:
+      type: apikey
+      in: header
+      name: x-api-key
+      description: API key starting with `sk_live_` (64 characters). Get yours from the [Enrich Dashboard](https://sendkit.ai/dashboard/api-keys).
+    BearerToken:
+      type: bearer
+      scheme: bearer
+      description: Same `sk_live_` key passed as a Bearer token in the Authorization header.

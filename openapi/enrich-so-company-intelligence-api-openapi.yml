@@ -1,9 +1,7 @@
 openapi: 3.2.0
 info:
   title: Enrich Company Intelligence API
-  description: 'Enrich (enrich.so) is a person and company data enrichment API. From one REST interface it resolves professional profiles from an email address (reverse email lookup), finds and verifies professional email addresses, finds phone/mobile numbers, resolves a company and geolocation from an IP address, scrapes LinkedIn company followers, and searches a lead-finder database of people and organizations. All requests use the base URL https://dev.enrich.so/api/v3 and authenticate with an API key passed either in the `x-api-key` header or as `Authorization: Bearer`. Usage is metered against a prepaid credit balance; "not found" results are refunded.
-
-    Grounding note: the single-lookup endpoints in this document (POST /reverse-lookup/lookup, POST /email-finder, POST /email-validation, GET /reverse-lookup/phones, POST /ip-to-company, POST /company-follower, POST /lead-finder/search, POST /lead-finder/reveal) and their credit costs are confirmed from the live Enrich documentation. The batch / progress / results sub-paths are modeled from the documented batch-and-poll pattern (submit -> check progress -> get results) and their exact URL segments should be confirmed against the current docs before code generation. Modeled operations are marked with `x-endpoint-modeled: true`.'
+  description: Enrich (enrich.so) is a person and company data enrichment API.
   version: '3.0'
   contact:
     name: Enrich
@@ -104,14 +102,19 @@ components:
           type: integer
         cached:
           type: boolean
-    IpToCompanyRequest:
+    ErrorEnvelope:
       type: object
-      required:
-      - ip
       properties:
-        ip:
-          type: string
-          description: IPv4 or IPv6 address to resolve.
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
     CompanyFollowerRequest:
       type: object
       required:
@@ -149,19 +152,28 @@ components:
           type: string
         skipCache:
           type: boolean
-    ErrorEnvelope:
+    IpToCompanyRequest:
+      type: object
+      required:
+      - ip
+      properties:
+        ip:
+          type: string
+          description: IPv4 or IPv6 address to resolve.
+    CompanyFollowerResultsResponse:
       type: object
       properties:
         success:
           type: boolean
-          example: false
-        error:
+        data:
           type: object
           properties:
-            code:
+            status:
               type: string
-            message:
-              type: string
+            followers:
+              type: array
+              items:
+                type: object
     StartCompanyFollowerResponse:
       type: object
       properties:
@@ -206,29 +218,15 @@ components:
               type: string
             usageType:
               type: string
-    CompanyFollowerResultsResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: object
-          properties:
-            status:
-              type: string
-            followers:
-              type: array
-              items:
-                type: object
   responses:
-    InsufficientCredits:
-      description: Not enough credits to complete the request.
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    Unauthorized:
-      description: Missing, invalid, or disabled API key.
+    InsufficientCredits:
+      description: Not enough credits to complete the request.
       content:
         application/json:
           schema:

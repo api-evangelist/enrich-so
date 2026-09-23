@@ -1,9 +1,7 @@
 openapi: 3.2.0
 info:
   title: Enrich Email Verification API
-  description: 'Enrich (enrich.so) is a person and company data enrichment API. From one REST interface it resolves professional profiles from an email address (reverse email lookup), finds and verifies professional email addresses, finds phone/mobile numbers, resolves a company and geolocation from an IP address, scrapes LinkedIn company followers, and searches a lead-finder database of people and organizations. All requests use the base URL https://dev.enrich.so/api/v3 and authenticate with an API key passed either in the `x-api-key` header or as `Authorization: Bearer`. Usage is metered against a prepaid credit balance; "not found" results are refunded.
-
-    Grounding note: the single-lookup endpoints in this document (POST /reverse-lookup/lookup, POST /email-finder, POST /email-validation, GET /reverse-lookup/phones, POST /ip-to-company, POST /company-follower, POST /lead-finder/search, POST /lead-finder/reveal) and their credit costs are confirmed from the live Enrich documentation. The batch / progress / results sub-paths are modeled from the documented batch-and-poll pattern (submit -> check progress -> get results) and their exact URL segments should be confirmed against the current docs before code generation. Modeled operations are marked with `x-endpoint-modeled: true`.'
+  description: Enrich (enrich.so) is a person and company data enrichment API.
   version: '3.0'
   contact:
     name: Enrich
@@ -78,16 +76,6 @@ components:
           type: integer
         cached:
           type: boolean
-    EmailValidationRequest:
-      type: object
-      required:
-      - email
-      properties:
-        email:
-          type: string
-          format: email
-          minLength: 1
-          maxLength: 254
     ErrorEnvelope:
       type: object
       properties:
@@ -111,6 +99,16 @@ components:
           items:
             type: string
             format: email
+    EmailValidationRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
     BatchSubmitResponse:
       type: object
       properties:
@@ -146,8 +144,8 @@ components:
             catchAll:
               type: boolean
   responses:
-    RateLimited:
-      description: Rate limit exceeded. Includes a Retry-After header.
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
       content:
         application/json:
           schema:
@@ -158,8 +156,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    Unauthorized:
-      description: Missing, invalid, or disabled API key.
+    RateLimited:
+      description: Rate limit exceeded. Includes a Retry-After header.
       content:
         application/json:
           schema:

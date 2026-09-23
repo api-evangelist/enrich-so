@@ -1,15 +1,17 @@
 openapi: 3.2.0
 info:
-  title: Enrich So Email Validation API
+  title: Enrich Email Validation API
   version: '3.0'
+  description: Enrich (enrich.so) data enrichment API v3. Assembled verbatim from the per-endpoint OpenAPI fragments Enrich publishes on every page of https://doc.enrich.so (each documentation page embeds its own OpenAPI fragment; this document is the union of them).
   contact:
     name: Enrich
     url: https://www.enrich.so
   termsOfService: https://www.enrich.so/terms-of-service
-  description: 'Operations tagged Email Validation across 2 of this provider''s published API definitions: enrich-so-email-verification-api-openapi.yml, enrich-so-v3-harvested-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://dev.enrich.so/api/v3
-  description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
+  description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
+security:
+- ApiKeyHeader: []
 tags:
 - name: Email Validation
 paths:
@@ -24,9 +26,7 @@ paths:
         provider, and whether the domain is a catch-all.
 
 
-        **Cost:** 1 credit. You are **not** charged if the result is `risky`.
-
-        '
+        **Cost:** 1 credit. You are **not** charged if the result is `risky`.'
       operationId: validateEmail
       tags:
       - Email Validation
@@ -72,6 +72,7 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
@@ -85,6 +86,7 @@ paths:
                 detail: body/email Invalid email
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
@@ -97,6 +99,7 @@ paths:
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '402':
           description: You don't have enough credits for this request
           content:
@@ -109,6 +112,7 @@ paths:
                 status: 402
                 detail: 'Not enough credits. Required: 10, available: 3'
           headers: {}
+          x-apidog-name: Payment Required
         '429':
           description: You've sent too many requests — wait and try again
           content:
@@ -133,6 +137,7 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: Too Many Requests
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
@@ -145,17 +150,59 @@ paths:
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: Internal Server Error
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: ITulbGf-iaBy1jastxLFZ
+            schemeIds:
+            - ApiKeyHeader
+          - id: MRl9ot_U0Hi0CGtsoDsHI
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: ITulbGf-iaBy1jastxLFZ
+          scopes:
+            MRl9ot_U0Hi0CGtsoDsHI: {}
+      x-apidog-folder: Email Validation
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483191-run
-    servers:
-    - url: https://dev.enrich.so/api/v3
-      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
   /email-validation/batch:
     post:
       summary: Validate emails in batch
       deprecated: false
-      description: "Submit up to **500 000 emails** in a single request. We automatically\nremove duplicates (case-insensitive) before processing, so you only pay\nfor unique addresses.\n\n**Cost:** 1 credit per unique email, reserved when you submit. Any unused\ncredits are refunded automatically when you fetch results.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** every time an individual email finishes\n   validation. See [emailValidationResult](#tag/Webhooks/operation/webhookEmailValidationResult)\n   for the exact payload.\n\n2. **A completion callback** once every email in the batch has been\n   processed. See [emailValidationCompletion](#tag/Webhooks/operation/webhookEmailValidationCompletion)\n   for the exact payload.\n"
+      description: 'Submit up to **500 000 emails** in a single request. We automatically
+
+        remove duplicates (case-insensitive) before processing, so you only pay
+
+        for unique addresses.
+
+
+        **Cost:** 1 credit per unique email, reserved when you submit. Any unused
+
+        credits are refunded automatically when you fetch results.
+
+
+        ### Webhook callbacks
+
+
+        If you include a `webhookUrl`, your server will receive:
+
+
+        1. **A per-result callback** every time an individual email finishes
+
+        validation. See emailValidationResult
+
+        for the exact payload.
+
+
+        2. **A completion callback** once every email in the batch has been
+
+        processed. See emailValidationCompletion
+
+        for the exact payload.'
       operationId: batchValidateEmails
       tags:
       - Email Validation
@@ -193,6 +240,7 @@ paths:
                   creditsPerItem: 1
                   estimatedCredits: 4
           headers: {}
+          x-apidog-name: OK
         '400':
           description: Something is wrong with the request — check the `detail` field for specifics
           content:
@@ -206,6 +254,7 @@ paths:
                 detail: body/email Invalid email
                 instance: /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
           headers: {}
+          x-apidog-name: Bad Request
         '401':
           description: Your API key is missing or invalid
           content:
@@ -218,6 +267,7 @@ paths:
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '402':
           description: You don't have enough credits for this request
           content:
@@ -230,6 +280,7 @@ paths:
                 status: 402
                 detail: 'Not enough credits. Required: 10, available: 3'
           headers: {}
+          x-apidog-name: Payment Required
         '429':
           description: You've sent too many requests — wait and try again
           content:
@@ -254,6 +305,7 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: Too Many Requests
         '500':
           description: Something went wrong on our end — try again in a moment
           content:
@@ -266,12 +318,25 @@ paths:
                 status: 500
                 detail: An unexpected error occurred. Please try again later.
           headers: {}
+          x-apidog-name: Internal Server Error
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: ITulbGf-iaBy1jastxLFZ
+            schemeIds:
+            - ApiKeyHeader
+          - id: MRl9ot_U0Hi0CGtsoDsHI
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: ITulbGf-iaBy1jastxLFZ
+          scopes:
+            MRl9ot_U0Hi0CGtsoDsHI: {}
+      x-apidog-folder: Email Validation
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483192-run
-    servers:
-    - url: https://dev.enrich.so/api/v3
-      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
   /email-validation/batch/{batchId}:
     get:
       summary: Check batch validation progress
@@ -283,9 +348,7 @@ paths:
         `completed`, or `failed`.
 
 
-        **Cost:** Free — polling never costs credits.
-
-        '
+        **Cost:** Free — polling never costs credits.'
       operationId: getEmailValidationBatchStatus
       tags:
       - Email Validation
@@ -314,6 +377,7 @@ paths:
                   processedItems: 3
                   progress: 75
           headers: {}
+          x-apidog-name: OK
         '401':
           description: Your API key is missing or invalid
           content:
@@ -326,6 +390,7 @@ paths:
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '404':
           description: The resource you requested doesn't exist or doesn't belong to your organization
           content:
@@ -338,6 +403,7 @@ paths:
                 status: 404
                 detail: No batch found with that ID
           headers: {}
+          x-apidog-name: Not Found
         '429':
           description: You've sent too many requests — wait and try again
           content:
@@ -362,12 +428,25 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: Too Many Requests
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: ITulbGf-iaBy1jastxLFZ
+            schemeIds:
+            - ApiKeyHeader
+          - id: MRl9ot_U0Hi0CGtsoDsHI
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: ITulbGf-iaBy1jastxLFZ
+          scopes:
+            MRl9ot_U0Hi0CGtsoDsHI: {}
+      x-apidog-folder: Email Validation
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483193-run
-    servers:
-    - url: https://dev.enrich.so/api/v3
-      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
   /email-validation/batch/{batchId}/results:
     get:
       summary: Get batch validation results
@@ -381,9 +460,7 @@ paths:
 
         `completed` or `failed`, we calculate the final cost and refund any excess
 
-        credits. Subsequent calls return the cached settlement.
-
-        '
+        credits. Subsequent calls return the cached settlement.'
       operationId: getEmailValidationBatchResults
       tags:
       - Email Validation
@@ -460,6 +537,7 @@ paths:
                   totalItems: 4
                   processedItems: 4
           headers: {}
+          x-apidog-name: OK
         '401':
           description: Your API key is missing or invalid
           content:
@@ -472,6 +550,7 @@ paths:
                 status: 401
                 detail: The API key provided is invalid or has been revoked
           headers: {}
+          x-apidog-name: Unauthorized
         '404':
           description: The resource you requested doesn't exist or doesn't belong to your organization
           content:
@@ -484,6 +563,7 @@ paths:
                 status: 404
                 detail: No batch found with that ID
           headers: {}
+          x-apidog-name: Not Found
         '429':
           description: You've sent too many requests — wait and try again
           content:
@@ -508,161 +588,27 @@ paths:
             X-RateLimit-Reset:
               schema:
                 type: string
+          x-apidog-name: Too Many Requests
       security:
       - ApiKeyHeader: []
+        x-apidog:
+          schemeGroups:
+          - id: ITulbGf-iaBy1jastxLFZ
+            schemeIds:
+            - ApiKeyHeader
+          - id: MRl9ot_U0Hi0CGtsoDsHI
+            schemeIds:
+            - BearerToken
+          required: true
+          use:
+            id: ITulbGf-iaBy1jastxLFZ
+          scopes:
+            MRl9ot_U0Hi0CGtsoDsHI: {}
+      x-apidog-folder: Email Validation
+      x-apidog-status: released
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483194-run
-    servers:
-    - url: https://dev.enrich.so/api/v3
-      description: Enrich API v3 production base URL, published at https://doc.enrich.so/api-reference-1951025m0
 components:
   schemas:
-    EnrichmentMeta:
-      type: object
-      description: Metadata included with every enrichment response
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request — useful for support tickets
-          examples:
-          - 664f2b3c9a1e4d0012abcdef
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: How many credits this request consumed
-          examples:
-          - 10
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after this request
-          examples:
-          - 24990
-        processingTimeMs:
-          type: number
-          description: How long the lookup took, in milliseconds
-          examples:
-          - 420
-    EmailValidationResult:
-      type: object
-      description: The result of validating a single email address
-      required:
-      - email
-      - result
-      - message
-      - isCatchAll
-      - confidence
-      properties:
-        email:
-          type: string
-          description: The email address that was validated
-          examples:
-          - sarah.chen@stripe.com
-        result:
-          type: string
-          enum:
-          - valid
-          - invalid
-          - risky
-          description: 'The validation verdict:
-
-            - `valid` — the mailbox exists and accepts mail
-
-            - `invalid` — the mailbox does not exist
-
-            - `risky` — we can''t confirm delivery (e.g. catch-all domain)
-
-            '
-          examples:
-          - valid
-        message:
-          type: string
-          description: A human-readable explanation of the result
-          examples:
-          - The mailbox exists and is accepting mail
-        isCatchAll:
-          type: boolean
-          description: Whether the domain accepts mail to any address (catch-all)
-          examples:
-          - false
-        isFederated:
-          type: boolean
-          description: Whether the email uses SSO or federated authentication
-          examples:
-          - false
-        hasSEG:
-          type: boolean
-          description: Whether the domain uses a Secure Email Gateway
-          examples:
-          - true
-        segProvider:
-          type: string
-          description: The name of the Secure Email Gateway provider
-          examples:
-          - Proofpoint
-        provider:
-          type: string
-          enum:
-          - GOOGLE
-          - MICROSOFT
-          - SMTP
-          description: The email service provider
-          examples:
-          - GOOGLE
-        confidence:
-          type: string
-          enum:
-          - definitive
-          - high
-          - medium
-          - low
-          - temporary
-          - none
-          description: 'How confident we are in the result:
-
-            - `definitive` — verified with certainty
-
-            - `high` — very likely correct
-
-            - `medium` — reasonably confident
-
-            - `low` — uncertain (often a catch-all domain)
-
-            - `temporary` — the server returned a temporary error
-
-            - `none` — no confidence data available
-
-            '
-          examples:
-          - high
-    BatchStatusResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/BatchStatusData'
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-              description: Request tracking ID
-    EmailValidationRequest:
-      type: object
-      required:
-      - email
-      properties:
-        email:
-          type: string
-          minLength: 1
-          maxLength: 254
-          description: The email address you want to validate
-          examples:
-          - sarah.chen@stripe.com
     BatchStatusData:
       type: object
       description: Progress information for a batch job
@@ -699,6 +645,95 @@ components:
           description: Completion percentage (0–100)
           examples:
           - 50
+      x-apidog-orders:
+      - batchId
+      - status
+      - totalItems
+      - processedItems
+      - progress
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    EnrichmentMeta:
+      type: object
+      description: Metadata included with every enrichment response
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request — useful for support tickets
+          examples:
+          - 664f2b3c9a1e4d0012abcdef
+        creditsUsed:
+          type: number
+          minimum: 0
+          description: How many credits this request consumed
+          examples:
+          - 10
+        creditsRemaining:
+          type: number
+          minimum: 0
+          description: Your remaining credit balance after this request
+          examples:
+          - 24990
+        processingTimeMs:
+          type: number
+          description: How long the lookup took, in milliseconds
+          examples:
+          - 420
+      x-apidog-orders:
+      - requestId
+      - creditsUsed
+      - creditsRemaining
+      - processingTimeMs
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchResultsMeta:
+      type: object
+      description: Metadata returned when you fetch batch results (includes credit settlement)
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request
+          examples:
+          - 665a23bc2c3b7800129dce10
+        creditsUsed:
+          type: number
+          minimum: 0
+          description: Actual credits charged after settlement
+          examples:
+          - 80
+        creditsRefunded:
+          type: number
+          minimum: 0
+          description: Credits refunded (difference between reserved and actual cost)
+          examples:
+          - 20
+        creditsRemaining:
+          type: number
+          minimum: 0
+          description: Your remaining credit balance after settlement
+          examples:
+          - 24920
+        totalItems:
+          type: integer
+          minimum: 0
+          description: Total items in the batch
+          examples:
+          - 10
+        processedItems:
+          type: integer
+          minimum: 0
+          description: Items that were processed
+          examples:
+          - 10
+      x-apidog-orders:
+      - requestId
+      - creditsUsed
+      - creditsRefunded
+      - creditsRemaining
+      - totalItems
+      - processedItems
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     ErrorEnvelope:
       type: object
       description: RFC 9457 Problem Details error response.
@@ -733,55 +768,14 @@ components:
           description: URI reference that identifies the specific occurrence.
           examples:
           - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-    BatchSubmitData:
-      type: object
-      description: Returned when you submit any batch job
-      required:
-      - batchId
+      x-apidog-orders:
+      - type
+      - title
       - status
-      - itemCount
-      properties:
-        batchId:
-          type: string
-          description: The unique identifier for this batch — use it to poll status and fetch results
-          examples:
-          - 665a1f4e2c3b7800129dce01
-        status:
-          type: string
-          description: The initial status (usually `queued`)
-          examples:
-          - queued
-        itemCount:
-          type: integer
-          minimum: 0
-          description: Number of unique items in the batch (after deduplication)
-          examples:
-          - 100
-        originalCount:
-          type: integer
-          minimum: 0
-          description: How many items you submitted before deduplication
-          examples:
-          - 110
-        duplicatesRemoved:
-          type: integer
-          minimum: 0
-          description: How many duplicate items were removed
-          examples:
-          - 10
-    EmailValidationResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/EmailValidationResult'
-        meta:
-          $ref: '#/components/schemas/EnrichmentMeta'
+      - detail
+      - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     EmailValidationBatchResultsResponse:
       type: object
       required:
@@ -824,60 +818,81 @@ components:
               items:
                 $ref: '#/components/schemas/EmailValidationResult'
               description: The validation results
+          x-apidog-orders:
+          - batchId
+          - status
+          - totalItems
+          - processedCount
+          - results
+          x-apidog-ignore-properties: []
         meta:
           $ref: '#/components/schemas/BatchResultsMeta'
-    BatchResultsMeta:
-      type: object
-      description: Metadata returned when you fetch batch results (includes credit settlement)
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request
-          examples:
-          - 665a23bc2c3b7800129dce10
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: Actual credits charged after settlement
-          examples:
-          - 80
-        creditsRefunded:
-          type: number
-          minimum: 0
-          description: Credits refunded (difference between reserved and actual cost)
-          examples:
-          - 20
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after settlement
-          examples:
-          - 24920
-        totalItems:
-          type: integer
-          minimum: 0
-          description: Total items in the batch
-          examples:
-          - 10
-        processedItems:
-          type: integer
-          minimum: 0
-          description: Items that were processed
-          examples:
-          - 10
-    BatchSubmitResponse:
-      type: object
-      required:
+      x-apidog-orders:
       - success
       - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchSubmitData:
+      type: object
+      description: Returned when you submit any batch job
+      required:
+      - batchId
+      - status
+      - itemCount
       properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/BatchSubmitData'
-        meta:
-          $ref: '#/components/schemas/BatchSubmitMeta'
+        batchId:
+          type: string
+          description: The unique identifier for this batch — use it to poll status and fetch results
+          examples:
+          - 665a1f4e2c3b7800129dce01
+        status:
+          type: string
+          description: The initial status (usually `queued`)
+          examples:
+          - queued
+        itemCount:
+          type: integer
+          minimum: 0
+          description: Number of unique items in the batch (after deduplication)
+          examples:
+          - 100
+        originalCount:
+          type: integer
+          minimum: 0
+          description: How many items you submitted before deduplication
+          examples:
+          - 110
+        duplicatesRemoved:
+          type: integer
+          minimum: 0
+          description: How many duplicate items were removed
+          examples:
+          - 10
+      x-apidog-orders:
+      - batchId
+      - status
+      - itemCount
+      - originalCount
+      - duplicatesRemoved
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    EmailValidationRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          minLength: 1
+          maxLength: 254
+          description: The email address you want to validate
+          examples:
+          - sarah.chen@stripe.com
+      x-apidog-orders:
+      - email
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     BatchSubmitMeta:
       type: object
       description: Metadata returned when you submit a batch job
@@ -905,6 +920,13 @@ components:
           description: Estimated total cost (same as creditsReserved)
           examples:
           - 100
+      x-apidog-orders:
+      - requestId
+      - creditsReserved
+      - creditsPerItem
+      - estimatedCredits
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     BatchEmailValidationRequest:
       type: object
       required:
@@ -931,40 +953,50 @@ components:
             '
           examples:
           - https://api.yourapp.com/webhooks/enrich
-    EnrichmentMeta_2:
-      type: object
-      description: Metadata included with every enrichment response
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request — useful for support tickets
-          examples:
-          - 664f2b3c9a1e4d0012abcdef
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: How many credits this request consumed
-          examples:
-          - 10
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after this request
-          examples:
-          - 24990
-        processingTimeMs:
-          type: number
-          description: How long the lookup took, in milliseconds
-          examples:
-          - 420
       x-apidog-orders:
-      - requestId
-      - creditsUsed
-      - creditsRemaining
-      - processingTimeMs
+      - emails
+      - webhookUrl
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    EmailValidationResult_2:
+    BatchSubmitResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/BatchSubmitData'
+        meta:
+          $ref: '#/components/schemas/BatchSubmitMeta'
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    EmailValidationResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/EmailValidationResult'
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta'
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    EmailValidationResult:
       type: object
       description: The result of validating a single email address
       required:
@@ -1068,7 +1100,7 @@ components:
       - confidence
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    BatchStatusResponse_2:
+    BatchStatusResponse:
       type: object
       required:
       - success
@@ -1078,7 +1110,7 @@ components:
           type: boolean
           const: true
         data:
-          $ref: '#/components/schemas/BatchStatusData_2'
+          $ref: '#/components/schemas/BatchStatusData'
         meta:
           type: object
           properties:
@@ -1094,370 +1126,7 @@ components:
       - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    EmailValidationRequest_2:
-      type: object
-      required:
-      - email
-      properties:
-        email:
-          type: string
-          minLength: 1
-          maxLength: 254
-          description: The email address you want to validate
-          examples:
-          - sarah.chen@stripe.com
-      x-apidog-orders:
-      - email
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchStatusData_2:
-      type: object
-      description: Progress information for a batch job
-      required:
-      - batchId
-      - status
-      properties:
-        batchId:
-          type: string
-          description: The batch identifier
-          examples:
-          - 665a1f4e2c3b7800129dce01
-        status:
-          type: string
-          description: 'Current status: `queued`, `processing`, `completed`, or `failed`'
-          examples:
-          - processing
-        totalItems:
-          type: integer
-          minimum: 0
-          description: Total items in the batch
-          examples:
-          - 100
-        processedItems:
-          type: integer
-          minimum: 0
-          description: Items processed so far
-          examples:
-          - 50
-        progress:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Completion percentage (0–100)
-          examples:
-          - 50
-      x-apidog-orders:
-      - batchId
-      - status
-      - totalItems
-      - processedItems
-      - progress
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    ErrorEnvelope_2:
-      type: object
-      description: RFC 9457 Problem Details error response.
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          type: string
-          format: uri
-          description: URI reference that identifies the problem type.
-          examples:
-          - https://dev.enrich.so/errors/validation-error
-        title:
-          type: string
-          description: Short, human-readable summary of the problem.
-          examples:
-          - Validation Error
-        status:
-          type: integer
-          description: HTTP status code.
-          examples:
-          - 400
-        detail:
-          type: string
-          description: Human-readable explanation specific to this occurrence.
-          examples:
-          - body/email Invalid email
-        instance:
-          type: string
-          description: URI reference that identifies the specific occurrence.
-          examples:
-          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-      x-apidog-orders:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchSubmitData_2:
-      type: object
-      description: Returned when you submit any batch job
-      required:
-      - batchId
-      - status
-      - itemCount
-      properties:
-        batchId:
-          type: string
-          description: The unique identifier for this batch — use it to poll status and fetch results
-          examples:
-          - 665a1f4e2c3b7800129dce01
-        status:
-          type: string
-          description: The initial status (usually `queued`)
-          examples:
-          - queued
-        itemCount:
-          type: integer
-          minimum: 0
-          description: Number of unique items in the batch (after deduplication)
-          examples:
-          - 100
-        originalCount:
-          type: integer
-          minimum: 0
-          description: How many items you submitted before deduplication
-          examples:
-          - 110
-        duplicatesRemoved:
-          type: integer
-          minimum: 0
-          description: How many duplicate items were removed
-          examples:
-          - 10
-      x-apidog-orders:
-      - batchId
-      - status
-      - itemCount
-      - originalCount
-      - duplicatesRemoved
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    EmailValidationResponse_2:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/EmailValidationResult_2'
-        meta:
-          $ref: '#/components/schemas/EnrichmentMeta_2'
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    EmailValidationBatchResultsResponse_2:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - batchId
-          - status
-          properties:
-            batchId:
-              type: string
-              description: The batch identifier
-              examples:
-              - 665a1f4e2c3b7800129dce01
-            status:
-              type: string
-              description: Final batch status
-              examples:
-              - completed
-            totalItems:
-              type: integer
-              minimum: 0
-              description: Total emails in the batch
-              examples:
-              - 4
-            processedCount:
-              type: integer
-              minimum: 0
-              description: Emails that were processed
-              examples:
-              - 4
-            results:
-              type: array
-              items:
-                $ref: '#/components/schemas/EmailValidationResult_2'
-              description: The validation results
-          x-apidog-orders:
-          - batchId
-          - status
-          - totalItems
-          - processedCount
-          - results
-          x-apidog-ignore-properties: []
-        meta:
-          $ref: '#/components/schemas/BatchResultsMeta_2'
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchResultsMeta_2:
-      type: object
-      description: Metadata returned when you fetch batch results (includes credit settlement)
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request
-          examples:
-          - 665a23bc2c3b7800129dce10
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: Actual credits charged after settlement
-          examples:
-          - 80
-        creditsRefunded:
-          type: number
-          minimum: 0
-          description: Credits refunded (difference between reserved and actual cost)
-          examples:
-          - 20
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after settlement
-          examples:
-          - 24920
-        totalItems:
-          type: integer
-          minimum: 0
-          description: Total items in the batch
-          examples:
-          - 10
-        processedItems:
-          type: integer
-          minimum: 0
-          description: Items that were processed
-          examples:
-          - 10
-      x-apidog-orders:
-      - requestId
-      - creditsUsed
-      - creditsRefunded
-      - creditsRemaining
-      - totalItems
-      - processedItems
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchSubmitResponse_2:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/BatchSubmitData_2'
-        meta:
-          $ref: '#/components/schemas/BatchSubmitMeta_2'
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchSubmitMeta_2:
-      type: object
-      description: Metadata returned when you submit a batch job
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request
-          examples:
-          - 665a1f4e2c3b7800129dce00
-        creditsReserved:
-          type: number
-          minimum: 0
-          description: Total credits reserved for the batch
-          examples:
-          - 100
-        creditsPerItem:
-          type: number
-          minimum: 0
-          description: Cost per item
-          examples:
-          - 10
-        estimatedCredits:
-          type: number
-          minimum: 0
-          description: Estimated total cost (same as creditsReserved)
-          examples:
-          - 100
-      x-apidog-orders:
-      - requestId
-      - creditsReserved
-      - creditsPerItem
-      - estimatedCredits
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchEmailValidationRequest_2:
-      type: object
-      required:
-      - emails
-      properties:
-        emails:
-          type: array
-          minItems: 1
-          maxItems: 500000
-          items:
-            type: string
-            minLength: 1
-          description: A list of email addresses to validate (up to 500 000)
-          examples:
-          - - sarah.chen@stripe.com
-            - james.rodriguez@hubspot.com
-        webhookUrl:
-          type: string
-          format: uri
-          description: 'A URL on your server where we should send webhook callbacks.
-
-            You''ll receive one POST per result, plus one final completion POST.
-
-            '
-          examples:
-          - https://api.yourapp.com/webhooks/enrich
-      x-apidog-orders:
-      - emails
-      - webhookUrl
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
   securitySchemes:
-    ApiKeyHeader:
-      type: apiKey
-      in: header
-      name: x-api-key
-      description: API key in the x-api-key header. Documented at https://doc.enrich.so/authentication-1951026m0
-    BearerToken:
-      type: http
-      scheme: bearer
-      description: 'The same API key sent as an Authorization: Bearer token.'
     apiKey:
       type: apikey
       name: x-api-key
@@ -1473,6 +1142,12 @@ components:
         `Authorization: Bearer sk_live_...`
 
         '
-x-refined-from:
-- enrich-so-email-verification-api-openapi.yml
-- enrich-so-v3-harvested-openapi.yml
+    ApiKeyHeader:
+      type: apikey
+      in: header
+      name: x-api-key
+      description: API key starting with `sk_live_` (64 characters). Get yours from the [Enrich Dashboard](https://sendkit.ai/dashboard/api-keys).
+    BearerToken:
+      type: bearer
+      scheme: bearer
+      description: Same `sk_live_` key passed as a Bearer token in the Authorization header.

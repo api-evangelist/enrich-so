@@ -84,7 +84,34 @@ paths:
     post:
       summary: Find phone numbers in batch
       deprecated: false
-      description: "Submit up to **500 000 items** (email addresses and/or profile URLs) for\nbulk phone lookup. Emails are deduplicated case-insensitively; profile\nURLs are deduplicated as-is.\n\n**Cost:** 10 credits per unique item, reserved upfront. At settlement,\nonly items where phones were actually found are charged — the rest are\nrefunded.\n\n### Webhook callbacks\n\nIf you include a `webhookUrl`, your server will receive:\n\n1. **A per-result callback** for every item as it is processed. See\n   [phoneResult](#tag/Webhooks/operation/webhookPhoneResult) for the payload.\n\n2. **A completion callback** when every item has been processed. See\n   [phoneCompletion](#tag/Webhooks/operation/webhookPhoneCompletion) for the payload.\n"
+      description: 'Submit up to **500 000 items** (email addresses and/or profile URLs) for
+
+        bulk phone lookup. Emails are deduplicated case-insensitively; profile
+
+        URLs are deduplicated as-is.
+
+
+        **Cost:** 10 credits per unique item, reserved upfront. At settlement,
+
+        only items where phones were actually found are charged — the rest are
+
+        refunded.
+
+
+        ### Webhook callbacks
+
+
+        If you include a `webhookUrl`, your server will receive:
+
+
+        1. **A per-result callback** for every item as it is processed. See
+
+        phoneResult for the payload.
+
+
+        2. **A completion callback** when every item has been processed. See
+
+        phoneCompletion for the payload.'
       operationId: createPhoneBulkJob
       tags:
       - Phone Finder
@@ -232,9 +259,7 @@ paths:
         from 0 to 100.
 
 
-        **Cost:** Free.
-
-        '
+        **Cost:** Free.'
       operationId: getPhoneBulkJobStatus
       tags:
       - Phone Finder
@@ -349,9 +374,7 @@ paths:
 
         **Credit settlement:** Only items where at least one phone number was found
 
-        are charged. Everything else is refunded.
-
-        '
+        are charged. Everything else is refunded.'
       operationId: getPhoneBulkJobResults
       tags:
       - Phone Finder
@@ -537,6 +560,18 @@ components:
                     type: string
                   type:
                     type: string
+    BatchSubmitResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            batchId:
+              type: string
+            status:
+              type: string
     PhoneBatchRequest:
       type: object
       required:
@@ -551,18 +586,6 @@ components:
                 type: string
               linkedin:
                 type: string
-    BatchSubmitResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: object
-          properties:
-            batchId:
-              type: string
-            status:
-              type: string
     PhoneBulkJobResultsResponse:
       type: object
       required:
@@ -629,7 +652,88 @@ components:
       - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    PhoneBulkJobStatusResponse:
+    BatchResultsMeta:
+      type: object
+      description: Metadata returned when you fetch batch results (includes credit settlement)
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request
+          examples:
+          - 665a23bc2c3b7800129dce10
+        creditsUsed:
+          type: number
+          minimum: 0
+          description: Actual credits charged after settlement
+          examples:
+          - 80
+        creditsRefunded:
+          type: number
+          minimum: 0
+          description: Credits refunded (difference between reserved and actual cost)
+          examples:
+          - 20
+        creditsRemaining:
+          type: number
+          minimum: 0
+          description: Your remaining credit balance after settlement
+          examples:
+          - 24920
+        totalItems:
+          type: integer
+          minimum: 0
+          description: Total items in the batch
+          examples:
+          - 10
+        processedItems:
+          type: integer
+          minimum: 0
+          description: Items that were processed
+          examples:
+          - 10
+      x-apidog-orders:
+      - requestId
+      - creditsUsed
+      - creditsRefunded
+      - creditsRemaining
+      - totalItems
+      - processedItems
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    EnrichmentMeta_2:
+      type: object
+      description: Metadata included with every enrichment response
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request — useful for support tickets
+          examples:
+          - 664f2b3c9a1e4d0012abcdef
+        creditsUsed:
+          type: number
+          minimum: 0
+          description: How many credits this request consumed
+          examples:
+          - 10
+        creditsRemaining:
+          type: number
+          minimum: 0
+          description: Your remaining credit balance after this request
+          examples:
+          - 24990
+        processingTimeMs:
+          type: number
+          description: How long the lookup took, in milliseconds
+          examples:
+          - 420
+      x-apidog-orders:
+      - requestId
+      - creditsUsed
+      - creditsRemaining
+      - processingTimeMs
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    PhoneLookupResponse_2:
       type: object
       required:
       - success
@@ -639,15 +743,9 @@ components:
           type: boolean
           const: true
         data:
-          $ref: '#/components/schemas/PhoneBulkJobStatusData'
+          $ref: '#/components/schemas/PhoneLookupResult'
         meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-          x-apidog-orders:
-          - requestId
-          x-apidog-ignore-properties: []
+          $ref: '#/components/schemas/EnrichmentMeta_2'
       x-apidog-orders:
       - success
       - data
@@ -696,6 +794,40 @@ components:
       - instance
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
+    BatchSubmitMeta:
+      type: object
+      description: Metadata returned when you submit a batch job
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request
+          examples:
+          - 665a1f4e2c3b7800129dce00
+        creditsReserved:
+          type: number
+          minimum: 0
+          description: Total credits reserved for the batch
+          examples:
+          - 100
+        creditsPerItem:
+          type: number
+          minimum: 0
+          description: Cost per item
+          examples:
+          - 10
+        estimatedCredits:
+          type: number
+          minimum: 0
+          description: Estimated total cost (same as creditsReserved)
+          examples:
+          - 100
+      x-apidog-orders:
+      - requestId
+      - creditsReserved
+      - creditsPerItem
+      - estimatedCredits
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     PhoneLookupResult:
       type: object
       required:
@@ -713,7 +845,7 @@ components:
       - phones
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    PhoneLookupResponse_2:
+    PhoneBulkJobStatusResponse:
       type: object
       required:
       - success
@@ -723,9 +855,15 @@ components:
           type: boolean
           const: true
         data:
-          $ref: '#/components/schemas/PhoneLookupResult'
+          $ref: '#/components/schemas/PhoneBulkJobStatusData'
         meta:
-          $ref: '#/components/schemas/EnrichmentMeta_2'
+          type: object
+          properties:
+            requestId:
+              type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
       x-apidog-orders:
       - success
       - data
@@ -751,43 +889,48 @@ components:
       - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    PhoneBulkJobStatusData:
+    PhoneBatchRequest_2:
       type: object
-      required:
-      - batchId
-      - status
+      description: 'Submit emails and/or profile URLs for bulk phone lookup.
+
+        You must provide at least one item. The combined total cannot exceed 500 000.
+
+        '
       properties:
-        batchId:
+        emails:
+          type: array
+          maxItems: 500000
+          items:
+            type: string
+            format: email
+            maxLength: 254
+          description: Email addresses to look up
+          examples:
+          - - sarah.chen@stripe.com
+            - james.rodriguez@hubspot.com
+        linkedins:
+          type: array
+          maxItems: 500000
+          items:
+            type: string
+            maxLength: 500
+          description: Profile URLs to look up
+          examples:
+          - - https://www.example.com/in/priyapatel
+        webhookUrl:
           type: string
+          format: uri
+          description: 'A URL on your server where we should send webhook callbacks.
+
+            You''ll receive one POST per item, plus one final completion POST.
+
+            '
           examples:
-          - 665c52bf7b8e3f00149f0a10
-        status:
-          type: string
-          examples:
-          - processing
-        totalItems:
-          type: integer
-          minimum: 0
-          examples:
-          - 100
-        processedItems:
-          type: integer
-          minimum: 0
-          examples:
-          - 50
-        progress:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Completion percentage (0–100)
-          examples:
-          - 50
+          - https://api.yourapp.com/webhooks/enrich
       x-apidog-orders:
-      - batchId
-      - status
-      - totalItems
-      - processedItems
-      - progress
+      - emails
+      - linkedins
+      - webhookUrl
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     PhoneBulkJobSubmitData:
@@ -838,96 +981,43 @@ components:
       - duplicatesRemoved
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    BatchResultsMeta:
+    PhoneBulkJobStatusData:
       type: object
-      description: Metadata returned when you fetch batch results (includes credit settlement)
+      required:
+      - batchId
+      - status
       properties:
-        requestId:
+        batchId:
           type: string
-          description: Unique ID for this request
           examples:
-          - 665a23bc2c3b7800129dce10
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: Actual credits charged after settlement
+          - 665c52bf7b8e3f00149f0a10
+        status:
+          type: string
           examples:
-          - 80
-        creditsRefunded:
-          type: number
-          minimum: 0
-          description: Credits refunded (difference between reserved and actual cost)
-          examples:
-          - 20
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after settlement
-          examples:
-          - 24920
+          - processing
         totalItems:
           type: integer
           minimum: 0
-          description: Total items in the batch
           examples:
-          - 10
+          - 100
         processedItems:
           type: integer
           minimum: 0
-          description: Items that were processed
           examples:
-          - 10
+          - 50
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Completion percentage (0–100)
+          examples:
+          - 50
       x-apidog-orders:
-      - requestId
-      - creditsUsed
-      - creditsRefunded
-      - creditsRemaining
+      - batchId
+      - status
       - totalItems
       - processedItems
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    PhoneBatchRequest_2:
-      type: object
-      description: 'Submit emails and/or profile URLs for bulk phone lookup.
-
-        You must provide at least one item. The combined total cannot exceed 500 000.
-
-        '
-      properties:
-        emails:
-          type: array
-          maxItems: 500000
-          items:
-            type: string
-            format: email
-            maxLength: 254
-          description: Email addresses to look up
-          examples:
-          - - sarah.chen@stripe.com
-            - james.rodriguez@hubspot.com
-        linkedins:
-          type: array
-          maxItems: 500000
-          items:
-            type: string
-            maxLength: 500
-          description: Profile URLs to look up
-          examples:
-          - - https://www.example.com/in/priyapatel
-        webhookUrl:
-          type: string
-          format: uri
-          description: 'A URL on your server where we should send webhook callbacks.
-
-            You''ll receive one POST per item, plus one final completion POST.
-
-            '
-          examples:
-          - https://api.yourapp.com/webhooks/enrich
-      x-apidog-orders:
-      - emails
-      - linkedins
-      - webhookUrl
+      - progress
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     PhoneBulkResultItem:
@@ -963,82 +1053,15 @@ components:
       - error
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    BatchSubmitMeta:
-      type: object
-      description: Metadata returned when you submit a batch job
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request
-          examples:
-          - 665a1f4e2c3b7800129dce00
-        creditsReserved:
-          type: number
-          minimum: 0
-          description: Total credits reserved for the batch
-          examples:
-          - 100
-        creditsPerItem:
-          type: number
-          minimum: 0
-          description: Cost per item
-          examples:
-          - 10
-        estimatedCredits:
-          type: number
-          minimum: 0
-          description: Estimated total cost (same as creditsReserved)
-          examples:
-          - 100
-      x-apidog-orders:
-      - requestId
-      - creditsReserved
-      - creditsPerItem
-      - estimatedCredits
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    EnrichmentMeta_2:
-      type: object
-      description: Metadata included with every enrichment response
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request — useful for support tickets
-          examples:
-          - 664f2b3c9a1e4d0012abcdef
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: How many credits this request consumed
-          examples:
-          - 10
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after this request
-          examples:
-          - 24990
-        processingTimeMs:
-          type: number
-          description: How long the lookup took, in milliseconds
-          examples:
-          - 420
-      x-apidog-orders:
-      - requestId
-      - creditsUsed
-      - creditsRemaining
-      - processingTimeMs
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
   responses:
-    InsufficientCredits:
-      description: Not enough credits to complete the request.
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    Unauthorized:
-      description: Missing, invalid, or disabled API key.
+    InsufficientCredits:
+      description: Not enough credits to complete the request.
       content:
         application/json:
           schema:
