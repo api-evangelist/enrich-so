@@ -288,6 +288,8 @@ apis:
   humanURL: https://doc.enrich.so/get-your-credit-balance-27483207e0
   baseURL: https://dev.enrich.so/api/v3
   tags:
+  - Email Verification
+  tags_raw:
   - Email Validation
   properties:
   - type: OpenAPI

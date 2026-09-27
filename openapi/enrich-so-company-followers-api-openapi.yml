@@ -826,6 +826,60 @@ paths:
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27728073-run
 components:
   schemas:
+    StartCompanyFollowerData:
+      type: object
+      required:
+      - batchId
+      - message
+      properties:
+        batchId:
+          type: string
+          description: Unique batch ID for tracking this scrape job
+        message:
+          type: string
+          description: Human-readable status message
+      x-apidog-orders:
+      - batchId
+      - message
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    StartCompanyFollowerResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/StartCompanyFollowerData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsReserved:
+              type: number
+              description: Credits reserved upfront based on max_limit × creditsPerItem
+            creditsPerItem:
+              type: number
+              description: Credit cost per profile for your team
+            estimatedCredits:
+              type: number
+              description: Estimated total credits
+          x-apidog-orders:
+          - requestId
+          - creditsReserved
+          - creditsPerItem
+          - estimatedCredits
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     ErrorEnvelope:
       type: object
       description: RFC 9457 Problem Details error response.
@@ -985,31 +1039,6 @@ components:
       - spotlights
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    CompanyFollowerProgressResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/CompanyFollowerProgressData'
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-          x-apidog-orders:
-          - requestId
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     CompanyFollowerResultsResponse:
       type: object
       required:
@@ -1047,20 +1076,68 @@ components:
       - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    StartCompanyFollowerData:
+    CompanyFollowerProgressResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/CompanyFollowerProgressData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    CompanyFollowerProgressData:
       type: object
       required:
       - batchId
-      - message
+      - processed
+      - total
+      - errors
+      - done
       properties:
         batchId:
           type: string
-          description: Unique batch ID for tracking this scrape job
+          description: Batch ID for this scrape job
+        processed:
+          type: integer
+          description: Number of profiles processed so far
+        total:
+          type: integer
+          description: Total profiles to process (-1 if unknown yet)
+        errors:
+          type: integer
+          description: Number of errors encountered
+        done:
+          type: boolean
+          description: Whether scraping is complete
+        partial:
+          type: boolean
+          description: True when the scrape finished but under-collected followers — a filter (or the overall total) delivered fewer results than expected beyond the allowed tolerance. The profiles returned are valid; re-run the scrape (optionally with skipCache) to fill the gap.
         message:
           type: string
           description: Human-readable status message
       x-apidog-orders:
       - batchId
+      - processed
+      - total
+      - errors
+      - done
+      - partial
       - message
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
@@ -1115,83 +1192,6 @@ components:
       - count
       - data
       - pagination
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    StartCompanyFollowerResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/StartCompanyFollowerData'
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-            creditsReserved:
-              type: number
-              description: Credits reserved upfront based on max_limit × creditsPerItem
-            creditsPerItem:
-              type: number
-              description: Credit cost per profile for your team
-            estimatedCredits:
-              type: number
-              description: Estimated total credits
-          x-apidog-orders:
-          - requestId
-          - creditsReserved
-          - creditsPerItem
-          - estimatedCredits
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    CompanyFollowerProgressData:
-      type: object
-      required:
-      - batchId
-      - processed
-      - total
-      - errors
-      - done
-      properties:
-        batchId:
-          type: string
-          description: Batch ID for this scrape job
-        processed:
-          type: integer
-          description: Number of profiles processed so far
-        total:
-          type: integer
-          description: Total profiles to process (-1 if unknown yet)
-        errors:
-          type: integer
-          description: Number of errors encountered
-        done:
-          type: boolean
-          description: Whether scraping is complete
-        partial:
-          type: boolean
-          description: True when the scrape finished but under-collected followers — a filter (or the overall total) delivered fewer results than expected beyond the allowed tolerance. The profiles returned are valid; re-run the scrape (optionally with skipCache) to fill the gap.
-        message:
-          type: string
-          description: Human-readable status message
-      x-apidog-orders:
-      - batchId
-      - processed
-      - total
-      - errors
-      - done
-      - partial
-      - message
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
   securitySchemes:

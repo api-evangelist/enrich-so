@@ -229,6 +229,100 @@ paths:
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483208-run
 components:
   schemas:
+    WalletTransaction:
+      type: object
+      required:
+      - id
+      - organizationId
+      - type
+      - amount
+      - balanceAfter
+      - description
+      - createdAt
+      properties:
+        id:
+          type: string
+          description: Transaction ID
+          examples:
+          - 665e10a14a6d8c001abc2001
+        organizationId:
+          type: string
+          examples:
+          - 665e0b2f4a6d8c001abc1234
+        type:
+          type: string
+          description: 'One of: `deduction`, `topup`, `adjustment`, or `refund`'
+          examples:
+          - deduction
+        amount:
+          type: number
+          description: The credit amount (negative for deductions, positive for top-ups and refunds)
+          examples:
+          - -10
+        balanceAfter:
+          type: number
+          description: Your balance after this transaction
+          examples:
+          - 24990
+        description:
+          type: string
+          description: A short note about what happened
+          examples:
+          - 'Email finder: emily.zhang@figma.com'
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional context (varies by transaction type)
+          x-apidog-orders: []
+          properties: {}
+          x-apidog-ignore-properties: []
+        createdAt:
+          type: string
+          format: date-time
+          description: When this transaction happened
+          examples:
+          - '2025-06-03T14:35:00.000Z'
+      x-apidog-orders:
+      - id
+      - organizationId
+      - type
+      - amount
+      - balanceAfter
+      - description
+      - metadata
+      - createdAt
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    WalletTransactionsResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - transactions
+          - pagination
+          properties:
+            transactions:
+              type: array
+              items:
+                $ref: '#/components/schemas/WalletTransaction'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+          x-apidog-orders:
+          - transactions
+          - pagination
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     WalletBalanceResponse:
       type: object
       required:
@@ -324,100 +418,6 @@ components:
       - limit
       - total
       - totalPages
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    WalletTransaction:
-      type: object
-      required:
-      - id
-      - organizationId
-      - type
-      - amount
-      - balanceAfter
-      - description
-      - createdAt
-      properties:
-        id:
-          type: string
-          description: Transaction ID
-          examples:
-          - 665e10a14a6d8c001abc2001
-        organizationId:
-          type: string
-          examples:
-          - 665e0b2f4a6d8c001abc1234
-        type:
-          type: string
-          description: 'One of: `deduction`, `topup`, `adjustment`, or `refund`'
-          examples:
-          - deduction
-        amount:
-          type: number
-          description: The credit amount (negative for deductions, positive for top-ups and refunds)
-          examples:
-          - -10
-        balanceAfter:
-          type: number
-          description: Your balance after this transaction
-          examples:
-          - 24990
-        description:
-          type: string
-          description: A short note about what happened
-          examples:
-          - 'Email finder: emily.zhang@figma.com'
-        metadata:
-          type: object
-          additionalProperties: true
-          description: Additional context (varies by transaction type)
-          x-apidog-orders: []
-          properties: {}
-          x-apidog-ignore-properties: []
-        createdAt:
-          type: string
-          format: date-time
-          description: When this transaction happened
-          examples:
-          - '2025-06-03T14:35:00.000Z'
-      x-apidog-orders:
-      - id
-      - organizationId
-      - type
-      - amount
-      - balanceAfter
-      - description
-      - metadata
-      - createdAt
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    WalletTransactionsResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - transactions
-          - pagination
-          properties:
-            transactions:
-              type: array
-              items:
-                $ref: '#/components/schemas/WalletTransaction'
-            pagination:
-              $ref: '#/components/schemas/Pagination'
-          x-apidog-orders:
-          - transactions
-          - pagination
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     WalletBalance:

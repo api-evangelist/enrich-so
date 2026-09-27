@@ -480,97 +480,6 @@ components:
       - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    ErrorEnvelope:
-      type: object
-      description: RFC 9457 Problem Details error response.
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          type: string
-          format: uri
-          description: URI reference that identifies the problem type.
-          examples:
-          - https://dev.enrich.so/errors/validation-error
-        title:
-          type: string
-          description: Short, human-readable summary of the problem.
-          examples:
-          - Validation Error
-        status:
-          type: integer
-          description: HTTP status code.
-          examples:
-          - 400
-        detail:
-          type: string
-          description: Human-readable explanation specific to this occurrence.
-          examples:
-          - body/email Invalid email
-        instance:
-          type: string
-          description: URI reference that identifies the specific occurrence.
-          examples:
-          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-      x-apidog-orders:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    InviteBody:
-      type: object
-      required:
-      - email
-      - role
-      properties:
-        email:
-          type: string
-          format: email
-          description: The email address of the person you want to invite
-          examples:
-          - marco.silva@yourcompany.com
-        role:
-          type: string
-          enum:
-          - admin
-          - member
-          description: The role to assign them
-          examples:
-          - member
-      x-apidog-orders:
-      - email
-      - role
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    SuccessOperationResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - success
-          properties:
-            success:
-              type: boolean
-          x-apidog-orders:
-          - success
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     TeamMember:
       type: object
       required:
@@ -653,6 +562,72 @@ components:
       - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
+    SuccessOperationResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - success
+          properties:
+            success:
+              type: boolean
+          x-apidog-orders:
+          - success
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+      x-apidog-orders:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     InvitationListResponse:
       type: object
       required:
@@ -722,6 +697,31 @@ components:
       - status
       - expiresAt
       - createdAt
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    InviteBody:
+      type: object
+      required:
+      - email
+      - role
+      properties:
+        email:
+          type: string
+          format: email
+          description: The email address of the person you want to invite
+          examples:
+          - marco.silva@yourcompany.com
+        role:
+          type: string
+          enum:
+          - admin
+          - member
+          description: The role to assign them
+          examples:
+          - member
+      x-apidog-orders:
+      - email
+      - role
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
   securitySchemes:
