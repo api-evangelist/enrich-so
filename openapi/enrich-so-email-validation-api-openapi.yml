@@ -609,20 +609,132 @@ paths:
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483194-run
 components:
   schemas:
-    EmailValidationRequest:
+    EmailValidationResponse:
       type: object
       required:
-      - email
+      - success
+      - data
       properties:
-        email:
-          type: string
-          minLength: 1
-          maxLength: 254
-          description: The email address you want to validate
-          examples:
-          - sarah.chen@stripe.com
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/EmailValidationResult'
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta'
       x-apidog-orders:
-      - email
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchResultsMeta:
+      type: object
+      description: Metadata returned when you fetch batch results (includes credit settlement)
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request
+          examples:
+          - 665a23bc2c3b7800129dce10
+        creditsUsed:
+          type: number
+          minimum: 0
+          description: Actual credits charged after settlement
+          examples:
+          - 80
+        creditsRefunded:
+          type: number
+          minimum: 0
+          description: Credits refunded (difference between reserved and actual cost)
+          examples:
+          - 20
+        creditsRemaining:
+          type: number
+          minimum: 0
+          description: Your remaining credit balance after settlement
+          examples:
+          - 24920
+        totalItems:
+          type: integer
+          minimum: 0
+          description: Total items in the batch
+          examples:
+          - 10
+        processedItems:
+          type: integer
+          minimum: 0
+          description: Items that were processed
+          examples:
+          - 10
+      x-apidog-orders:
+      - requestId
+      - creditsUsed
+      - creditsRefunded
+      - creditsRemaining
+      - totalItems
+      - processedItems
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+      x-apidog-orders:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchSubmitResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/BatchSubmitData'
+        meta:
+          $ref: '#/components/schemas/BatchSubmitMeta'
+      x-apidog-orders:
+      - success
+      - data
+      - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     BatchSubmitMeta:
@@ -703,125 +815,138 @@ components:
       - duplicatesRemoved
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    BatchResultsMeta:
+    EnrichmentMeta:
       type: object
-      description: Metadata returned when you fetch batch results (includes credit settlement)
+      description: Metadata included with every enrichment response
       properties:
         requestId:
           type: string
-          description: Unique ID for this request
+          description: Unique ID for this request — useful for support tickets
           examples:
-          - 665a23bc2c3b7800129dce10
+          - 664f2b3c9a1e4d0012abcdef
         creditsUsed:
           type: number
           minimum: 0
-          description: Actual credits charged after settlement
+          description: How many credits this request consumed
           examples:
-          - 80
-        creditsRefunded:
-          type: number
-          minimum: 0
-          description: Credits refunded (difference between reserved and actual cost)
-          examples:
-          - 20
+          - 10
         creditsRemaining:
           type: number
           minimum: 0
-          description: Your remaining credit balance after settlement
+          description: Your remaining credit balance after this request
           examples:
-          - 24920
+          - 24990
+        processingTimeMs:
+          type: number
+          description: How long the lookup took, in milliseconds
+          examples:
+          - 420
+      x-apidog-orders:
+      - requestId
+      - creditsUsed
+      - creditsRemaining
+      - processingTimeMs
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchStatusData:
+      type: object
+      description: Progress information for a batch job
+      required:
+      - batchId
+      - status
+      properties:
+        batchId:
+          type: string
+          description: The batch identifier
+          examples:
+          - 665a1f4e2c3b7800129dce01
+        status:
+          type: string
+          description: 'Current status: `queued`, `processing`, `completed`, or `failed`'
+          examples:
+          - processing
         totalItems:
           type: integer
           minimum: 0
           description: Total items in the batch
           examples:
-          - 10
+          - 100
         processedItems:
           type: integer
           minimum: 0
-          description: Items that were processed
+          description: Items processed so far
           examples:
-          - 10
+          - 50
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Completion percentage (0–100)
+          examples:
+          - 50
       x-apidog-orders:
-      - requestId
-      - creditsUsed
-      - creditsRefunded
-      - creditsRemaining
+      - batchId
+      - status
       - totalItems
       - processedItems
+      - progress
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    BatchEmailValidationRequest:
+    EmailValidationBatchResultsResponse:
       type: object
       required:
-      - emails
+      - success
+      - data
       properties:
-        emails:
-          type: array
-          minItems: 1
-          maxItems: 500000
-          items:
-            type: string
-            minLength: 1
-          description: A list of email addresses to validate (up to 500 000)
-          examples:
-          - - sarah.chen@stripe.com
-            - james.rodriguez@hubspot.com
-        webhookUrl:
-          type: string
-          format: uri
-          description: 'A URL on your server where we should send webhook callbacks.
-
-            You''ll receive one POST per result, plus one final completion POST.
-
-            '
-          examples:
-          - https://api.yourapp.com/webhooks/enrich
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - batchId
+          - status
+          properties:
+            batchId:
+              type: string
+              description: The batch identifier
+              examples:
+              - 665a1f4e2c3b7800129dce01
+            status:
+              type: string
+              description: Final batch status
+              examples:
+              - completed
+            totalItems:
+              type: integer
+              minimum: 0
+              description: Total emails in the batch
+              examples:
+              - 4
+            processedCount:
+              type: integer
+              minimum: 0
+              description: Emails that were processed
+              examples:
+              - 4
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/EmailValidationResult'
+              description: The validation results
+          x-apidog-orders:
+          - batchId
+          - status
+          - totalItems
+          - processedCount
+          - results
+          x-apidog-ignore-properties: []
+        meta:
+          $ref: '#/components/schemas/BatchResultsMeta'
       x-apidog-orders:
-      - emails
-      - webhookUrl
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    ErrorEnvelope:
-      type: object
-      description: RFC 9457 Problem Details error response.
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          type: string
-          format: uri
-          description: URI reference that identifies the problem type.
-          examples:
-          - https://dev.enrich.so/errors/validation-error
-        title:
-          type: string
-          description: Short, human-readable summary of the problem.
-          examples:
-          - Validation Error
-        status:
-          type: integer
-          description: HTTP status code.
-          examples:
-          - 400
-        detail:
-          type: string
-          description: Human-readable explanation specific to this occurrence.
-          examples:
-          - body/email Invalid email
-        instance:
-          type: string
-          description: URI reference that identifies the specific occurrence.
-          examples:
-          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-      x-apidog-orders:
-      - type
-      - title
-      - status
-      - detail
-      - instance
+      - success
+      - data
+      - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     EmailValidationResult:
@@ -928,81 +1053,20 @@ components:
       - confidence
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    BatchStatusData:
+    EmailValidationRequest:
       type: object
-      description: Progress information for a batch job
       required:
-      - batchId
-      - status
+      - email
       properties:
-        batchId:
+        email:
           type: string
-          description: The batch identifier
+          minLength: 1
+          maxLength: 254
+          description: The email address you want to validate
           examples:
-          - 665a1f4e2c3b7800129dce01
-        status:
-          type: string
-          description: 'Current status: `queued`, `processing`, `completed`, or `failed`'
-          examples:
-          - processing
-        totalItems:
-          type: integer
-          minimum: 0
-          description: Total items in the batch
-          examples:
-          - 100
-        processedItems:
-          type: integer
-          minimum: 0
-          description: Items processed so far
-          examples:
-          - 50
-        progress:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Completion percentage (0–100)
-          examples:
-          - 50
+          - sarah.chen@stripe.com
       x-apidog-orders:
-      - batchId
-      - status
-      - totalItems
-      - processedItems
-      - progress
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    EnrichmentMeta:
-      type: object
-      description: Metadata included with every enrichment response
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request — useful for support tickets
-          examples:
-          - 664f2b3c9a1e4d0012abcdef
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: How many credits this request consumed
-          examples:
-          - 10
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after this request
-          examples:
-          - 24990
-        processingTimeMs:
-          type: number
-          description: How long the lookup took, in milliseconds
-          examples:
-          - 420
-      x-apidog-orders:
-      - requestId
-      - creditsUsed
-      - creditsRemaining
-      - processingTimeMs
+      - email
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     BatchStatusResponse:
@@ -1031,99 +1095,35 @@ components:
       - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    EmailValidationBatchResultsResponse:
+    BatchEmailValidationRequest:
       type: object
       required:
-      - success
-      - data
+      - emails
       properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - batchId
-          - status
-          properties:
-            batchId:
-              type: string
-              description: The batch identifier
-              examples:
-              - 665a1f4e2c3b7800129dce01
-            status:
-              type: string
-              description: Final batch status
-              examples:
-              - completed
-            totalItems:
-              type: integer
-              minimum: 0
-              description: Total emails in the batch
-              examples:
-              - 4
-            processedCount:
-              type: integer
-              minimum: 0
-              description: Emails that were processed
-              examples:
-              - 4
-            results:
-              type: array
-              items:
-                $ref: '#/components/schemas/EmailValidationResult'
-              description: The validation results
-          x-apidog-orders:
-          - batchId
-          - status
-          - totalItems
-          - processedCount
-          - results
-          x-apidog-ignore-properties: []
-        meta:
-          $ref: '#/components/schemas/BatchResultsMeta'
+        emails:
+          type: array
+          minItems: 1
+          maxItems: 500000
+          items:
+            type: string
+            minLength: 1
+          description: A list of email addresses to validate (up to 500 000)
+          examples:
+          - - sarah.chen@stripe.com
+            - james.rodriguez@hubspot.com
+        webhookUrl:
+          type: string
+          format: uri
+          description: 'A URL on your server where we should send webhook callbacks.
+
+            You''ll receive one POST per result, plus one final completion POST.
+
+            '
+          examples:
+          - https://api.yourapp.com/webhooks/enrich
       x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    EmailValidationResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/EmailValidationResult'
-        meta:
-          $ref: '#/components/schemas/EnrichmentMeta'
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchSubmitResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/BatchSubmitData'
-        meta:
-          $ref: '#/components/schemas/BatchSubmitMeta'
-      x-apidog-orders:
-      - success
-      - data
-      - meta
+      - emails
+      - webhookUrl
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
   securitySchemes:

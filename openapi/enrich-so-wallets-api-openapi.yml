@@ -229,6 +229,97 @@ paths:
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483208-run
 components:
   schemas:
+    Pagination:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - totalPages
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: The page you're on
+          examples:
+          - 1
+        limit:
+          type: integer
+          minimum: 1
+          description: Items per page
+          examples:
+          - 50
+        total:
+          type: integer
+          minimum: 0
+          description: Total items across all pages
+          examples:
+          - 3
+        totalPages:
+          type: integer
+          minimum: 0
+          description: Total number of pages
+          examples:
+          - 1
+      x-apidog-orders:
+      - page
+      - limit
+      - total
+      - totalPages
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    WalletBalanceResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/WalletBalance'
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    WalletBalance:
+      type: object
+      required:
+      - organizationId
+      - balance
+      - currency
+      - asOf
+      properties:
+        organizationId:
+          type: string
+          description: Your organization ID
+          examples:
+          - 665e0b2f4a6d8c001abc1234
+        balance:
+          type: number
+          description: Your current credit balance
+          examples:
+          - 25000
+        currency:
+          type: string
+          const: credits
+          examples:
+          - credits
+        asOf:
+          type: string
+          format: date-time
+          description: When this balance was last calculated
+          examples:
+          - '2025-06-03T14:22:10.000Z'
+      x-apidog-orders:
+      - organizationId
+      - balance
+      - currency
+      - asOf
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     WalletTransaction:
       type: object
       required:
@@ -293,52 +384,6 @@ components:
       - createdAt
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    WalletTransactionsResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - transactions
-          - pagination
-          properties:
-            transactions:
-              type: array
-              items:
-                $ref: '#/components/schemas/WalletTransaction'
-            pagination:
-              $ref: '#/components/schemas/Pagination'
-          x-apidog-orders:
-          - transactions
-          - pagination
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    WalletBalanceResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/WalletBalance'
-      x-apidog-orders:
-      - success
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     ErrorEnvelope:
       type: object
       description: RFC 9457 Problem Details error response.
@@ -381,79 +426,34 @@ components:
       - instance
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    Pagination:
+    WalletTransactionsResponse:
       type: object
       required:
-      - page
-      - limit
-      - total
-      - totalPages
+      - success
+      - data
       properties:
-        page:
-          type: integer
-          minimum: 1
-          description: The page you're on
-          examples:
-          - 1
-        limit:
-          type: integer
-          minimum: 1
-          description: Items per page
-          examples:
-          - 50
-        total:
-          type: integer
-          minimum: 0
-          description: Total items across all pages
-          examples:
-          - 3
-        totalPages:
-          type: integer
-          minimum: 0
-          description: Total number of pages
-          examples:
-          - 1
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - transactions
+          - pagination
+          properties:
+            transactions:
+              type: array
+              items:
+                $ref: '#/components/schemas/WalletTransaction'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+          x-apidog-orders:
+          - transactions
+          - pagination
+          x-apidog-ignore-properties: []
       x-apidog-orders:
-      - page
-      - limit
-      - total
-      - totalPages
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    WalletBalance:
-      type: object
-      required:
-      - organizationId
-      - balance
-      - currency
-      - asOf
-      properties:
-        organizationId:
-          type: string
-          description: Your organization ID
-          examples:
-          - 665e0b2f4a6d8c001abc1234
-        balance:
-          type: number
-          description: Your current credit balance
-          examples:
-          - 25000
-        currency:
-          type: string
-          const: credits
-          examples:
-          - credits
-        asOf:
-          type: string
-          format: date-time
-          description: When this balance was last calculated
-          examples:
-          - '2025-06-03T14:22:10.000Z'
-      x-apidog-orders:
-      - organizationId
-      - balance
-      - currency
-      - asOf
+      - success
+      - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
   securitySchemes:

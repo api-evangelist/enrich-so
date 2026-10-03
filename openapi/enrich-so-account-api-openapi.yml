@@ -52,33 +52,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 components:
-  responses:
-    Unauthorized:
-      description: Missing, invalid, or disabled API key.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
   schemas:
-    WalletTransactionsResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-              amount:
-                type: integer
-              type:
-                type: string
-              createdAt:
-                type: string
-                format: date-time
     WalletBalanceResponse:
       type: object
       properties:
@@ -102,6 +76,32 @@ components:
               type: string
             message:
               type: string
+    WalletTransactionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              amount:
+                type: integer
+              type:
+                type: string
+              createdAt:
+                type: string
+                format: date-time
+  responses:
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
   securitySchemes:
     apiKeyHeader:
       type: apiKey

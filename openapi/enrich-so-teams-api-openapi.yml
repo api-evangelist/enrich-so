@@ -480,6 +480,120 @@ components:
       - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
+    InviteBody:
+      type: object
+      required:
+      - email
+      - role
+      properties:
+        email:
+          type: string
+          format: email
+          description: The email address of the person you want to invite
+          examples:
+          - marco.silva@yourcompany.com
+        role:
+          type: string
+          enum:
+          - admin
+          - member
+          description: The role to assign them
+          examples:
+          - member
+      x-apidog-orders:
+      - email
+      - role
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    Invitation:
+      type: object
+      required:
+      - id
+      - email
+      - role
+      - status
+      - expiresAt
+      - createdAt
+      properties:
+        id:
+          type: string
+          examples:
+          - 665e2e7f4a6d8c001abc5001
+        email:
+          type: string
+          format: email
+          description: Who was invited
+          examples:
+          - marco.silva@yourcompany.com
+        role:
+          type: string
+          enum:
+          - admin
+          - member
+          description: The role they'll have when they accept
+          examples:
+          - member
+        status:
+          type: string
+          const: pending
+          description: Invitation status (always `pending` for outstanding invitations)
+        expiresAt:
+          type: string
+          format: date-time
+          description: When the invitation expires
+          examples:
+          - '2025-07-03T15:00:00.000Z'
+        createdAt:
+          type: string
+          format: date-time
+          description: When the invitation was sent
+          examples:
+          - '2025-06-03T15:00:00.000Z'
+      x-apidog-orders:
+      - id
+      - email
+      - role
+      - status
+      - expiresAt
+      - createdAt
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    InvitationListResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invitation'
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    TeamMemberListResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     TeamMember:
       type: object
       required:
@@ -542,24 +656,6 @@ components:
       - name
       - role
       - createdAt
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    TeamMemberListResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/TeamMember'
-      x-apidog-orders:
-      - success
-      - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     SuccessOperationResponse:
@@ -626,102 +722,6 @@ components:
       - status
       - detail
       - instance
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    InvitationListResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Invitation'
-      x-apidog-orders:
-      - success
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    Invitation:
-      type: object
-      required:
-      - id
-      - email
-      - role
-      - status
-      - expiresAt
-      - createdAt
-      properties:
-        id:
-          type: string
-          examples:
-          - 665e2e7f4a6d8c001abc5001
-        email:
-          type: string
-          format: email
-          description: Who was invited
-          examples:
-          - marco.silva@yourcompany.com
-        role:
-          type: string
-          enum:
-          - admin
-          - member
-          description: The role they'll have when they accept
-          examples:
-          - member
-        status:
-          type: string
-          const: pending
-          description: Invitation status (always `pending` for outstanding invitations)
-        expiresAt:
-          type: string
-          format: date-time
-          description: When the invitation expires
-          examples:
-          - '2025-07-03T15:00:00.000Z'
-        createdAt:
-          type: string
-          format: date-time
-          description: When the invitation was sent
-          examples:
-          - '2025-06-03T15:00:00.000Z'
-      x-apidog-orders:
-      - id
-      - email
-      - role
-      - status
-      - expiresAt
-      - createdAt
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    InviteBody:
-      type: object
-      required:
-      - email
-      - role
-      properties:
-        email:
-          type: string
-          format: email
-          description: The email address of the person you want to invite
-          examples:
-          - marco.silva@yourcompany.com
-        role:
-          type: string
-          enum:
-          - admin
-          - member
-          description: The role to assign them
-          examples:
-          - member
-      x-apidog-orders:
-      - email
-      - role
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
   securitySchemes:

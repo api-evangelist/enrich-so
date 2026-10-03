@@ -657,43 +657,6 @@ paths:
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483203-run
 components:
   schemas:
-    StartEndDate:
-      type: object
-      description: A date range (used for job history and education)
-      properties:
-        start:
-          type: object
-          properties:
-            month:
-              type: integer
-              minimum: 1
-              maximum: 12
-            year:
-              type: integer
-          x-apidog-orders:
-          - month
-          - year
-          x-apidog-ignore-properties: []
-        end:
-          type: object
-          description: '`null` means the person is still in this role or program'
-          properties:
-            month:
-              type: integer
-              minimum: 1
-              maximum: 12
-            year:
-              type: integer
-          x-apidog-orders:
-          - month
-          - year
-          x-apidog-ignore-properties: []
-          nullable: true
-      x-apidog-orders:
-      - start
-      - end
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     BulkLookupResponse:
       type: object
       required:
@@ -711,120 +674,6 @@ components:
       - success
       - data
       - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BulkLookupRequest:
-      type: object
-      required:
-      - emails
-      properties:
-        emails:
-          type: array
-          minItems: 1
-          maxItems: 100000
-          items:
-            type: string
-            format: email
-            maxLength: 254
-          description: Email addresses to look up (up to 100 000)
-          examples:
-          - - emily.zhang@figma.com
-            - david.kim@vercel.com
-        webhookUrl:
-          type: string
-          format: uri
-          description: 'A URL on your server where we should send webhook callbacks.
-
-            You''ll receive one POST per email, plus one final completion POST.
-
-            '
-          examples:
-          - https://api.yourapp.com/webhooks/enrich
-      x-apidog-orders:
-      - emails
-      - webhookUrl
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchSubmitMeta:
-      type: object
-      description: Metadata returned when you submit a batch job
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request
-          examples:
-          - 665a1f4e2c3b7800129dce00
-        creditsReserved:
-          type: number
-          minimum: 0
-          description: Total credits reserved for the batch
-          examples:
-          - 100
-        creditsPerItem:
-          type: number
-          minimum: 0
-          description: Cost per item
-          examples:
-          - 10
-        estimatedCredits:
-          type: number
-          minimum: 0
-          description: Estimated total cost (same as creditsReserved)
-          examples:
-          - 100
-      x-apidog-orders:
-      - requestId
-      - creditsReserved
-      - creditsPerItem
-      - estimatedCredits
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BulkLookupSubmitData:
-      type: object
-      description: Returned when you submit a bulk reverse lookup
-      required:
-      - batchId
-      - status
-      - itemCount
-      properties:
-        batchId:
-          type: string
-          description: The batch identifier — use it to poll status and fetch results
-          examples:
-          - 665d2f8b9c5b2a0015d0bc10
-        status:
-          type: string
-          examples:
-          - queued
-        itemCount:
-          type: integer
-          minimum: 0
-          description: Unique emails in the batch (after deduplication)
-          examples:
-          - 50
-        message:
-          type: string
-          examples:
-          - Bulk lookup job created
-        originalCount:
-          type: integer
-          minimum: 0
-          description: How many emails you submitted before deduplication
-          examples:
-          - 55
-        duplicatesRemoved:
-          type: integer
-          minimum: 0
-          description: How many duplicate emails were removed
-          examples:
-          - 5
-      x-apidog-orders:
-      - batchId
-      - status
-      - itemCount
-      - message
-      - originalCount
-      - duplicatesRemoved
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     BatchResultsMeta:
@@ -873,6 +722,48 @@ components:
       - creditsRemaining
       - totalItems
       - processedItems
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+      x-apidog-orders:
+      - type
+      - title
+      - status
+      - detail
+      - instance
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     BulkLookupResultsResponse:
@@ -941,46 +832,210 @@ components:
       - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    ErrorEnvelope:
+    EducationHistoryItem:
       type: object
-      description: RFC 9457 Problem Details error response.
-      required:
-      - type
-      - title
-      - status
+      description: One entry in a person's education history
       properties:
-        type:
+        degreeName:
+          type: string
+          description: Degree or program name
+          examples:
+          - B.S. Computer Science
+        startEndDate:
+          $ref: '#/components/schemas/StartEndDate'
+        schoolName:
+          type: string
+          description: Name of the school
+          examples:
+          - Stanford University
+        schoolLocation:
+          type: string
+          description: Where the school is located
+          examples:
+          - Stanford, CA
+        schoolLogo:
           type: string
           format: uri
-          description: URI reference that identifies the problem type.
-          examples:
-          - https://dev.enrich.so/errors/validation-error
+          description: URL of the school's logo
+      x-apidog-orders:
+      - degreeName
+      - startEndDate
+      - schoolName
+      - schoolLocation
+      - schoolLogo
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    PositionHistoryItem:
+      type: object
+      description: One entry in a person's work history
+      properties:
         title:
           type: string
-          description: Short, human-readable summary of the problem.
+          description: Job title
           examples:
-          - Validation Error
-        status:
-          type: integer
-          description: HTTP status code.
-          examples:
-          - 400
-        detail:
+          - Senior Software Engineer
+        startEndDate:
+          $ref: '#/components/schemas/StartEndDate'
+        description:
           type: string
-          description: Human-readable explanation specific to this occurrence.
+          description: What the person did in this role
           examples:
-          - body/email Invalid email
-        instance:
+          - Led the migration to a microservices architecture.
+        companyName:
           type: string
-          description: URI reference that identifies the specific occurrence.
+          description: Company name
           examples:
-          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+          - Stripe
+        companyLocation:
+          type: string
+          description: Where the company is located
+          examples:
+          - San Francisco, CA
+        companyLogo:
+          type: string
+          format: uri
+          description: URL of the company's logo
       x-apidog-orders:
-      - type
       - title
+      - startEndDate
+      - description
+      - companyName
+      - companyLocation
+      - companyLogo
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchSubmitMeta:
+      type: object
+      description: Metadata returned when you submit a batch job
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request
+          examples:
+          - 665a1f4e2c3b7800129dce00
+        creditsReserved:
+          type: number
+          minimum: 0
+          description: Total credits reserved for the batch
+          examples:
+          - 100
+        creditsPerItem:
+          type: number
+          minimum: 0
+          description: Cost per item
+          examples:
+          - 10
+        estimatedCredits:
+          type: number
+          minimum: 0
+          description: Estimated total cost (same as creditsReserved)
+          examples:
+          - 100
+      x-apidog-orders:
+      - requestId
+      - creditsReserved
+      - creditsPerItem
+      - estimatedCredits
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    EnrichmentMeta:
+      type: object
+      description: Metadata included with every enrichment response
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request — useful for support tickets
+          examples:
+          - 664f2b3c9a1e4d0012abcdef
+        creditsUsed:
+          type: number
+          minimum: 0
+          description: How many credits this request consumed
+          examples:
+          - 10
+        creditsRemaining:
+          type: number
+          minimum: 0
+          description: Your remaining credit balance after this request
+          examples:
+          - 24990
+        processingTimeMs:
+          type: number
+          description: How long the lookup took, in milliseconds
+          examples:
+          - 420
+      x-apidog-orders:
+      - requestId
+      - creditsUsed
+      - creditsRemaining
+      - processingTimeMs
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BulkLookupSubmitData:
+      type: object
+      description: Returned when you submit a bulk reverse lookup
+      required:
+      - batchId
       - status
-      - detail
-      - instance
+      - itemCount
+      properties:
+        batchId:
+          type: string
+          description: The batch identifier — use it to poll status and fetch results
+          examples:
+          - 665d2f8b9c5b2a0015d0bc10
+        status:
+          type: string
+          examples:
+          - queued
+        itemCount:
+          type: integer
+          minimum: 0
+          description: Unique emails in the batch (after deduplication)
+          examples:
+          - 50
+        message:
+          type: string
+          examples:
+          - Bulk lookup job created
+        originalCount:
+          type: integer
+          minimum: 0
+          description: How many emails you submitted before deduplication
+          examples:
+          - 55
+        duplicatesRemoved:
+          type: integer
+          minimum: 0
+          description: How many duplicate emails were removed
+          examples:
+          - 5
+      x-apidog-orders:
+      - batchId
+      - status
+      - itemCount
+      - message
+      - originalCount
+      - duplicatesRemoved
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    ReverseLookupResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/ReverseLookupResult'
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta'
+      x-apidog-orders:
+      - success
+      - data
+      - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     BatchStatusData:
@@ -1027,151 +1082,36 @@ components:
       - progress
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    EnrichmentMeta:
-      type: object
-      description: Metadata included with every enrichment response
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request — useful for support tickets
-          examples:
-          - 664f2b3c9a1e4d0012abcdef
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: How many credits this request consumed
-          examples:
-          - 10
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after this request
-          examples:
-          - 24990
-        processingTimeMs:
-          type: number
-          description: How long the lookup took, in milliseconds
-          examples:
-          - 420
-      x-apidog-orders:
-      - requestId
-      - creditsUsed
-      - creditsRemaining
-      - processingTimeMs
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    EducationHistoryItem:
-      type: object
-      description: One entry in a person's education history
-      properties:
-        degreeName:
-          type: string
-          description: Degree or program name
-          examples:
-          - B.S. Computer Science
-        startEndDate:
-          $ref: '#/components/schemas/StartEndDate'
-        schoolName:
-          type: string
-          description: Name of the school
-          examples:
-          - Stanford University
-        schoolLocation:
-          type: string
-          description: Where the school is located
-          examples:
-          - Stanford, CA
-        schoolLogo:
-          type: string
-          format: uri
-          description: URL of the school's logo
-      x-apidog-orders:
-      - degreeName
-      - startEndDate
-      - schoolName
-      - schoolLocation
-      - schoolLogo
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    LookupRequest:
+    BulkLookupRequest:
       type: object
       required:
-      - email
+      - emails
       properties:
-        email:
-          type: string
-          format: email
-          maxLength: 254
-          description: The email address to look up
+        emails:
+          type: array
+          minItems: 1
+          maxItems: 100000
+          items:
+            type: string
+            format: email
+            maxLength: 254
+          description: Email addresses to look up (up to 100 000)
           examples:
-          - emily.zhang@figma.com
-      x-apidog-orders:
-      - email
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchStatusResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/BatchStatusData'
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-              description: Request tracking ID
-          x-apidog-orders:
-          - requestId
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    PositionHistoryItem:
-      type: object
-      description: One entry in a person's work history
-      properties:
-        title:
-          type: string
-          description: Job title
-          examples:
-          - Senior Software Engineer
-        startEndDate:
-          $ref: '#/components/schemas/StartEndDate'
-        description:
-          type: string
-          description: What the person did in this role
-          examples:
-          - Led the migration to a microservices architecture.
-        companyName:
-          type: string
-          description: Company name
-          examples:
-          - Stripe
-        companyLocation:
-          type: string
-          description: Where the company is located
-          examples:
-          - San Francisco, CA
-        companyLogo:
+          - - emily.zhang@figma.com
+            - david.kim@vercel.com
+        webhookUrl:
           type: string
           format: uri
-          description: URL of the company's logo
+          description: 'A URL on your server where we should send webhook callbacks.
+
+            You''ll receive one POST per email, plus one final completion POST.
+
+            '
+          examples:
+          - https://api.yourapp.com/webhooks/enrich
       x-apidog-orders:
-      - title
-      - startEndDate
-      - description
-      - companyName
-      - companyLocation
-      - companyLogo
+      - emails
+      - webhookUrl
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     ReverseLookupResult:
@@ -1329,7 +1269,7 @@ components:
       - creditsConsumed
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    ReverseLookupResponse:
+    BatchStatusResponse:
       type: object
       required:
       - success
@@ -1339,13 +1279,73 @@ components:
           type: boolean
           const: true
         data:
-          $ref: '#/components/schemas/ReverseLookupResult'
+          $ref: '#/components/schemas/BatchStatusData'
         meta:
-          $ref: '#/components/schemas/EnrichmentMeta'
+          type: object
+          properties:
+            requestId:
+              type: string
+              description: Request tracking ID
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
       x-apidog-orders:
       - success
       - data
       - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    StartEndDate:
+      type: object
+      description: A date range (used for job history and education)
+      properties:
+        start:
+          type: object
+          properties:
+            month:
+              type: integer
+              minimum: 1
+              maximum: 12
+            year:
+              type: integer
+          x-apidog-orders:
+          - month
+          - year
+          x-apidog-ignore-properties: []
+        end:
+          type: object
+          description: '`null` means the person is still in this role or program'
+          properties:
+            month:
+              type: integer
+              minimum: 1
+              maximum: 12
+            year:
+              type: integer
+          x-apidog-orders:
+          - month
+          - year
+          x-apidog-ignore-properties: []
+          nullable: true
+      x-apidog-orders:
+      - start
+      - end
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LookupRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          description: The email address to look up
+          examples:
+          - emily.zhang@figma.com
+      x-apidog-orders:
+      - email
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
   securitySchemes:

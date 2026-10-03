@@ -517,6 +517,25 @@ paths:
     - url: https://dev.enrich.so/api/v3
       description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
 components:
+  responses:
+    RateLimited:
+      description: Rate limit exceeded. Includes a Retry-After header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InsufficientCredits:
+      description: Not enough credits to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unauthorized:
+      description: Missing, invalid, or disabled API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
   schemas:
     PhoneBatchRequest:
       type: object
@@ -532,6 +551,18 @@ components:
                 type: string
               linkedin:
                 type: string
+    BatchSubmitResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            batchId:
+              type: string
+            status:
+              type: string
     PhoneLookupResponse:
       type: object
       properties:
@@ -551,6 +582,16 @@ components:
                     type: string
                   type:
                     type: string
+    EnrichmentMeta:
+      type: object
+      description: Metadata returned with every response, including remaining credit balance.
+      properties:
+        creditsCharged:
+          type: integer
+        creditsRemaining:
+          type: integer
+        cached:
+          type: boolean
     ErrorEnvelope:
       type: object
       properties:
@@ -564,221 +605,6 @@ components:
               type: string
             message:
               type: string
-    EnrichmentMeta:
-      type: object
-      description: Metadata returned with every response, including remaining credit balance.
-      properties:
-        creditsCharged:
-          type: integer
-        creditsRemaining:
-          type: integer
-        cached:
-          type: boolean
-    BatchSubmitResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: object
-          properties:
-            batchId:
-              type: string
-            status:
-              type: string
-    PhoneBatchRequest_2:
-      type: object
-      description: 'Submit emails and/or profile URLs for bulk phone lookup.
-
-        You must provide at least one item. The combined total cannot exceed 500 000.
-
-        '
-      properties:
-        emails:
-          type: array
-          maxItems: 500000
-          items:
-            type: string
-            format: email
-            maxLength: 254
-          description: Email addresses to look up
-          examples:
-          - - sarah.chen@stripe.com
-            - james.rodriguez@hubspot.com
-        linkedins:
-          type: array
-          maxItems: 500000
-          items:
-            type: string
-            maxLength: 500
-          description: Profile URLs to look up
-          examples:
-          - - https://www.example.com/in/priyapatel
-        webhookUrl:
-          type: string
-          format: uri
-          description: 'A URL on your server where we should send webhook callbacks.
-
-            You''ll receive one POST per item, plus one final completion POST.
-
-            '
-          examples:
-          - https://api.yourapp.com/webhooks/enrich
-      x-apidog-orders:
-      - emails
-      - linkedins
-      - webhookUrl
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchSubmitMeta:
-      type: object
-      description: Metadata returned when you submit a batch job
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request
-          examples:
-          - 665a1f4e2c3b7800129dce00
-        creditsReserved:
-          type: number
-          minimum: 0
-          description: Total credits reserved for the batch
-          examples:
-          - 100
-        creditsPerItem:
-          type: number
-          minimum: 0
-          description: Cost per item
-          examples:
-          - 10
-        estimatedCredits:
-          type: number
-          minimum: 0
-          description: Estimated total cost (same as creditsReserved)
-          examples:
-          - 100
-      x-apidog-orders:
-      - requestId
-      - creditsReserved
-      - creditsPerItem
-      - estimatedCredits
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    PhoneLookupResponse_2:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/PhoneLookupResult'
-        meta:
-          $ref: '#/components/schemas/EnrichmentMeta_2'
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchResultsMeta:
-      type: object
-      description: Metadata returned when you fetch batch results (includes credit settlement)
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request
-          examples:
-          - 665a23bc2c3b7800129dce10
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: Actual credits charged after settlement
-          examples:
-          - 80
-        creditsRefunded:
-          type: number
-          minimum: 0
-          description: Credits refunded (difference between reserved and actual cost)
-          examples:
-          - 20
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after settlement
-          examples:
-          - 24920
-        totalItems:
-          type: integer
-          minimum: 0
-          description: Total items in the batch
-          examples:
-          - 10
-        processedItems:
-          type: integer
-          minimum: 0
-          description: Items that were processed
-          examples:
-          - 10
-      x-apidog-orders:
-      - requestId
-      - creditsUsed
-      - creditsRefunded
-      - creditsRemaining
-      - totalItems
-      - processedItems
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    PhoneBulkJobSubmitData:
-      type: object
-      description: Returned when you submit a bulk phone lookup job
-      required:
-      - batchId
-      - status
-      - itemCount
-      properties:
-        batchId:
-          type: string
-          description: The job identifier — use it to poll status and fetch results
-          examples:
-          - 665c52bf7b8e3f00149f0a10
-        status:
-          type: string
-          examples:
-          - queued
-        itemCount:
-          type: integer
-          minimum: 0
-          description: Unique items in the job (after deduplication)
-          examples:
-          - 100
-        message:
-          type: string
-          examples:
-          - Bulk phone lookup job created
-        originalCount:
-          type: integer
-          minimum: 0
-          description: How many items you submitted before deduplication
-          examples:
-          - 110
-        duplicatesRemoved:
-          type: integer
-          minimum: 0
-          description: How many duplicates were removed
-          examples:
-          - 10
-      x-apidog-orders:
-      - batchId
-      - status
-      - itemCount
-      - message
-      - originalCount
-      - duplicatesRemoved
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     PhoneBulkJobStatusData:
       type: object
       required:
@@ -816,139 +642,6 @@ components:
       - totalItems
       - processedItems
       - progress
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    ErrorEnvelope_2:
-      type: object
-      description: RFC 9457 Problem Details error response.
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          type: string
-          format: uri
-          description: URI reference that identifies the problem type.
-          examples:
-          - https://dev.enrich.so/errors/validation-error
-        title:
-          type: string
-          description: Short, human-readable summary of the problem.
-          examples:
-          - Validation Error
-        status:
-          type: integer
-          description: HTTP status code.
-          examples:
-          - 400
-        detail:
-          type: string
-          description: Human-readable explanation specific to this occurrence.
-          examples:
-          - body/email Invalid email
-        instance:
-          type: string
-          description: URI reference that identifies the specific occurrence.
-          examples:
-          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-      x-apidog-orders:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    EnrichmentMeta_2:
-      type: object
-      description: Metadata included with every enrichment response
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request — useful for support tickets
-          examples:
-          - 664f2b3c9a1e4d0012abcdef
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: How many credits this request consumed
-          examples:
-          - 10
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after this request
-          examples:
-          - 24990
-        processingTimeMs:
-          type: number
-          description: How long the lookup took, in milliseconds
-          examples:
-          - 420
-      x-apidog-orders:
-      - requestId
-      - creditsUsed
-      - creditsRemaining
-      - processingTimeMs
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    PhoneBulkResultItem:
-      type: object
-      description: One result from a bulk phone lookup
-      properties:
-        email:
-          type: string
-          description: The email address that was looked up (if the item was an email)
-          examples:
-          - sarah.chen@stripe.com
-        linkedin:
-          type: string
-          description: The profile URL that was looked up (if the item was a profile URL)
-          examples:
-          - https://www.example.com/in/priyapatel
-        phones:
-          type: array
-          items:
-            type: string
-          description: Phone numbers found for this person (empty if none found)
-          examples:
-          - - '+14158009370'
-        error:
-          type: string
-          description: An error message if the lookup failed for this item
-          examples:
-          - No phone numbers found for this profile
-      x-apidog-orders:
-      - email
-      - linkedin
-      - phones
-      - error
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    PhoneBulkJobStatusResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/PhoneBulkJobStatusData'
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-          x-apidog-orders:
-          - requestId
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     PhoneBulkJobResultsResponse:
@@ -1034,6 +727,150 @@ components:
       - phones
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
+    PhoneBatchRequest_2:
+      type: object
+      description: 'Submit emails and/or profile URLs for bulk phone lookup.
+
+        You must provide at least one item. The combined total cannot exceed 500 000.
+
+        '
+      properties:
+        emails:
+          type: array
+          maxItems: 500000
+          items:
+            type: string
+            format: email
+            maxLength: 254
+          description: Email addresses to look up
+          examples:
+          - - sarah.chen@stripe.com
+            - james.rodriguez@hubspot.com
+        linkedins:
+          type: array
+          maxItems: 500000
+          items:
+            type: string
+            maxLength: 500
+          description: Profile URLs to look up
+          examples:
+          - - https://www.example.com/in/priyapatel
+        webhookUrl:
+          type: string
+          format: uri
+          description: 'A URL on your server where we should send webhook callbacks.
+
+            You''ll receive one POST per item, plus one final completion POST.
+
+            '
+          examples:
+          - https://api.yourapp.com/webhooks/enrich
+      x-apidog-orders:
+      - emails
+      - linkedins
+      - webhookUrl
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchResultsMeta:
+      type: object
+      description: Metadata returned when you fetch batch results (includes credit settlement)
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request
+          examples:
+          - 665a23bc2c3b7800129dce10
+        creditsUsed:
+          type: number
+          minimum: 0
+          description: Actual credits charged after settlement
+          examples:
+          - 80
+        creditsRefunded:
+          type: number
+          minimum: 0
+          description: Credits refunded (difference between reserved and actual cost)
+          examples:
+          - 20
+        creditsRemaining:
+          type: number
+          minimum: 0
+          description: Your remaining credit balance after settlement
+          examples:
+          - 24920
+        totalItems:
+          type: integer
+          minimum: 0
+          description: Total items in the batch
+          examples:
+          - 10
+        processedItems:
+          type: integer
+          minimum: 0
+          description: Items that were processed
+          examples:
+          - 10
+      x-apidog-orders:
+      - requestId
+      - creditsUsed
+      - creditsRefunded
+      - creditsRemaining
+      - totalItems
+      - processedItems
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    PhoneBulkResultItem:
+      type: object
+      description: One result from a bulk phone lookup
+      properties:
+        email:
+          type: string
+          description: The email address that was looked up (if the item was an email)
+          examples:
+          - sarah.chen@stripe.com
+        linkedin:
+          type: string
+          description: The profile URL that was looked up (if the item was a profile URL)
+          examples:
+          - https://www.example.com/in/priyapatel
+        phones:
+          type: array
+          items:
+            type: string
+          description: Phone numbers found for this person (empty if none found)
+          examples:
+          - - '+14158009370'
+        error:
+          type: string
+          description: An error message if the lookup failed for this item
+          examples:
+          - No phone numbers found for this profile
+      x-apidog-orders:
+      - email
+      - linkedin
+      - phones
+      - error
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    PhoneLookupResponse_2:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/PhoneLookupResult'
+        meta:
+          $ref: '#/components/schemas/EnrichmentMeta_2'
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     PhoneBulkJobSubmitResponse:
       type: object
       required:
@@ -1053,25 +890,188 @@ components:
       - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-  responses:
-    RateLimited:
-      description: Rate limit exceeded. Includes a Retry-After header.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
-    Unauthorized:
-      description: Missing, invalid, or disabled API key.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
-    InsufficientCredits:
-      description: Not enough credits to complete the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
+    BatchSubmitMeta:
+      type: object
+      description: Metadata returned when you submit a batch job
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request
+          examples:
+          - 665a1f4e2c3b7800129dce00
+        creditsReserved:
+          type: number
+          minimum: 0
+          description: Total credits reserved for the batch
+          examples:
+          - 100
+        creditsPerItem:
+          type: number
+          minimum: 0
+          description: Cost per item
+          examples:
+          - 10
+        estimatedCredits:
+          type: number
+          minimum: 0
+          description: Estimated total cost (same as creditsReserved)
+          examples:
+          - 100
+      x-apidog-orders:
+      - requestId
+      - creditsReserved
+      - creditsPerItem
+      - estimatedCredits
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    EnrichmentMeta_2:
+      type: object
+      description: Metadata included with every enrichment response
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request — useful for support tickets
+          examples:
+          - 664f2b3c9a1e4d0012abcdef
+        creditsUsed:
+          type: number
+          minimum: 0
+          description: How many credits this request consumed
+          examples:
+          - 10
+        creditsRemaining:
+          type: number
+          minimum: 0
+          description: Your remaining credit balance after this request
+          examples:
+          - 24990
+        processingTimeMs:
+          type: number
+          description: How long the lookup took, in milliseconds
+          examples:
+          - 420
+      x-apidog-orders:
+      - requestId
+      - creditsUsed
+      - creditsRemaining
+      - processingTimeMs
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    PhoneBulkJobStatusResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/PhoneBulkJobStatusData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    ErrorEnvelope_2:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+      x-apidog-orders:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    PhoneBulkJobSubmitData:
+      type: object
+      description: Returned when you submit a bulk phone lookup job
+      required:
+      - batchId
+      - status
+      - itemCount
+      properties:
+        batchId:
+          type: string
+          description: The job identifier — use it to poll status and fetch results
+          examples:
+          - 665c52bf7b8e3f00149f0a10
+        status:
+          type: string
+          examples:
+          - queued
+        itemCount:
+          type: integer
+          minimum: 0
+          description: Unique items in the job (after deduplication)
+          examples:
+          - 100
+        message:
+          type: string
+          examples:
+          - Bulk phone lookup job created
+        originalCount:
+          type: integer
+          minimum: 0
+          description: How many items you submitted before deduplication
+          examples:
+          - 110
+        duplicatesRemoved:
+          type: integer
+          minimum: 0
+          description: How many duplicates were removed
+          examples:
+          - 10
+      x-apidog-orders:
+      - batchId
+      - status
+      - itemCount
+      - message
+      - originalCount
+      - duplicatesRemoved
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
   securitySchemes:
     apiKeyHeader:
       type: apiKey
