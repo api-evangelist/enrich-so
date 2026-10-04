@@ -464,7 +464,7 @@ paths:
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483209-run
 components:
   schemas:
-    InvitationResponse:
+    InvitationListResponse:
       type: object
       required:
       - success
@@ -474,35 +474,30 @@ components:
           type: boolean
           const: true
         data:
-          $ref: '#/components/schemas/Invitation'
+          type: array
+          items:
+            $ref: '#/components/schemas/Invitation'
       x-apidog-orders:
       - success
       - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    InviteBody:
+    TeamMemberListResponse:
       type: object
       required:
-      - email
-      - role
+      - success
+      - data
       properties:
-        email:
-          type: string
-          format: email
-          description: The email address of the person you want to invite
-          examples:
-          - marco.silva@yourcompany.com
-        role:
-          type: string
-          enum:
-          - admin
-          - member
-          description: The role to assign them
-          examples:
-          - member
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
       x-apidog-orders:
-      - email
-      - role
+      - success
+      - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     Invitation:
@@ -555,106 +550,6 @@ components:
       - role
       - status
       - expiresAt
-      - createdAt
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    InvitationListResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Invitation'
-      x-apidog-orders:
-      - success
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    TeamMemberListResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/TeamMember'
-      x-apidog-orders:
-      - success
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    TeamMember:
-      type: object
-      required:
-      - id
-      - userId
-      - email
-      - name
-      - role
-      - createdAt
-      properties:
-        id:
-          type: string
-          description: Membership ID
-          examples:
-          - 665e2a104a6d8c001abc4001
-        userId:
-          type: string
-          description: User ID
-          examples:
-          - 665e2a104a6d8c001abc4101
-        email:
-          type: string
-          format: email
-          description: The member's email address
-          examples:
-          - sarah.chen@yourcompany.com
-        name:
-          type: string
-          description: The member's display name
-          examples:
-          - Sarah Chen
-          nullable: true
-        role:
-          type: string
-          enum:
-          - owner
-          - admin
-          - member
-          description: 'Their role in the team:
-
-            - `owner` — full control, cannot be removed
-
-            - `admin` — can manage members and keys
-
-            - `member` — can use the API
-
-            '
-          examples:
-          - admin
-        createdAt:
-          type: string
-          format: date-time
-          description: When they joined the team
-          examples:
-          - '2025-01-15T09:00:00.000Z'
-      x-apidog-orders:
-      - id
-      - userId
-      - email
-      - name
-      - role
       - createdAt
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
@@ -722,6 +617,111 @@ components:
       - status
       - detail
       - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    InviteBody:
+      type: object
+      required:
+      - email
+      - role
+      properties:
+        email:
+          type: string
+          format: email
+          description: The email address of the person you want to invite
+          examples:
+          - marco.silva@yourcompany.com
+        role:
+          type: string
+          enum:
+          - admin
+          - member
+          description: The role to assign them
+          examples:
+          - member
+      x-apidog-orders:
+      - email
+      - role
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    InvitationResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/Invitation'
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    TeamMember:
+      type: object
+      required:
+      - id
+      - userId
+      - email
+      - name
+      - role
+      - createdAt
+      properties:
+        id:
+          type: string
+          description: Membership ID
+          examples:
+          - 665e2a104a6d8c001abc4001
+        userId:
+          type: string
+          description: User ID
+          examples:
+          - 665e2a104a6d8c001abc4101
+        email:
+          type: string
+          format: email
+          description: The member's email address
+          examples:
+          - sarah.chen@yourcompany.com
+        name:
+          type: string
+          description: The member's display name
+          examples:
+          - Sarah Chen
+          nullable: true
+        role:
+          type: string
+          enum:
+          - owner
+          - admin
+          - member
+          description: 'Their role in the team:
+
+            - `owner` — full control, cannot be removed
+
+            - `admin` — can manage members and keys
+
+            - `member` — can use the API
+
+            '
+          examples:
+          - admin
+        createdAt:
+          type: string
+          format: date-time
+          description: When they joined the team
+          examples:
+          - '2025-01-15T09:00:00.000Z'
+      x-apidog-orders:
+      - id
+      - userId
+      - email
+      - name
+      - role
+      - createdAt
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
   securitySchemes:

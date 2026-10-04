@@ -537,257 +537,6 @@ webhooks:
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27483219-run
 components:
   schemas:
-    WebhookCompanyFollowerCompletion:
-      type: object
-      required:
-      - event
-      - batchId
-      - timestamp
-      - data
-      properties:
-        event:
-          type: string
-          description: Event type identifier
-          examples:
-          - webhook:company_follower_completion.completed
-        batchId:
-          type: string
-          description: The batch ID for this scrape job
-        timestamp:
-          type: string
-          format: date-time
-          description: UTC timestamp when the event was produced
-        data:
-          type: object
-          required:
-          - companyUrl
-          - followerCount
-          - processingTimeMs
-          properties:
-            companyUrl:
-              type: string
-              format: uri
-              description: The LinkedIn company URL that was scraped
-            followerCount:
-              type: integer
-              description: Total number of follower profiles scraped
-            processingTimeMs:
-              type: integer
-              description: Total processing time in milliseconds
-          x-apidog-orders:
-          - companyUrl
-          - followerCount
-          - processingTimeMs
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - event
-      - batchId
-      - timestamp
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    WebhookReverseLookupResult:
-      type: object
-      description: Per-result callback for reverse email lookup batches.
-      required:
-      - event
-      - timestamp
-      - data
-      properties:
-        event:
-          type: string
-          const: webhook:email_result.completed
-        timestamp:
-          type: string
-          format: date-time
-        data:
-          type: object
-          required:
-          - job_id
-          - result_id
-          - type
-          properties:
-            job_id:
-              type: string
-            result_id:
-              type: string
-              description: The email address that was looked up
-            type:
-              type: string
-              enum:
-              - success
-              - no_match
-              - error
-            result:
-              description: Professional profile data (present when type is "success")
-              $ref: '#/components/schemas/ReverseLookupResult'
-            error:
-              type: string
-              description: Error message (present when type is "error")
-            message:
-              type: string
-              description: Human-readable summary ("Person found", "No information found", or error text)
-          x-apidog-orders:
-          - job_id
-          - result_id
-          - type
-          - result
-          - error
-          - message
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - event
-      - timestamp
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    WebhookEmailFinderResult:
-      type: object
-      description: Per-result callback for email finder batches.
-      required:
-      - event
-      - timestamp
-      - data
-      properties:
-        event:
-          type: string
-          const: webhook:finder_lookup.completed
-        timestamp:
-          type: string
-          format: date-time
-        data:
-          type: object
-          required:
-          - job_id
-          - result_id
-          - result
-          properties:
-            job_id:
-              type: string
-            result_id:
-              type: string
-              description: The email address that was looked up
-            result:
-              type: object
-              required:
-              - email
-              - result
-              - is_catch_all
-              properties:
-                email:
-                  type: string
-                result:
-                  type: string
-                  enum:
-                  - found
-                  - not_found
-                message:
-                  type: string
-                confidence:
-                  type: string
-                  enum:
-                  - high
-                  - medium
-                  - low
-                is_catch_all:
-                  type: boolean
-                domain:
-                  type: string
-                provider:
-                  type: string
-                  description: Email provider (GOOGLE, MICROSOFT, ZOHO, etc.)
-              x-apidog-orders:
-              - email
-              - result
-              - message
-              - confidence
-              - is_catch_all
-              - domain
-              - provider
-              x-apidog-ignore-properties: []
-          x-apidog-orders:
-          - job_id
-          - result_id
-          - result
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - event
-      - timestamp
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    EducationHistoryItem:
-      type: object
-      description: One entry in a person's education history
-      properties:
-        degreeName:
-          type: string
-          description: Degree or program name
-          examples:
-          - B.S. Computer Science
-        startEndDate:
-          $ref: '#/components/schemas/StartEndDate'
-        schoolName:
-          type: string
-          description: Name of the school
-          examples:
-          - Stanford University
-        schoolLocation:
-          type: string
-          description: Where the school is located
-          examples:
-          - Stanford, CA
-        schoolLogo:
-          type: string
-          format: uri
-          description: URL of the school's logo
-      x-apidog-orders:
-      - degreeName
-      - startEndDate
-      - schoolName
-      - schoolLocation
-      - schoolLogo
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    PositionHistoryItem:
-      type: object
-      description: One entry in a person's work history
-      properties:
-        title:
-          type: string
-          description: Job title
-          examples:
-          - Senior Software Engineer
-        startEndDate:
-          $ref: '#/components/schemas/StartEndDate'
-        description:
-          type: string
-          description: What the person did in this role
-          examples:
-          - Led the migration to a microservices architecture.
-        companyName:
-          type: string
-          description: Company name
-          examples:
-          - Stripe
-        companyLocation:
-          type: string
-          description: Where the company is located
-          examples:
-          - San Francisco, CA
-        companyLogo:
-          type: string
-          format: uri
-          description: URL of the company's logo
-      x-apidog-orders:
-      - title
-      - startEndDate
-      - description
-      - companyName
-      - companyLocation
-      - companyLogo
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     WebhookPhoneResult:
       type: object
       description: Per-result callback for phone finder batches.
@@ -845,9 +594,9 @@ components:
       - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    WebhookReverseLookupCompletion:
+    WebhookEmailValidationCompletion:
       type: object
-      description: Completion callback for reverse email lookup batches.
+      description: Completion callback for email validation batches.
       required:
       - event
       - timestamp
@@ -855,58 +604,7 @@ components:
       properties:
         event:
           type: string
-          const: webhook:email_completion.completed
-        timestamp:
-          type: string
-          format: date-time
-        data:
-          type: object
-          required:
-          - job_id
-          - status
-          - total_items
-          - found
-          - not_found
-          - completed_at
-          properties:
-            job_id:
-              type: string
-            status:
-              type: string
-            total_items:
-              type: integer
-            found:
-              type: integer
-            not_found:
-              type: integer
-            completed_at:
-              type: string
-              format: date-time
-          x-apidog-orders:
-          - job_id
-          - status
-          - total_items
-          - found
-          - not_found
-          - completed_at
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - event
-      - timestamp
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    WebhookEmailFinderCompletion:
-      type: object
-      description: Completion callback for email finder batches.
-      required:
-      - event
-      - timestamp
-      - data
-      properties:
-        event:
-          type: string
-          const: finder.completed
+          const: validation.completed
         timestamp:
           type: string
           format: date-time
@@ -934,12 +632,15 @@ components:
             completed_at:
               type: string
               format: date-time
-            found:
+            valid:
               type: integer
-              description: Number of emails successfully found
-            not_found:
+              description: Number of emails that validated as valid
+            invalid:
               type: integer
-              description: Number of lookups where no email was found
+              description: Number of emails that validated as invalid
+            risky:
+              type: integer
+              description: Number of emails that validated as risky
           x-apidog-orders:
           - job_id
           - status
@@ -947,266 +648,9 @@ components:
           - successful
           - failed
           - completed_at
-          - found
-          - not_found
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - event
-      - timestamp
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    WebhookCompanyFollowerResult:
-      type: object
-      required:
-      - event
-      - batchId
-      - timestamp
-      - data
-      properties:
-        event:
-          type: string
-          description: Event type identifier
-          examples:
-          - webhook:company_follower_result.completed
-        batchId:
-          type: string
-          description: The batch ID for this scrape job
-        timestamp:
-          type: string
-          format: date-time
-          description: UTC timestamp when the event was produced
-        data:
-          type: object
-          required:
-          - companyUrl
-          - follower
-          properties:
-            companyUrl:
-              type: string
-              format: uri
-              description: The LinkedIn company URL being scraped
-            follower:
-              type: object
-              description: A single follower profile with all available fields
-              properties:
-                objectURN:
-                  type: string
-                  description: LinkedIn profile URN identifier
-                name:
-                  type:
-                  - string
-                  - 'null'
-                  description: Full name
-                firstName:
-                  type:
-                  - string
-                  - 'null'
-                  description: First name
-                lastName:
-                  type:
-                  - string
-                  - 'null'
-                  description: Last name
-                profileUrl:
-                  type: string
-                  description: LinkedIn profile URL
-                profilePictureUrl:
-                  type:
-                  - string
-                  - 'null'
-                  description: Profile picture URL
-                title:
-                  type:
-                  - string
-                  - 'null'
-                  description: Job title
-                companyName:
-                  type:
-                  - string
-                  - 'null'
-                  description: Current company name
-                companyProfileUrl:
-                  type:
-                  - string
-                  - 'null'
-                  description: Company LinkedIn URL
-                companyWebsite:
-                  type:
-                  - string
-                  - 'null'
-                  description: Company website URL
-                companyDomain:
-                  type:
-                  - string
-                  - 'null'
-                  description: Company domain
-                companyLogoUrl:
-                  type:
-                  - string
-                  - 'null'
-                  description: Company logo URL
-                companyLocation:
-                  type:
-                  - string
-                  - 'null'
-                  description: Company location
-                location:
-                  type:
-                  - string
-                  - 'null'
-                  description: Profile location
-                summary:
-                  type:
-                  - string
-                  - 'null'
-                  description: Profile summary
-                connectionDegree:
-                  type:
-                  - number
-                  - 'null'
-                  description: Connection degree (1, 2, or 3)
-                tenureAtCompany:
-                  type:
-                  - string
-                  - 'null'
-                  description: Time at current company
-                industry:
-                  type:
-                  - string
-                  - 'null'
-                  description: Industry
-                isPremium:
-                  type:
-                  - boolean
-                  - 'null'
-                  description: Whether profile is Premium
-                isSaved:
-                  type:
-                  - boolean
-                  - 'null'
-                  description: Whether profile is saved in Sales Navigator
-                isOpenProfile:
-                  type:
-                  - boolean
-                  - 'null'
-                  description: Whether profile is Open Profile
-                spotlights:
-                  type: array
-                  items:
-                    type: string
-                  description: Profile badges and highlights
-                createdAt:
-                  type: string
-                  format: date-time
-                  description: When the profile was scraped
-              x-apidog-orders:
-              - objectURN
-              - name
-              - firstName
-              - lastName
-              - profileUrl
-              - profilePictureUrl
-              - title
-              - companyName
-              - companyProfileUrl
-              - companyWebsite
-              - companyDomain
-              - companyLogoUrl
-              - companyLocation
-              - location
-              - summary
-              - connectionDegree
-              - tenureAtCompany
-              - industry
-              - isPremium
-              - isSaved
-              - isOpenProfile
-              - spotlights
-              - createdAt
-              x-apidog-ignore-properties: []
-          x-apidog-orders:
-          - companyUrl
-          - follower
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - event
-      - batchId
-      - timestamp
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    WebhookEmailValidationResult:
-      type: object
-      description: Per-result callback for email validation batches.
-      required:
-      - event
-      - timestamp
-      - data
-      properties:
-        event:
-          type: string
-          const: webhook:email_lookup.completed
-        timestamp:
-          type: string
-          format: date-time
-        data:
-          type: object
-          required:
-          - job_id
-          - result_id
-          - result
-          properties:
-            job_id:
-              type: string
-            result_id:
-              type: string
-              description: The email address that was validated
-            result:
-              type: object
-              required:
-              - email
-              - result
-              - is_catch_all
-              properties:
-                email:
-                  type: string
-                result:
-                  type: string
-                  enum:
-                  - valid
-                  - invalid
-                  - risky
-                message:
-                  type: string
-                provider:
-                  type: string
-                confidence:
-                  type: string
-                  enum:
-                  - definitive
-                  - high
-                  - medium
-                  - low
-                  - temporary
-                  - none
-                is_catch_all:
-                  type: boolean
-                domain:
-                  type: string
-              x-apidog-orders:
-              - email
-              - result
-              - message
-              - provider
-              - confidence
-              - is_catch_all
-              - domain
-              x-apidog-ignore-properties: []
-          x-apidog-orders:
-          - job_id
-          - result_id
-          - result
+          - valid
+          - invalid
+          - risky
           x-apidog-ignore-properties: []
       x-apidog-orders:
       - event
@@ -1420,9 +864,9 @@ components:
       - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    WebhookEmailValidationCompletion:
+    WebhookReverseLookupResult:
       type: object
-      description: Completion callback for email validation batches.
+      description: Per-result callback for reverse email lookup batches.
       required:
       - event
       - timestamp
@@ -1430,7 +874,281 @@ components:
       properties:
         event:
           type: string
-          const: validation.completed
+          const: webhook:email_result.completed
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          required:
+          - job_id
+          - result_id
+          - type
+          properties:
+            job_id:
+              type: string
+            result_id:
+              type: string
+              description: The email address that was looked up
+            type:
+              type: string
+              enum:
+              - success
+              - no_match
+              - error
+            result:
+              description: Professional profile data (present when type is "success")
+              $ref: '#/components/schemas/ReverseLookupResult'
+            error:
+              type: string
+              description: Error message (present when type is "error")
+            message:
+              type: string
+              description: Human-readable summary ("Person found", "No information found", or error text)
+          x-apidog-orders:
+          - job_id
+          - result_id
+          - type
+          - result
+          - error
+          - message
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - event
+      - timestamp
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    PositionHistoryItem:
+      type: object
+      description: One entry in a person's work history
+      properties:
+        title:
+          type: string
+          description: Job title
+          examples:
+          - Senior Software Engineer
+        startEndDate:
+          $ref: '#/components/schemas/StartEndDate'
+        description:
+          type: string
+          description: What the person did in this role
+          examples:
+          - Led the migration to a microservices architecture.
+        companyName:
+          type: string
+          description: Company name
+          examples:
+          - Stripe
+        companyLocation:
+          type: string
+          description: Where the company is located
+          examples:
+          - San Francisco, CA
+        companyLogo:
+          type: string
+          format: uri
+          description: URL of the company's logo
+      x-apidog-orders:
+      - title
+      - startEndDate
+      - description
+      - companyName
+      - companyLocation
+      - companyLogo
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    WebhookCompanyFollowerResult:
+      type: object
+      required:
+      - event
+      - batchId
+      - timestamp
+      - data
+      properties:
+        event:
+          type: string
+          description: Event type identifier
+          examples:
+          - webhook:company_follower_result.completed
+        batchId:
+          type: string
+          description: The batch ID for this scrape job
+        timestamp:
+          type: string
+          format: date-time
+          description: UTC timestamp when the event was produced
+        data:
+          type: object
+          required:
+          - companyUrl
+          - follower
+          properties:
+            companyUrl:
+              type: string
+              format: uri
+              description: The LinkedIn company URL being scraped
+            follower:
+              type: object
+              description: A single follower profile with all available fields
+              properties:
+                objectURN:
+                  type: string
+                  description: LinkedIn profile URN identifier
+                name:
+                  type:
+                  - string
+                  - 'null'
+                  description: Full name
+                firstName:
+                  type:
+                  - string
+                  - 'null'
+                  description: First name
+                lastName:
+                  type:
+                  - string
+                  - 'null'
+                  description: Last name
+                profileUrl:
+                  type: string
+                  description: LinkedIn profile URL
+                profilePictureUrl:
+                  type:
+                  - string
+                  - 'null'
+                  description: Profile picture URL
+                title:
+                  type:
+                  - string
+                  - 'null'
+                  description: Job title
+                companyName:
+                  type:
+                  - string
+                  - 'null'
+                  description: Current company name
+                companyProfileUrl:
+                  type:
+                  - string
+                  - 'null'
+                  description: Company LinkedIn URL
+                companyWebsite:
+                  type:
+                  - string
+                  - 'null'
+                  description: Company website URL
+                companyDomain:
+                  type:
+                  - string
+                  - 'null'
+                  description: Company domain
+                companyLogoUrl:
+                  type:
+                  - string
+                  - 'null'
+                  description: Company logo URL
+                companyLocation:
+                  type:
+                  - string
+                  - 'null'
+                  description: Company location
+                location:
+                  type:
+                  - string
+                  - 'null'
+                  description: Profile location
+                summary:
+                  type:
+                  - string
+                  - 'null'
+                  description: Profile summary
+                connectionDegree:
+                  type:
+                  - number
+                  - 'null'
+                  description: Connection degree (1, 2, or 3)
+                tenureAtCompany:
+                  type:
+                  - string
+                  - 'null'
+                  description: Time at current company
+                industry:
+                  type:
+                  - string
+                  - 'null'
+                  description: Industry
+                isPremium:
+                  type:
+                  - boolean
+                  - 'null'
+                  description: Whether profile is Premium
+                isSaved:
+                  type:
+                  - boolean
+                  - 'null'
+                  description: Whether profile is saved in Sales Navigator
+                isOpenProfile:
+                  type:
+                  - boolean
+                  - 'null'
+                  description: Whether profile is Open Profile
+                spotlights:
+                  type: array
+                  items:
+                    type: string
+                  description: Profile badges and highlights
+                createdAt:
+                  type: string
+                  format: date-time
+                  description: When the profile was scraped
+              x-apidog-orders:
+              - objectURN
+              - name
+              - firstName
+              - lastName
+              - profileUrl
+              - profilePictureUrl
+              - title
+              - companyName
+              - companyProfileUrl
+              - companyWebsite
+              - companyDomain
+              - companyLogoUrl
+              - companyLocation
+              - location
+              - summary
+              - connectionDegree
+              - tenureAtCompany
+              - industry
+              - isPremium
+              - isSaved
+              - isOpenProfile
+              - spotlights
+              - createdAt
+              x-apidog-ignore-properties: []
+          x-apidog-orders:
+          - companyUrl
+          - follower
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - event
+      - batchId
+      - timestamp
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    WebhookEmailFinderCompletion:
+      type: object
+      description: Completion callback for email finder batches.
+      required:
+      - event
+      - timestamp
+      - data
+      properties:
+        event:
+          type: string
+          const: finder.completed
         timestamp:
           type: string
           format: date-time
@@ -1458,15 +1176,12 @@ components:
             completed_at:
               type: string
               format: date-time
-            valid:
+            found:
               type: integer
-              description: Number of emails that validated as valid
-            invalid:
+              description: Number of emails successfully found
+            not_found:
               type: integer
-              description: Number of emails that validated as invalid
-            risky:
-              type: integer
-              description: Number of emails that validated as risky
+              description: Number of lookups where no email was found
           x-apidog-orders:
           - job_id
           - status
@@ -1474,9 +1189,8 @@ components:
           - successful
           - failed
           - completed_at
-          - valid
-          - invalid
-          - risky
+          - found
+          - not_found
           x-apidog-ignore-properties: []
       x-apidog-orders:
       - event
@@ -1519,6 +1233,292 @@ components:
       x-apidog-orders:
       - start
       - end
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    WebhookEmailFinderResult:
+      type: object
+      description: Per-result callback for email finder batches.
+      required:
+      - event
+      - timestamp
+      - data
+      properties:
+        event:
+          type: string
+          const: webhook:finder_lookup.completed
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          required:
+          - job_id
+          - result_id
+          - result
+          properties:
+            job_id:
+              type: string
+            result_id:
+              type: string
+              description: The email address that was looked up
+            result:
+              type: object
+              required:
+              - email
+              - result
+              - is_catch_all
+              properties:
+                email:
+                  type: string
+                result:
+                  type: string
+                  enum:
+                  - found
+                  - not_found
+                message:
+                  type: string
+                confidence:
+                  type: string
+                  enum:
+                  - high
+                  - medium
+                  - low
+                is_catch_all:
+                  type: boolean
+                domain:
+                  type: string
+                provider:
+                  type: string
+                  description: Email provider (GOOGLE, MICROSOFT, ZOHO, etc.)
+              x-apidog-orders:
+              - email
+              - result
+              - message
+              - confidence
+              - is_catch_all
+              - domain
+              - provider
+              x-apidog-ignore-properties: []
+          x-apidog-orders:
+          - job_id
+          - result_id
+          - result
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - event
+      - timestamp
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    WebhookEmailValidationResult:
+      type: object
+      description: Per-result callback for email validation batches.
+      required:
+      - event
+      - timestamp
+      - data
+      properties:
+        event:
+          type: string
+          const: webhook:email_lookup.completed
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          required:
+          - job_id
+          - result_id
+          - result
+          properties:
+            job_id:
+              type: string
+            result_id:
+              type: string
+              description: The email address that was validated
+            result:
+              type: object
+              required:
+              - email
+              - result
+              - is_catch_all
+              properties:
+                email:
+                  type: string
+                result:
+                  type: string
+                  enum:
+                  - valid
+                  - invalid
+                  - risky
+                message:
+                  type: string
+                provider:
+                  type: string
+                confidence:
+                  type: string
+                  enum:
+                  - definitive
+                  - high
+                  - medium
+                  - low
+                  - temporary
+                  - none
+                is_catch_all:
+                  type: boolean
+                domain:
+                  type: string
+              x-apidog-orders:
+              - email
+              - result
+              - message
+              - provider
+              - confidence
+              - is_catch_all
+              - domain
+              x-apidog-ignore-properties: []
+          x-apidog-orders:
+          - job_id
+          - result_id
+          - result
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - event
+      - timestamp
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    WebhookReverseLookupCompletion:
+      type: object
+      description: Completion callback for reverse email lookup batches.
+      required:
+      - event
+      - timestamp
+      - data
+      properties:
+        event:
+          type: string
+          const: webhook:email_completion.completed
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          required:
+          - job_id
+          - status
+          - total_items
+          - found
+          - not_found
+          - completed_at
+          properties:
+            job_id:
+              type: string
+            status:
+              type: string
+            total_items:
+              type: integer
+            found:
+              type: integer
+            not_found:
+              type: integer
+            completed_at:
+              type: string
+              format: date-time
+          x-apidog-orders:
+          - job_id
+          - status
+          - total_items
+          - found
+          - not_found
+          - completed_at
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - event
+      - timestamp
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    EducationHistoryItem:
+      type: object
+      description: One entry in a person's education history
+      properties:
+        degreeName:
+          type: string
+          description: Degree or program name
+          examples:
+          - B.S. Computer Science
+        startEndDate:
+          $ref: '#/components/schemas/StartEndDate'
+        schoolName:
+          type: string
+          description: Name of the school
+          examples:
+          - Stanford University
+        schoolLocation:
+          type: string
+          description: Where the school is located
+          examples:
+          - Stanford, CA
+        schoolLogo:
+          type: string
+          format: uri
+          description: URL of the school's logo
+      x-apidog-orders:
+      - degreeName
+      - startEndDate
+      - schoolName
+      - schoolLocation
+      - schoolLogo
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    WebhookCompanyFollowerCompletion:
+      type: object
+      required:
+      - event
+      - batchId
+      - timestamp
+      - data
+      properties:
+        event:
+          type: string
+          description: Event type identifier
+          examples:
+          - webhook:company_follower_completion.completed
+        batchId:
+          type: string
+          description: The batch ID for this scrape job
+        timestamp:
+          type: string
+          format: date-time
+          description: UTC timestamp when the event was produced
+        data:
+          type: object
+          required:
+          - companyUrl
+          - followerCount
+          - processingTimeMs
+          properties:
+            companyUrl:
+              type: string
+              format: uri
+              description: The LinkedIn company URL that was scraped
+            followerCount:
+              type: integer
+              description: Total number of follower profiles scraped
+            processingTimeMs:
+              type: integer
+              description: Total processing time in milliseconds
+          x-apidog-orders:
+          - companyUrl
+          - followerCount
+          - processingTimeMs
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - event
+      - batchId
+      - timestamp
+      - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
   securitySchemes:

@@ -92,51 +92,20 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   schemas:
-    CompanyFollowerRequest:
+    CompanyFollowerResultsResponse:
       type: object
-      required:
-      - companyUrl
-      - max_limit
       properties:
-        companyUrl:
-          type: string
-          description: LinkedIn company URL to scrape.
-        max_limit:
-          type: integer
-          minimum: 1
-          maximum: 50000
-        countries:
-          type: array
-          items:
-            type: string
-        states:
-          type: array
-          items:
-            type: string
-        jobTitles:
-          type: array
-          items:
-            type: string
-        departments:
-          type: array
-          items:
-            type: string
-        levels:
-          type: array
-          items:
-            type: string
-        webhookUrl:
-          type: string
-        skipCache:
+        success:
           type: boolean
-    IpToCompanyRequest:
-      type: object
-      required:
-      - ip
-      properties:
-        ip:
-          type: string
-          description: IPv4 or IPv6 address to resolve.
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+            followers:
+              type: array
+              items:
+                type: object
     IpToCompanyResponse:
       type: object
       properties:
@@ -177,6 +146,64 @@ components:
           type: integer
         cached:
           type: boolean
+    ErrorEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    IpToCompanyRequest:
+      type: object
+      required:
+      - ip
+      properties:
+        ip:
+          type: string
+          description: IPv4 or IPv6 address to resolve.
+    CompanyFollowerRequest:
+      type: object
+      required:
+      - companyUrl
+      - max_limit
+      properties:
+        companyUrl:
+          type: string
+          description: LinkedIn company URL to scrape.
+        max_limit:
+          type: integer
+          minimum: 1
+          maximum: 50000
+        countries:
+          type: array
+          items:
+            type: string
+        states:
+          type: array
+          items:
+            type: string
+        jobTitles:
+          type: array
+          items:
+            type: string
+        departments:
+          type: array
+          items:
+            type: string
+        levels:
+          type: array
+          items:
+            type: string
+        webhookUrl:
+          type: string
+        skipCache:
+          type: boolean
     StartCompanyFollowerResponse:
       type: object
       properties:
@@ -191,42 +218,15 @@ components:
               type: integer
             perItemCost:
               type: integer
-    ErrorEnvelope:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: object
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-    CompanyFollowerResultsResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: object
-          properties:
-            status:
-              type: string
-            followers:
-              type: array
-              items:
-                type: object
   responses:
-    RateLimited:
-      description: Rate limit exceeded. Includes a Retry-After header.
+    NotFound:
+      description: No matching record was found.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    NotFound:
-      description: No matching record was found.
+    RateLimited:
+      description: Rate limit exceeded. Includes a Retry-After header.
       content:
         application/json:
           schema:

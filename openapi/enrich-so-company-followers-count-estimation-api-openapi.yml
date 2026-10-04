@@ -339,39 +339,6 @@ components:
       - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    CountEstimateStatusResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/CountEstimateStatusData'
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-            creditsRefunded:
-              type: number
-              description: Credits refunded (100, if job failed)
-            creditsRemaining:
-              type: number
-              description: Remaining credit balance
-          x-apidog-orders:
-          - requestId
-          - creditsRefunded
-          - creditsRemaining
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     StartCountEstimateData:
       type: object
       required:
@@ -409,52 +376,64 @@ components:
       - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    CountEstimateStatusData:
+    CountEstimateResultData:
       type: object
       required:
-      - batchId
-      - status
-      - companyUrl
-      - createdAt
+      - totalCount
       properties:
-        batchId:
-          type: string
-          description: Batch ID
-        status:
-          type: string
-          enum:
-          - pending
-          - in_progress
-          - completed
-          - failed
-          - cancelled
-          description: Current job status
-        companyUrl:
-          type: string
-          description: LinkedIn company URL
-        message:
-          type: string
-          description: Human-readable status message
-        createdAt:
-          type: string
-          format: date-time
-          description: When the job was created
-        completedAt:
-          type: string
-          format: date-time
-          description: When the job completed
+        totalCount:
+          type: integer
+          description: Total estimated follower count
+        functionBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctionBreakdownItem'
+          description: Breakdown by department/function (if departments filter was applied)
           nullable: true
-        data:
-          $ref: '#/components/schemas/CountEstimateResultData'
-          description: Result data (when completed)
+        seniorityBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeniorityBreakdownItem'
+          description: Breakdown by seniority level (if levels filter was applied)
+          nullable: true
+        filtersApplied:
+          type: object
+          properties:
+            countries:
+              type: array
+              items:
+                type: string
+            states:
+              type: array
+              items:
+                type: string
+              description: State/province filters applied
+            jobTitles:
+              type: array
+              items:
+                type: string
+            departments:
+              type: array
+              items:
+                type: string
+            levels:
+              type: array
+              items:
+                type: string
+          description: Filters applied to the estimation
+          x-apidog-orders:
+          - countries
+          - states
+          - jobTitles
+          - departments
+          - levels
+          x-apidog-ignore-properties: []
+          nullable: true
       x-apidog-orders:
-      - batchId
-      - status
-      - companyUrl
-      - message
-      - createdAt
-      - completedAt
-      - data
+      - totalCount
+      - functionBreakdown
+      - seniorityBreakdown
+      - filtersApplied
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     CountEstimateRequest:
@@ -1643,100 +1622,6 @@ components:
       - levels
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    CountEstimateResultData:
-      type: object
-      required:
-      - totalCount
-      properties:
-        totalCount:
-          type: integer
-          description: Total estimated follower count
-        functionBreakdown:
-          type: array
-          items:
-            $ref: '#/components/schemas/FunctionBreakdownItem'
-          description: Breakdown by department/function (if departments filter was applied)
-          nullable: true
-        seniorityBreakdown:
-          type: array
-          items:
-            $ref: '#/components/schemas/SeniorityBreakdownItem'
-          description: Breakdown by seniority level (if levels filter was applied)
-          nullable: true
-        filtersApplied:
-          type: object
-          properties:
-            countries:
-              type: array
-              items:
-                type: string
-            states:
-              type: array
-              items:
-                type: string
-              description: State/province filters applied
-            jobTitles:
-              type: array
-              items:
-                type: string
-            departments:
-              type: array
-              items:
-                type: string
-            levels:
-              type: array
-              items:
-                type: string
-          description: Filters applied to the estimation
-          x-apidog-orders:
-          - countries
-          - states
-          - jobTitles
-          - departments
-          - levels
-          x-apidog-ignore-properties: []
-          nullable: true
-      x-apidog-orders:
-      - totalCount
-      - functionBreakdown
-      - seniorityBreakdown
-      - filtersApplied
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    FunctionBreakdownItem:
-      type: object
-      required:
-      - functionName
-      - functionId
-      - count
-      - percentage
-      properties:
-        functionName:
-          type: string
-          description: Job function name (e.g., Engineering)
-        functionId:
-          type: string
-          description: Job function ID
-        count:
-          type: integer
-          description: Count of people in this function
-        percentage:
-          type: number
-          description: Percentage of total
-        seniorityBreakdown:
-          type: array
-          items:
-            $ref: '#/components/schemas/SeniorityBreakdownItem'
-          description: Nested seniority breakdown within this department
-          nullable: true
-      x-apidog-orders:
-      - functionName
-      - functionId
-      - count
-      - percentage
-      - seniorityBreakdown
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     ErrorEnvelope:
       type: object
       description: RFC 9457 Problem Details error response.
@@ -1777,6 +1662,121 @@ components:
       - status
       - detail
       - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    CountEstimateStatusData:
+      type: object
+      required:
+      - batchId
+      - status
+      - companyUrl
+      - createdAt
+      properties:
+        batchId:
+          type: string
+          description: Batch ID
+        status:
+          type: string
+          enum:
+          - pending
+          - in_progress
+          - completed
+          - failed
+          - cancelled
+          description: Current job status
+        companyUrl:
+          type: string
+          description: LinkedIn company URL
+        message:
+          type: string
+          description: Human-readable status message
+        createdAt:
+          type: string
+          format: date-time
+          description: When the job was created
+        completedAt:
+          type: string
+          format: date-time
+          description: When the job completed
+          nullable: true
+        data:
+          $ref: '#/components/schemas/CountEstimateResultData'
+          description: Result data (when completed)
+      x-apidog-orders:
+      - batchId
+      - status
+      - companyUrl
+      - message
+      - createdAt
+      - completedAt
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    FunctionBreakdownItem:
+      type: object
+      required:
+      - functionName
+      - functionId
+      - count
+      - percentage
+      properties:
+        functionName:
+          type: string
+          description: Job function name (e.g., Engineering)
+        functionId:
+          type: string
+          description: Job function ID
+        count:
+          type: integer
+          description: Count of people in this function
+        percentage:
+          type: number
+          description: Percentage of total
+        seniorityBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeniorityBreakdownItem'
+          description: Nested seniority breakdown within this department
+          nullable: true
+      x-apidog-orders:
+      - functionName
+      - functionId
+      - count
+      - percentage
+      - seniorityBreakdown
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    CountEstimateStatusResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/CountEstimateStatusData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsRefunded:
+              type: number
+              description: Credits refunded (100, if job failed)
+            creditsRemaining:
+              type: number
+              description: Remaining credit balance
+          x-apidog-orders:
+          - requestId
+          - creditsRefunded
+          - creditsRemaining
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     SeniorityBreakdownItem:

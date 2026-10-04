@@ -66,6 +66,16 @@ paths:
                 $ref: '#/components/schemas/BatchSubmitResponse'
 components:
   schemas:
+    BatchEmailValidationRequest:
+      type: object
+      required:
+      - emails
+      properties:
+        emails:
+          type: array
+          items:
+            type: string
+            format: email
     EmailValidationResponse:
       type: object
       properties:
@@ -88,18 +98,6 @@ components:
               type: string
             catchAll:
               type: boolean
-    BatchSubmitResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: object
-          properties:
-            batchId:
-              type: string
-            status:
-              type: string
     EnrichmentMeta:
       type: object
       description: Metadata returned with every response, including remaining credit balance.
@@ -110,16 +108,6 @@ components:
           type: integer
         cached:
           type: boolean
-    EmailValidationRequest:
-      type: object
-      required:
-      - email
-      properties:
-        email:
-          type: string
-          format: email
-          minLength: 1
-          maxLength: 254
     ErrorEnvelope:
       type: object
       properties:
@@ -133,16 +121,28 @@ components:
               type: string
             message:
               type: string
-    BatchEmailValidationRequest:
+    EmailValidationRequest:
       type: object
       required:
-      - emails
+      - email
       properties:
-        emails:
-          type: array
-          items:
-            type: string
-            format: email
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+    BatchSubmitResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            batchId:
+              type: string
+            status:
+              type: string
   responses:
     RateLimited:
       description: Rate limit exceeded. Includes a Retry-After header.

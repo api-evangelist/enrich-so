@@ -826,136 +826,6 @@ paths:
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27728073-run
 components:
   schemas:
-    CompanyFollowerProgressData:
-      type: object
-      required:
-      - batchId
-      - processed
-      - total
-      - errors
-      - done
-      properties:
-        batchId:
-          type: string
-          description: Batch ID for this scrape job
-        processed:
-          type: integer
-          description: Number of profiles processed so far
-        total:
-          type: integer
-          description: Total profiles to process (-1 if unknown yet)
-        errors:
-          type: integer
-          description: Number of errors encountered
-        done:
-          type: boolean
-          description: Whether scraping is complete
-        partial:
-          type: boolean
-          description: True when the scrape finished but under-collected followers — a filter (or the overall total) delivered fewer results than expected beyond the allowed tolerance. The profiles returned are valid; re-run the scrape (optionally with skipCache) to fill the gap.
-        message:
-          type: string
-          description: Human-readable status message
-      x-apidog-orders:
-      - batchId
-      - processed
-      - total
-      - errors
-      - done
-      - partial
-      - message
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    CompanyFollowerResultsData:
-      type: object
-      required:
-      - batchId
-      - count
-      - data
-      - pagination
-      properties:
-        batchId:
-          type: string
-          description: Batch ID for this scrape job
-        count:
-          type: integer
-          description: Number of follower profiles in this page
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/FollowerProfile'
-          description: Array of follower profiles
-        pagination:
-          type: object
-          required:
-          - page
-          - limit
-          - total
-          - totalPages
-          description: Pagination metadata
-          properties:
-            page:
-              type: integer
-              description: Current page number
-            limit:
-              type: integer
-              description: Results per page
-            total:
-              type: integer
-              description: Total number of follower profiles
-            totalPages:
-              type: integer
-              description: Total number of pages
-          x-apidog-orders:
-          - page
-          - limit
-          - total
-          - totalPages
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - batchId
-      - count
-      - data
-      - pagination
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    StartCompanyFollowerResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/StartCompanyFollowerData'
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-            creditsReserved:
-              type: number
-              description: Credits reserved upfront based on max_limit × creditsPerItem
-            creditsPerItem:
-              type: number
-              description: Credit cost per profile for your team
-            estimatedCredits:
-              type: number
-              description: Estimated total credits
-          x-apidog-orders:
-          - requestId
-          - creditsReserved
-          - creditsPerItem
-          - estimatedCredits
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     FollowerProfile:
       type: object
       required:
@@ -1073,21 +943,94 @@ components:
       - spotlights
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    StartCompanyFollowerData:
+    CompanyFollowerResultsResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/CompanyFollowerResultsData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsUsed:
+              type: number
+              description: Credits consumed (count × creditsPerItem)
+            creditsRefunded:
+              type: number
+              description: Excess credits refunded
+            creditsRemaining:
+              type: number
+              description: Remaining credit balance
+          x-apidog-orders:
+          - requestId
+          - creditsUsed
+          - creditsRefunded
+          - creditsRemaining
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    CompanyFollowerResultsData:
       type: object
       required:
       - batchId
-      - message
+      - count
+      - data
+      - pagination
       properties:
         batchId:
           type: string
-          description: Unique batch ID for tracking this scrape job
-        message:
-          type: string
-          description: Human-readable status message
+          description: Batch ID for this scrape job
+        count:
+          type: integer
+          description: Number of follower profiles in this page
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/FollowerProfile'
+          description: Array of follower profiles
+        pagination:
+          type: object
+          required:
+          - page
+          - limit
+          - total
+          - totalPages
+          description: Pagination metadata
+          properties:
+            page:
+              type: integer
+              description: Current page number
+            limit:
+              type: integer
+              description: Results per page
+            total:
+              type: integer
+              description: Total number of follower profiles
+            totalPages:
+              type: integer
+              description: Total number of pages
+          x-apidog-orders:
+          - page
+          - limit
+          - total
+          - totalPages
+          x-apidog-ignore-properties: []
       x-apidog-orders:
       - batchId
-      - message
+      - count
+      - data
+      - pagination
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     CompanyFollowerProgressResponse:
@@ -1157,7 +1100,64 @@ components:
       - instance
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    CompanyFollowerResultsResponse:
+    CompanyFollowerProgressData:
+      type: object
+      required:
+      - batchId
+      - processed
+      - total
+      - errors
+      - done
+      properties:
+        batchId:
+          type: string
+          description: Batch ID for this scrape job
+        processed:
+          type: integer
+          description: Number of profiles processed so far
+        total:
+          type: integer
+          description: Total profiles to process (-1 if unknown yet)
+        errors:
+          type: integer
+          description: Number of errors encountered
+        done:
+          type: boolean
+          description: Whether scraping is complete
+        partial:
+          type: boolean
+          description: True when the scrape finished but under-collected followers — a filter (or the overall total) delivered fewer results than expected beyond the allowed tolerance. The profiles returned are valid; re-run the scrape (optionally with skipCache) to fill the gap.
+        message:
+          type: string
+          description: Human-readable status message
+      x-apidog-orders:
+      - batchId
+      - processed
+      - total
+      - errors
+      - done
+      - partial
+      - message
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    StartCompanyFollowerData:
+      type: object
+      required:
+      - batchId
+      - message
+      properties:
+        batchId:
+          type: string
+          description: Unique batch ID for tracking this scrape job
+        message:
+          type: string
+          description: Human-readable status message
+      x-apidog-orders:
+      - batchId
+      - message
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    StartCompanyFollowerResponse:
       type: object
       required:
       - success
@@ -1167,26 +1167,26 @@ components:
           type: boolean
           const: true
         data:
-          $ref: '#/components/schemas/CompanyFollowerResultsData'
+          $ref: '#/components/schemas/StartCompanyFollowerData'
         meta:
           type: object
           properties:
             requestId:
               type: string
-            creditsUsed:
+            creditsReserved:
               type: number
-              description: Credits consumed (count × creditsPerItem)
-            creditsRefunded:
+              description: Credits reserved upfront based on max_limit × creditsPerItem
+            creditsPerItem:
               type: number
-              description: Excess credits refunded
-            creditsRemaining:
+              description: Credit cost per profile for your team
+            estimatedCredits:
               type: number
-              description: Remaining credit balance
+              description: Estimated total credits
           x-apidog-orders:
           - requestId
-          - creditsUsed
-          - creditsRefunded
-          - creditsRemaining
+          - creditsReserved
+          - creditsPerItem
+          - estimatedCredits
           x-apidog-ignore-properties: []
       x-apidog-orders:
       - success
