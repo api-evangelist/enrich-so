@@ -41,6 +41,9 @@ accessModel:
   generated: '2026-09-03'
   method: derived
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/enrich-so.png
+x-docs-platform: redoc
+x-docs-platform-confidence: medium
+x-docs-platform-checked: 2026-10-03
 tags:
 - Data Enrichment
 - Contact Discovery
@@ -527,6 +530,9 @@ apis:
   - type: OpenAPI
     url: openapi/enrich-so-webhooks-api-openapi.yml
 common:
+- type: CapabilityMap
+  url: capabilities/enrich-so-capability-edges.yml
+  name: Enrich Business Capability Map
 - type: Overlay
   url: overlays/enrich-so-account-overlay.yaml
 - type: Overlay
