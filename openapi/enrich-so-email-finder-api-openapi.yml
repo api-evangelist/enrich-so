@@ -345,6 +345,19 @@ paths:
       description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
 components:
   schemas:
+    ErrorEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
     EmailFinderResponse:
       type: object
       properties:
@@ -362,6 +375,28 @@ components:
               format: email
             confidence:
               type: number
+    BatchSubmitResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            batchId:
+              type: string
+            status:
+              type: string
+    EnrichmentMeta:
+      type: object
+      description: Metadata returned with every response, including remaining credit balance.
+      properties:
+        creditsCharged:
+          type: integer
+        creditsRemaining:
+          type: integer
+        cached:
+          type: boolean
     EmailFinderRequest:
       type: object
       required:
@@ -376,41 +411,6 @@ components:
         domain:
           type: string
           description: Company domain, e.g. figma.com.
-    EnrichmentMeta:
-      type: object
-      description: Metadata returned with every response, including remaining credit balance.
-      properties:
-        creditsCharged:
-          type: integer
-        creditsRemaining:
-          type: integer
-        cached:
-          type: boolean
-    ErrorEnvelope:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: object
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-    BatchSubmitResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: object
-          properties:
-            batchId:
-              type: string
-            status:
-              type: string
     BatchEmailFinderRequest:
       type: object
       required:
@@ -420,39 +420,172 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EmailFinderRequest'
-    Lead:
+    ErrorEnvelope_2:
       type: object
-      description: A single person to find an email for
+      description: RFC 9457 Problem Details error response.
       required:
-      - firstName
-      - lastName
-      - domain
+      - type
+      - title
+      - status
       properties:
-        firstName:
+        type:
           type: string
-          minLength: 1
-          maxLength: 100
-          description: First name
+          format: uri
+          description: URI reference that identifies the problem type.
           examples:
-          - Emily
-        lastName:
+          - https://dev.enrich.so/errors/validation-error
+        title:
           type: string
-          minLength: 1
-          maxLength: 100
-          description: Last name
+          description: Short, human-readable summary of the problem.
           examples:
-          - Zhang
-        domain:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
           type: string
-          minLength: 1
-          maxLength: 253
-          description: Company domain
+          description: Human-readable explanation specific to this occurrence.
           examples:
-          - figma.com
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
       x-apidog-orders:
-      - firstName
-      - lastName
-      - domain
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchResultsMeta:
+      type: object
+      description: Metadata returned when you fetch batch results (includes credit settlement)
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request
+          examples:
+          - 665a23bc2c3b7800129dce10
+        creditsUsed:
+          type: number
+          minimum: 0
+          description: Actual credits charged after settlement
+          examples:
+          - 80
+        creditsRefunded:
+          type: number
+          minimum: 0
+          description: Credits refunded (difference between reserved and actual cost)
+          examples:
+          - 20
+        creditsRemaining:
+          type: number
+          minimum: 0
+          description: Your remaining credit balance after settlement
+          examples:
+          - 24920
+        totalItems:
+          type: integer
+          minimum: 0
+          description: Total items in the batch
+          examples:
+          - 10
+        processedItems:
+          type: integer
+          minimum: 0
+          description: Items that were processed
+          examples:
+          - 10
+      x-apidog-orders:
+      - requestId
+      - creditsUsed
+      - creditsRefunded
+      - creditsRemaining
+      - totalItems
+      - processedItems
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchSubmitMeta:
+      type: object
+      description: Metadata returned when you submit a batch job
+      properties:
+        requestId:
+          type: string
+          description: Unique ID for this request
+          examples:
+          - 665a1f4e2c3b7800129dce00
+        creditsReserved:
+          type: number
+          minimum: 0
+          description: Total credits reserved for the batch
+          examples:
+          - 100
+        creditsPerItem:
+          type: number
+          minimum: 0
+          description: Cost per item
+          examples:
+          - 10
+        estimatedCredits:
+          type: number
+          minimum: 0
+          description: Estimated total cost (same as creditsReserved)
+          examples:
+          - 100
+      x-apidog-orders:
+      - requestId
+      - creditsReserved
+      - creditsPerItem
+      - estimatedCredits
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchStatusData:
+      type: object
+      description: Progress information for a batch job
+      required:
+      - batchId
+      - status
+      properties:
+        batchId:
+          type: string
+          description: The batch identifier
+          examples:
+          - 665a1f4e2c3b7800129dce01
+        status:
+          type: string
+          description: 'Current status: `queued`, `processing`, `completed`, or `failed`'
+          examples:
+          - processing
+        totalItems:
+          type: integer
+          minimum: 0
+          description: Total items in the batch
+          examples:
+          - 100
+        processedItems:
+          type: integer
+          minimum: 0
+          description: Items processed so far
+          examples:
+          - 50
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Completion percentage (0–100)
+          examples:
+          - 50
+      x-apidog-orders:
+      - batchId
+      - status
+      - totalItems
+      - processedItems
+      - progress
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     EmailFinderResponse_2:
@@ -474,7 +607,51 @@ components:
       - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    EmailFinderBatchResultsResponse:
+    BatchSubmitData:
+      type: object
+      description: Returned when you submit any batch job
+      required:
+      - batchId
+      - status
+      - itemCount
+      properties:
+        batchId:
+          type: string
+          description: The unique identifier for this batch — use it to poll status and fetch results
+          examples:
+          - 665a1f4e2c3b7800129dce01
+        status:
+          type: string
+          description: The initial status (usually `queued`)
+          examples:
+          - queued
+        itemCount:
+          type: integer
+          minimum: 0
+          description: Number of unique items in the batch (after deduplication)
+          examples:
+          - 100
+        originalCount:
+          type: integer
+          minimum: 0
+          description: How many items you submitted before deduplication
+          examples:
+          - 110
+        duplicatesRemoved:
+          type: integer
+          minimum: 0
+          description: How many duplicate items were removed
+          examples:
+          - 10
+      x-apidog-orders:
+      - batchId
+      - status
+      - itemCount
+      - originalCount
+      - duplicatesRemoved
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchStatusResponse:
       type: object
       required:
       - success
@@ -484,47 +661,35 @@ components:
           type: boolean
           const: true
         data:
-          type: object
-          required:
-          - batchId
-          - status
-          properties:
-            batchId:
-              type: string
-              description: The batch identifier
-              examples:
-              - 665b12cf3e4c9200138eaf10
-            status:
-              type: string
-              description: Final batch status
-              examples:
-              - completed
-            totalItems:
-              type: integer
-              minimum: 0
-              description: Total leads in the batch
-              examples:
-              - 3
-            processedCount:
-              type: integer
-              minimum: 0
-              description: Leads that were processed
-              examples:
-              - 3
-            results:
-              type: array
-              items:
-                $ref: '#/components/schemas/EmailFinderResult'
-              description: The finder results
-          x-apidog-orders:
-          - batchId
-          - status
-          - totalItems
-          - processedCount
-          - results
-          x-apidog-ignore-properties: []
+          $ref: '#/components/schemas/BatchStatusData'
         meta:
-          $ref: '#/components/schemas/BatchResultsMeta'
+          type: object
+          properties:
+            requestId:
+              type: string
+              description: Request tracking ID
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    BatchSubmitResponse_2:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/BatchSubmitData'
+        meta:
+          $ref: '#/components/schemas/BatchSubmitMeta'
       x-apidog-orders:
       - success
       - data
@@ -602,41 +767,40 @@ components:
       - message
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    BatchSubmitMeta:
+    EnrichmentMeta_2:
       type: object
-      description: Metadata returned when you submit a batch job
+      description: Metadata included with every enrichment response
       properties:
         requestId:
           type: string
-          description: Unique ID for this request
+          description: Unique ID for this request — useful for support tickets
           examples:
-          - 665a1f4e2c3b7800129dce00
-        creditsReserved:
+          - 664f2b3c9a1e4d0012abcdef
+        creditsUsed:
           type: number
           minimum: 0
-          description: Total credits reserved for the batch
-          examples:
-          - 100
-        creditsPerItem:
-          type: number
-          minimum: 0
-          description: Cost per item
+          description: How many credits this request consumed
           examples:
           - 10
-        estimatedCredits:
+        creditsRemaining:
           type: number
           minimum: 0
-          description: Estimated total cost (same as creditsReserved)
+          description: Your remaining credit balance after this request
           examples:
-          - 100
+          - 24990
+        processingTimeMs:
+          type: number
+          description: How long the lookup took, in milliseconds
+          examples:
+          - 420
       x-apidog-orders:
       - requestId
-      - creditsReserved
-      - creditsPerItem
-      - estimatedCredits
+      - creditsUsed
+      - creditsRemaining
+      - processingTimeMs
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    BatchStatusResponse:
+    EmailFinderBatchResultsResponse:
       type: object
       required:
       - success
@@ -646,20 +810,86 @@ components:
           type: boolean
           const: true
         data:
-          $ref: '#/components/schemas/BatchStatusData'
-        meta:
           type: object
+          required:
+          - batchId
+          - status
           properties:
-            requestId:
+            batchId:
               type: string
-              description: Request tracking ID
+              description: The batch identifier
+              examples:
+              - 665b12cf3e4c9200138eaf10
+            status:
+              type: string
+              description: Final batch status
+              examples:
+              - completed
+            totalItems:
+              type: integer
+              minimum: 0
+              description: Total leads in the batch
+              examples:
+              - 3
+            processedCount:
+              type: integer
+              minimum: 0
+              description: Leads that were processed
+              examples:
+              - 3
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/EmailFinderResult'
+              description: The finder results
           x-apidog-orders:
-          - requestId
+          - batchId
+          - status
+          - totalItems
+          - processedCount
+          - results
           x-apidog-ignore-properties: []
+        meta:
+          $ref: '#/components/schemas/BatchResultsMeta'
       x-apidog-orders:
       - success
       - data
       - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    Lead:
+      type: object
+      description: A single person to find an email for
+      required:
+      - firstName
+      - lastName
+      - domain
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: First name
+          examples:
+          - Emily
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Last name
+          examples:
+          - Zhang
+        domain:
+          type: string
+          minLength: 1
+          maxLength: 253
+          description: Company domain
+          examples:
+          - figma.com
+      x-apidog-orders:
+      - firstName
+      - lastName
+      - domain
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     EmailFinderRequest_2:
@@ -696,192 +926,6 @@ components:
       - domain
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    EnrichmentMeta_2:
-      type: object
-      description: Metadata included with every enrichment response
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request — useful for support tickets
-          examples:
-          - 664f2b3c9a1e4d0012abcdef
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: How many credits this request consumed
-          examples:
-          - 10
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after this request
-          examples:
-          - 24990
-        processingTimeMs:
-          type: number
-          description: How long the lookup took, in milliseconds
-          examples:
-          - 420
-      x-apidog-orders:
-      - requestId
-      - creditsUsed
-      - creditsRemaining
-      - processingTimeMs
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchStatusData:
-      type: object
-      description: Progress information for a batch job
-      required:
-      - batchId
-      - status
-      properties:
-        batchId:
-          type: string
-          description: The batch identifier
-          examples:
-          - 665a1f4e2c3b7800129dce01
-        status:
-          type: string
-          description: 'Current status: `queued`, `processing`, `completed`, or `failed`'
-          examples:
-          - processing
-        totalItems:
-          type: integer
-          minimum: 0
-          description: Total items in the batch
-          examples:
-          - 100
-        processedItems:
-          type: integer
-          minimum: 0
-          description: Items processed so far
-          examples:
-          - 50
-        progress:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Completion percentage (0–100)
-          examples:
-          - 50
-      x-apidog-orders:
-      - batchId
-      - status
-      - totalItems
-      - processedItems
-      - progress
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchResultsMeta:
-      type: object
-      description: Metadata returned when you fetch batch results (includes credit settlement)
-      properties:
-        requestId:
-          type: string
-          description: Unique ID for this request
-          examples:
-          - 665a23bc2c3b7800129dce10
-        creditsUsed:
-          type: number
-          minimum: 0
-          description: Actual credits charged after settlement
-          examples:
-          - 80
-        creditsRefunded:
-          type: number
-          minimum: 0
-          description: Credits refunded (difference between reserved and actual cost)
-          examples:
-          - 20
-        creditsRemaining:
-          type: number
-          minimum: 0
-          description: Your remaining credit balance after settlement
-          examples:
-          - 24920
-        totalItems:
-          type: integer
-          minimum: 0
-          description: Total items in the batch
-          examples:
-          - 10
-        processedItems:
-          type: integer
-          minimum: 0
-          description: Items that were processed
-          examples:
-          - 10
-      x-apidog-orders:
-      - requestId
-      - creditsUsed
-      - creditsRefunded
-      - creditsRemaining
-      - totalItems
-      - processedItems
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    ErrorEnvelope_2:
-      type: object
-      description: RFC 9457 Problem Details error response.
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          type: string
-          format: uri
-          description: URI reference that identifies the problem type.
-          examples:
-          - https://dev.enrich.so/errors/validation-error
-        title:
-          type: string
-          description: Short, human-readable summary of the problem.
-          examples:
-          - Validation Error
-        status:
-          type: integer
-          description: HTTP status code.
-          examples:
-          - 400
-        detail:
-          type: string
-          description: Human-readable explanation specific to this occurrence.
-          examples:
-          - body/email Invalid email
-        instance:
-          type: string
-          description: URI reference that identifies the specific occurrence.
-          examples:
-          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-      x-apidog-orders:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    BatchSubmitResponse_2:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/BatchSubmitData'
-        meta:
-          $ref: '#/components/schemas/BatchSubmitMeta'
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     BatchEmailFinderRequest_2:
       type: object
       required:
@@ -909,59 +953,15 @@ components:
       - webhookUrl
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    BatchSubmitData:
-      type: object
-      description: Returned when you submit any batch job
-      required:
-      - batchId
-      - status
-      - itemCount
-      properties:
-        batchId:
-          type: string
-          description: The unique identifier for this batch — use it to poll status and fetch results
-          examples:
-          - 665a1f4e2c3b7800129dce01
-        status:
-          type: string
-          description: The initial status (usually `queued`)
-          examples:
-          - queued
-        itemCount:
-          type: integer
-          minimum: 0
-          description: Number of unique items in the batch (after deduplication)
-          examples:
-          - 100
-        originalCount:
-          type: integer
-          minimum: 0
-          description: How many items you submitted before deduplication
-          examples:
-          - 110
-        duplicatesRemoved:
-          type: integer
-          minimum: 0
-          description: How many duplicate items were removed
-          examples:
-          - 10
-      x-apidog-orders:
-      - batchId
-      - status
-      - itemCount
-      - originalCount
-      - duplicatesRemoved
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
   responses:
-    RateLimited:
-      description: Rate limit exceeded. Includes a Retry-After header.
+    InsufficientCredits:
+      description: Not enough credits to complete the request.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    InsufficientCredits:
-      description: Not enough credits to complete the request.
+    RateLimited:
+      description: Rate limit exceeded. Includes a Retry-After header.
       content:
         application/json:
           schema:

@@ -53,6 +53,19 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 components:
   schemas:
+    ErrorEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
     WalletTransactionsResponse:
       type: object
       properties:
@@ -82,19 +95,6 @@ components:
           properties:
             balance:
               type: integer
-    ErrorEnvelope:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: object
-          properties:
-            code:
-              type: string
-            message:
-              type: string
   responses:
     Unauthorized:
       description: Missing, invalid, or disabled API key.

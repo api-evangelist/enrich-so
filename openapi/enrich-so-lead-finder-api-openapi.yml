@@ -2125,24 +2125,26 @@ paths:
       description: Enrich API v3 (base URL published at https://doc.enrich.so/api-reference-1951025m0)
 components:
   schemas:
-    LeadSearchResponse:
+    ErrorEnvelope:
       type: object
       properties:
         success:
           type: boolean
-        pagination:
+          example: false
+        error:
           type: object
           properties:
-            page:
-              type: integer
-            pageSize:
-              type: integer
-            total:
-              type: integer
-        data:
-          type: array
-          items:
-            type: object
+            code:
+              type: string
+            message:
+              type: string
+    LeadCountResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        count:
+          type: integer
     LeadRevealRequest:
       type: object
       required:
@@ -2163,43 +2165,6 @@ components:
             enum:
             - email
             - phone
-    LeadCountResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        count:
-          type: integer
-    LeadCountRequest:
-      type: object
-      required:
-      - filters
-      properties:
-        filters:
-          type: object
-    ErrorEnvelope:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: object
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-    LeadRevealResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: object
-          properties:
-            jobId:
-              type: string
     LeadSearchRequest:
       type: object
       required:
@@ -2218,38 +2183,75 @@ components:
           default: 25
         excludeFilters:
           type: object
-    SavedSearchItem:
+    LeadCountRequest:
       type: object
       required:
-      - id
-      - name
       - filters
-      - createdAt
-      - updatedAt
       properties:
-        id:
-          type: string
-          description: Saved search ID
-        name:
-          type: string
-          description: Search name
         filters:
-          $ref: '#/components/schemas/LeadFinderSearchFilters'
-          description: Saved search filters
-        createdAt:
-          type: string
-          format: date-time
-          description: Creation timestamp
-        updatedAt:
-          type: string
-          format: date-time
-          description: Last update timestamp
+          type: object
+    LeadRevealResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            jobId:
+              type: string
+    LeadSearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            pageSize:
+              type: integer
+            total:
+              type: integer
+        data:
+          type: array
+          items:
+            type: object
+    LeadEnrichRequest:
+      type: object
+      required:
+      - leads
+      - fields
+      properties:
+        leads:
+          type: array
+          minItems: 1
+          maxItems: 25
+          items:
+            type: object
+            required:
+            - id
+            properties:
+              id:
+                type: string
+                description: Lead ID from search results
+            x-apidog-orders:
+            - id
+            x-apidog-ignore-properties: []
+          description: Leads to enrich (max 25)
+        fields:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum:
+            - email
+            - phone
+          description: Which contact fields to reveal
       x-apidog-orders:
-      - id
-      - name
-      - filters
-      - createdAt
-      - updatedAt
+      - leads
+      - fields
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     LeadFinderDeletedResponse:
@@ -2271,6 +2273,366 @@ components:
               const: true
           x-apidog-orders:
           - deleted
+          x-apidog-ignore-properties: []
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    RevealedContact:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Encrypted lead identifier
+        firstName:
+          type: string
+          description: First name
+          nullable: true
+        lastName:
+          type: string
+          description: Last name
+          nullable: true
+        jobTitle:
+          type: string
+          description: Job title
+          nullable: true
+        companyName:
+          type: string
+          description: Company name
+          nullable: true
+        emailAddress:
+          type: string
+          description: Email address (revealed). Only present when email field was requested.
+          nullable: true
+        phone:
+          type: string
+          description: Phone number (revealed). Only present when phone field was requested.
+          nullable: true
+        cellphone:
+          type: string
+          description: Cellphone number (revealed). Only present when phone field was requested.
+          nullable: true
+        linkedinUrl:
+          type: string
+          description: LinkedIn profile URL
+          nullable: true
+        domain:
+          type: string
+          description: Company domain
+          nullable: true
+      x-apidog-orders:
+      - id
+      - firstName
+      - lastName
+      - jobTitle
+      - companyName
+      - emailAddress
+      - phone
+      - cellphone
+      - linkedinUrl
+      - domain
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    UnlockNamesResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - results
+          properties:
+            results:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Lead ID
+                  lastName:
+                    type: string
+                    description: Full last name
+                x-apidog-orders:
+                - id
+                - lastName
+                x-apidog-ignore-properties: []
+          x-apidog-orders:
+          - results
+          x-apidog-ignore-properties: []
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsUsed:
+              type: number
+          x-apidog-orders:
+          - requestId
+          - creditsUsed
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadExportJobListResponse:
+      type: object
+      description: Paginated list of export jobs for the team
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - jobs
+          - total
+          - page
+          - limit
+          properties:
+            jobs:
+              type: array
+              items:
+                $ref: '#/components/schemas/LeadExportJobSummary'
+              description: List of export job summaries
+            total:
+              type: number
+              description: Total number of jobs matching the query
+            page:
+              type: number
+              description: Current page number
+            limit:
+              type: number
+              description: Results per page
+          x-apidog-orders:
+          - jobs
+          - total
+          - page
+          - limit
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadExportJobStatusResponse:
+      type: object
+      description: Export job status response. Single flat object — all fields always present.
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - jobId
+          - name
+          - status
+          - phase
+          - progress
+          - totalRows
+          - processedRows
+          - creditsUsed
+          - creditsRefunded
+          - error
+          - downloadUrl
+          - createdAt
+          - completedAt
+          properties:
+            jobId:
+              type: string
+              description: Export job ID
+              examples:
+              - ej_a1b2c3d4e5f6a7b8
+            name:
+              type: string
+              description: Display name for the export job
+            status:
+              type: string
+              enum:
+              - pending
+              - processing
+              - completed
+              - failed
+              description: Current job status
+            phase:
+              type: string
+              enum:
+              - queued
+              - fetching
+              - enriching
+              - generating
+              - uploading
+              description: Current processing phase
+            progress:
+              type: number
+              description: Progress percentage 0-100
+            totalRows:
+              type: number
+              description: Total rows (actual if available, otherwise estimated)
+            processedRows:
+              type: number
+              description: Rows processed so far
+            creditsUsed:
+              type: number
+              description: Credits consumed
+            creditsRefunded:
+              type: number
+              description: Credits refunded
+            error:
+              type: string
+              description: Error message (null unless failed)
+              nullable: true
+            downloadUrl:
+              type: string
+              description: Pre-signed download URL (only for completed jobs)
+              nullable: true
+            createdAt:
+              type: string
+              format: date-time
+              description: Job creation timestamp (ISO 8601)
+            completedAt:
+              type: string
+              format: date-time
+              description: Job completion timestamp (ISO 8601), null if not yet complete
+              nullable: true
+          x-apidog-orders:
+          - jobId
+          - name
+          - status
+          - phase
+          - progress
+          - totalRows
+          - processedRows
+          - creditsUsed
+          - creditsRefunded
+          - error
+          - downloadUrl
+          - createdAt
+          - completedAt
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    RevealJobListResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - jobs
+          - total
+          - page
+          - limit
+          properties:
+            jobs:
+              type: array
+              items:
+                $ref: '#/components/schemas/RevealJobSummary'
+            total:
+              type: integer
+              description: Total jobs matching the filter
+            page:
+              type: integer
+            limit:
+              type: integer
+          x-apidog-orders:
+          - jobs
+          - total
+          - page
+          - limit
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    RevealJobSubmitResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+          - jobId
+          - status
+          - totalLeads
+          - fields
+          - creditsReserved
+          - message
+          properties:
+            jobId:
+              type: string
+              description: Reveal/enrich job ID (starts with `rj_`)
+              examples:
+              - rj_a1b2c3d4e5f6g7h8
+            status:
+              type: string
+              enum:
+              - pending
+              description: Always `pending` on submit
+            totalLeads:
+              type: integer
+              description: Number of leads submitted
+            fields:
+              type: array
+              items:
+                type: string
+                enum:
+                - email
+                - phone
+              description: Which fields were requested
+            creditsReserved:
+              type: number
+              description: Credits reserved upfront for this reveal/enrich job
+            message:
+              type: string
+              description: Human-readable message with polling URL
+          x-apidog-orders:
+          - jobId
+          - status
+          - totalLeads
+          - fields
+          - creditsReserved
+          - message
           x-apidog-ignore-properties: []
         meta:
           type: object
@@ -2364,154 +2726,132 @@ components:
       - pageSize
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    LeadExportRequest:
+    LeadExportJobSummary:
       type: object
+      description: Summary of an export job as returned in the list endpoint
       required:
-      - filters
+      - jobId
+      - name
+      - status
+      - phase
+      - totalRows
+      - processedRows
+      - progress
+      - creditsUsed
+      - creditsRefunded
+      - createdAt
+      - completedAt
+      - error
       properties:
-        filters:
-          $ref: '#/components/schemas/LeadFinderSearchFilters'
-        excludeFilters:
-          type: object
-          additionalProperties: false
-          description: Filters to exclude from export. Only personHeadline, companyHeadline, aboutUs, domain, and jobTitle are supported.
-          properties:
-            personHeadline:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Person LinkedIn headline to exclude (keyword/contains match)
-            companyHeadline:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Company headline to exclude (keyword/contains match)
-            aboutUs:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Company overview/about us to exclude (keyword/contains match)
-            domain:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 5000
-              description: Company domain to exclude (exact match)
-            jobTitle:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 25
-              description: Job title to exclude (keyword/contains match)
-          x-apidog-orders:
-          - personHeadline
-          - companyHeadline
-          - aboutUs
-          - domain
-          - jobTitle
-          x-apidog-ignore-properties: []
+        jobId:
+          type: string
+          description: Export job ID
+          examples:
+          - ej_a1b2c3d4e5f6a7b8
         name:
           type: string
-          maxLength: 200
-          description: Display name for the export (shown in export history). Auto-generated if omitted.
-        maxResults:
-          type: integer
-          minimum: 1
-          maximum: 100000
-          default: 1000
-          description: Maximum rows to export
-        includeContactInfo:
-          type: boolean
-          default: false
-          description: 'Shorthand: include both email and phone (costs credits per lead)'
-        includeEmail:
-          type: boolean
-          default: false
-          description: Include email addresses (10 credits per lead)
-        includePhone:
-          type: boolean
-          default: false
-          description: Include phone numbers (525 credits per lead)
-        includeNames:
-          type: boolean
-          default: false
-          description: Include full last names (1 credit per lead)
-        leadIds:
-          type: array
-          items:
-            type: string
-          maxItems: 100000
-          description: Export specific leads by encrypted ID (selected rows mode)
-        page:
-          type: integer
-          minimum: 1
-          description: Export a specific page of results (current page mode)
-        pageSize:
-          type: integer
-          minimum: 1
-          maximum: 100
-          description: Page size when exporting a specific page
+          description: Display name for the export job
+        status:
+          type: string
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          description: Current job status
+        phase:
+          type: string
+          enum:
+          - queued
+          - fetching
+          - enriching
+          - generating
+          - uploading
+          description: Current processing phase
+        totalRows:
+          type: number
+          description: Total rows (actual if available, otherwise estimated)
+        processedRows:
+          type: number
+          description: Rows processed so far
+        progress:
+          type: number
+          description: Progress percentage 0-100
+        creditsUsed:
+          type: number
+          description: Credits consumed
+        creditsRefunded:
+          type: number
+          description: Credits refunded
+        createdAt:
+          type: string
+          format: date-time
+          description: Job creation timestamp (ISO 8601)
+        completedAt:
+          type: string
+          format: date-time
+          description: Job completion timestamp (ISO 8601), null if not yet complete
+          nullable: true
+        error:
+          type: string
+          description: Error message (only for failed jobs)
+          nullable: true
       x-apidog-orders:
-      - filters
-      - excludeFilters
+      - jobId
       - name
-      - maxResults
-      - includeContactInfo
-      - includeEmail
-      - includePhone
-      - includeNames
-      - leadIds
-      - page
-      - pageSize
+      - status
+      - phase
+      - totalRows
+      - processedRows
+      - progress
+      - creditsUsed
+      - creditsRefunded
+      - createdAt
+      - completedAt
+      - error
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    LeadFinderFilterOptionsResponse:
+    LeadFinderPagination:
       type: object
       required:
-      - success
-      - data
+      - page
+      - pageSize
+      - totalResults
+      - totalPages
+      - hasMore
       properties:
-        success:
+        page:
+          type: integer
+          description: Current page number
+        pageSize:
+          type: integer
+          description: Results per page
+        totalResults:
+          type: integer
+          description: 'Maximum number of results you can paginate through. For <=10k: exact deduped count. For >10k: approximate count with 25% dedup discount. Capped at 500,000 to prevent excessive pagination. Equals searchedTotalResult when under 500k.'
+        totalPages:
+          type: integer
+          description: Total navigable pages based on totalResults (capped at 500,000)
+        hasMore:
           type: boolean
-          const: true
-        data:
-          type: object
-          description: Object keyed by filter field name, each containing an array of available values
-          additionalProperties:
-            type: array
-            items:
-              type: string
-          properties: {}
-          x-apidog-orders: []
-          x-apidog-ignore-properties: []
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-          x-apidog-orders:
-          - requestId
-          x-apidog-ignore-properties: []
+          description: Whether more pages exist beyond the current page
+        isApproximate:
+          type: boolean
+          description: True when results exceed 10,000 — count is estimated with a 25% dedup discount instead of running an exact dedup query
+        searchedTotalResult:
+          type: integer
+          description: Total leads matching your search. Same as totalResults when under 500k. When totalResults hits the 500k pagination cap, this field shows the raw total count without any discount or cap applied.
       x-apidog-orders:
-      - success
-      - data
-      - meta
+      - page
+      - pageSize
+      - totalResults
+      - totalPages
+      - hasMore
+      - isApproximate
+      - searchedTotalResult
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    RevealJobListResponse:
+    LeadSearchResponse_2:
       type: object
       required:
       - success
@@ -2523,117 +2863,27 @@ components:
         data:
           type: object
           required:
-          - jobs
-          - total
-          - page
-          - limit
+          - results
+          - pagination
           properties:
-            jobs:
+            results:
               type: array
               items:
-                $ref: '#/components/schemas/RevealJobSummary'
-            total:
-              type: integer
-              description: Total jobs matching the filter
-            page:
-              type: integer
-            limit:
-              type: integer
+                $ref: '#/components/schemas/LeadSearchPreviewResult'
+              description: Array of search results
+            pagination:
+              $ref: '#/components/schemas/LeadFinderPagination'
+              description: Pagination metadata
           x-apidog-orders:
-          - jobs
-          - total
-          - page
-          - limit
+          - results
+          - pagination
           x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    RevealJobSummary:
-      type: object
-      required:
-      - jobId
-      - status
-      - jobType
-      - fields
-      - total
-      - processed
-      - creditsUsed
-      - creditsRefunded
-      - createdAt
-      properties:
-        jobId:
-          type: string
-        status:
-          type: string
-          enum:
-          - pending
-          - processing
-          - completed
-          - failed
-        jobType:
-          type: string
-          enum:
-          - reveal
-          - enrich
-        fields:
-          type: array
-          items:
-            type: string
-            enum:
-            - email
-            - phone
-        total:
-          type: integer
-          description: Total leads in the job
-        processed:
-          type: integer
-          description: Leads processed
-        creditsUsed:
-          type: number
-          description: Credits consumed
-        creditsRefunded:
-          type: number
-          description: Credits refunded
-        createdAt:
-          type: string
-          format: date-time
-        completedAt:
-          type: string
-          format: date-time
-          nullable: true
-      x-apidog-orders:
-      - jobId
-      - status
-      - jobType
-      - fields
-      - total
-      - processed
-      - creditsUsed
-      - creditsRefunded
-      - createdAt
-      - completedAt
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    SavedSearchListResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/SavedSearchItem'
         meta:
           type: object
           properties:
             requestId:
               type: string
+              description: Request tracking ID
           x-apidog-orders:
           - requestId
           x-apidog-ignore-properties: []
@@ -2641,24 +2891,6 @@ components:
       - success
       - data
       - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    SavedSearchCreateRequest:
-      type: object
-      required:
-      - name
-      - filters
-      properties:
-        name:
-          type: string
-          minLength: 1
-          maxLength: 100
-          description: Search name
-        filters:
-          $ref: '#/components/schemas/LeadFinderSearchFilters'
-      x-apidog-orders:
-      - name
-      - filters
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     ErrorEnvelope_2:
@@ -2703,7 +2935,7 @@ components:
       - instance
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    UnlockNamesResponse:
+    LeadCountResponse_2:
       type: object
       required:
       - success
@@ -2715,64 +2947,31 @@ components:
         data:
           type: object
           required:
-          - results
+          - count
+          - searchType
+          - isApproximate
           properties:
-            results:
-              type: array
-              items:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    description: Lead ID
-                  lastName:
-                    type: string
-                    description: Full last name
-                x-apidog-orders:
-                - id
-                - lastName
-                x-apidog-ignore-properties: []
-          x-apidog-orders:
-          - results
-          x-apidog-ignore-properties: []
-        meta:
-          type: object
-          properties:
-            requestId:
+            count:
+              type: integer
+              description: 'Maximum pageable results. For <=10k: exact deduped count. For >10k: approximate count with 25% dedup discount. Capped at 500,000 to prevent excessive pagination. Equals searchedTotalResult when under 500k.'
+            searchType:
               type: string
-            creditsUsed:
-              type: number
+              enum:
+              - people
+              - company
+              - unified
+              description: Type of search performed
+            isApproximate:
+              type: boolean
+              description: True when results exceed 10,000 — count is estimated with a 25% dedup discount instead of running an exact dedup query
+            searchedTotalResult:
+              type: integer
+              description: Total leads matching your search. Same as count when under 500k. When count hits the 500k pagination cap, this field shows the raw total count without any discount or cap applied.
           x-apidog-orders:
-          - requestId
-          - creditsUsed
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    LeadFinderSuggestResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - values
-          properties:
-            values:
-              type: array
-              items:
-                type: string
-              description: Matching company names
-          x-apidog-orders:
-          - values
+          - count
+          - searchType
+          - isApproximate
+          - searchedTotalResult
           x-apidog-ignore-properties: []
         meta:
           type: object
@@ -2823,133 +3022,37 @@ components:
       - fields
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    UnlockNamesRequest:
+    LeadFinderFilterOptionsResponse:
       type: object
       required:
-      - leads
+      - success
+      - data
       properties:
-        leads:
-          type: array
-          minItems: 1
-          maxItems: 100
-          items:
-            type: object
-            required:
-            - id
-            properties:
-              id:
-                type: string
-                description: Encrypted lead ID
-            x-apidog-orders:
-            - id
-            x-apidog-ignore-properties: []
-          description: Leads whose last names to unlock (max 100)
-      x-apidog-orders:
-      - leads
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    LeadFinderPagination:
-      type: object
-      required:
-      - page
-      - pageSize
-      - totalResults
-      - totalPages
-      - hasMore
-      properties:
-        page:
-          type: integer
-          description: Current page number
-        pageSize:
-          type: integer
-          description: Results per page
-        totalResults:
-          type: integer
-          description: 'Maximum number of results you can paginate through. For <=10k: exact deduped count. For >10k: approximate count with 25% dedup discount. Capped at 500,000 to prevent excessive pagination. Equals searchedTotalResult when under 500k.'
-        totalPages:
-          type: integer
-          description: Total navigable pages based on totalResults (capped at 500,000)
-        hasMore:
+        success:
           type: boolean
-          description: Whether more pages exist beyond the current page
-        isApproximate:
-          type: boolean
-          description: True when results exceed 10,000 — count is estimated with a 25% dedup discount instead of running an exact dedup query
-        searchedTotalResult:
-          type: integer
-          description: Total leads matching your search. Same as totalResults when under 500k. When totalResults hits the 500k pagination cap, this field shows the raw total count without any discount or cap applied.
-      x-apidog-orders:
-      - page
-      - pageSize
-      - totalResults
-      - totalPages
-      - hasMore
-      - isApproximate
-      - searchedTotalResult
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    LeadCountRequest_2:
-      type: object
-      required:
-      - filters
-      properties:
-        filters:
-          $ref: '#/components/schemas/LeadFinderSearchFilters'
-        excludeFilters:
+          const: true
+        data:
           type: object
-          additionalProperties: false
-          description: Filters to exclude from count. Only personHeadline, companyHeadline, aboutUs, domain, and jobTitle are supported.
+          description: Object keyed by filter field name, each containing an array of available values
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          properties: {}
+          x-apidog-orders: []
+          x-apidog-ignore-properties: []
+        meta:
+          type: object
           properties:
-            personHeadline:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Person LinkedIn headline to exclude (keyword/contains match)
-            companyHeadline:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Company headline to exclude (keyword/contains match)
-            aboutUs:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 10
-              description: Company overview/about us to exclude (keyword/contains match)
-            domain:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 5000
-              description: Company domain to exclude (exact match)
-            jobTitle:
-              oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-                maxItems: 25
-              description: Job title to exclude (keyword/contains match)
+            requestId:
+              type: string
           x-apidog-orders:
-          - personHeadline
-          - companyHeadline
-          - aboutUs
-          - domain
-          - jobTitle
+          - requestId
           x-apidog-ignore-properties: []
       x-apidog-orders:
-      - filters
-      - excludeFilters
+      - success
+      - data
+      - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     LeadFinderSearchFilters:
@@ -3783,280 +3886,6 @@ components:
       - totalFundingAmountOrg
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    LeadEnrichRequest:
-      type: object
-      required:
-      - leads
-      - fields
-      properties:
-        leads:
-          type: array
-          minItems: 1
-          maxItems: 25
-          items:
-            type: object
-            required:
-            - id
-            properties:
-              id:
-                type: string
-                description: Lead ID from search results
-            x-apidog-orders:
-            - id
-            x-apidog-ignore-properties: []
-          description: Leads to enrich (max 25)
-        fields:
-          type: array
-          minItems: 1
-          items:
-            type: string
-            enum:
-            - email
-            - phone
-          description: Which contact fields to reveal
-      x-apidog-orders:
-      - leads
-      - fields
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    LeadExportJobSummary:
-      type: object
-      description: Summary of an export job as returned in the list endpoint
-      required:
-      - jobId
-      - name
-      - status
-      - phase
-      - totalRows
-      - processedRows
-      - progress
-      - creditsUsed
-      - creditsRefunded
-      - createdAt
-      - completedAt
-      - error
-      properties:
-        jobId:
-          type: string
-          description: Export job ID
-          examples:
-          - ej_a1b2c3d4e5f6a7b8
-        name:
-          type: string
-          description: Display name for the export job
-        status:
-          type: string
-          enum:
-          - pending
-          - processing
-          - completed
-          - failed
-          description: Current job status
-        phase:
-          type: string
-          enum:
-          - queued
-          - fetching
-          - enriching
-          - generating
-          - uploading
-          description: Current processing phase
-        totalRows:
-          type: number
-          description: Total rows (actual if available, otherwise estimated)
-        processedRows:
-          type: number
-          description: Rows processed so far
-        progress:
-          type: number
-          description: Progress percentage 0-100
-        creditsUsed:
-          type: number
-          description: Credits consumed
-        creditsRefunded:
-          type: number
-          description: Credits refunded
-        createdAt:
-          type: string
-          format: date-time
-          description: Job creation timestamp (ISO 8601)
-        completedAt:
-          type: string
-          format: date-time
-          description: Job completion timestamp (ISO 8601), null if not yet complete
-          nullable: true
-        error:
-          type: string
-          description: Error message (only for failed jobs)
-          nullable: true
-      x-apidog-orders:
-      - jobId
-      - name
-      - status
-      - phase
-      - totalRows
-      - processedRows
-      - progress
-      - creditsUsed
-      - creditsRefunded
-      - createdAt
-      - completedAt
-      - error
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    RevealJobSubmitResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - jobId
-          - status
-          - totalLeads
-          - fields
-          - creditsReserved
-          - message
-          properties:
-            jobId:
-              type: string
-              description: Reveal/enrich job ID (starts with `rj_`)
-              examples:
-              - rj_a1b2c3d4e5f6g7h8
-            status:
-              type: string
-              enum:
-              - pending
-              description: Always `pending` on submit
-            totalLeads:
-              type: integer
-              description: Number of leads submitted
-            fields:
-              type: array
-              items:
-                type: string
-                enum:
-                - email
-                - phone
-              description: Which fields were requested
-            creditsReserved:
-              type: number
-              description: Credits reserved upfront for this reveal/enrich job
-            message:
-              type: string
-              description: Human-readable message with polling URL
-          x-apidog-orders:
-          - jobId
-          - status
-          - totalLeads
-          - fields
-          - creditsReserved
-          - message
-          x-apidog-ignore-properties: []
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-          x-apidog-orders:
-          - requestId
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    LeadSearchResponse_2:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - results
-          - pagination
-          properties:
-            results:
-              type: array
-              items:
-                $ref: '#/components/schemas/LeadSearchPreviewResult'
-              description: Array of search results
-            pagination:
-              $ref: '#/components/schemas/LeadFinderPagination'
-              description: Pagination metadata
-          x-apidog-orders:
-          - results
-          - pagination
-          x-apidog-ignore-properties: []
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-              description: Request tracking ID
-          x-apidog-orders:
-          - requestId
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    LeadExportJobListResponse:
-      type: object
-      description: Paginated list of export jobs for the team
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - jobs
-          - total
-          - page
-          - limit
-          properties:
-            jobs:
-              type: array
-              items:
-                $ref: '#/components/schemas/LeadExportJobSummary'
-              description: List of export job summaries
-            total:
-              type: number
-              description: Total number of jobs matching the query
-            page:
-              type: number
-              description: Current page number
-            limit:
-              type: number
-              description: Results per page
-          x-apidog-orders:
-          - jobs
-          - total
-          - page
-          - limit
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     AsyncExportResponse:
       type: object
       description: Response returned immediately when an async export job is submitted
@@ -4124,7 +3953,32 @@ components:
       - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    LeadCountResponse_2:
+    UnlockNamesRequest:
+      type: object
+      required:
+      - leads
+      properties:
+        leads:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: object
+            required:
+            - id
+            properties:
+              id:
+                type: string
+                description: Encrypted lead ID
+            x-apidog-orders:
+            - id
+            x-apidog-ignore-properties: []
+          description: Leads whose last names to unlock (max 100)
+      x-apidog-orders:
+      - leads
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadFinderSuggestResponse:
       type: object
       required:
       - success
@@ -4136,31 +3990,15 @@ components:
         data:
           type: object
           required:
-          - count
-          - searchType
-          - isApproximate
+          - values
           properties:
-            count:
-              type: integer
-              description: 'Maximum pageable results. For <=10k: exact deduped count. For >10k: approximate count with 25% dedup discount. Capped at 500,000 to prevent excessive pagination. Equals searchedTotalResult when under 500k.'
-            searchType:
-              type: string
-              enum:
-              - people
-              - company
-              - unified
-              description: Type of search performed
-            isApproximate:
-              type: boolean
-              description: True when results exceed 10,000 — count is estimated with a 25% dedup discount instead of running an exact dedup query
-            searchedTotalResult:
-              type: integer
-              description: Total leads matching your search. Same as count when under 500k. When count hits the 500k pagination cap, this field shows the raw total count without any discount or cap applied.
+            values:
+              type: array
+              items:
+                type: string
+              description: Matching company names
           x-apidog-orders:
-          - count
-          - searchType
-          - isApproximate
-          - searchedTotalResult
+          - values
           x-apidog-ignore-properties: []
         meta:
           type: object
@@ -4176,61 +4014,38 @@ components:
       - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    RevealedContact:
+    SavedSearchItem:
       type: object
       required:
       - id
+      - name
+      - filters
+      - createdAt
+      - updatedAt
       properties:
         id:
           type: string
-          description: Encrypted lead identifier
-        firstName:
+          description: Saved search ID
+        name:
           type: string
-          description: First name
-          nullable: true
-        lastName:
+          description: Search name
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+          description: Saved search filters
+        createdAt:
           type: string
-          description: Last name
-          nullable: true
-        jobTitle:
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
           type: string
-          description: Job title
-          nullable: true
-        companyName:
-          type: string
-          description: Company name
-          nullable: true
-        emailAddress:
-          type: string
-          description: Email address (revealed). Only present when email field was requested.
-          nullable: true
-        phone:
-          type: string
-          description: Phone number (revealed). Only present when phone field was requested.
-          nullable: true
-        cellphone:
-          type: string
-          description: Cellphone number (revealed). Only present when phone field was requested.
-          nullable: true
-        linkedinUrl:
-          type: string
-          description: LinkedIn profile URL
-          nullable: true
-        domain:
-          type: string
-          description: Company domain
-          nullable: true
+          format: date-time
+          description: Last update timestamp
       x-apidog-orders:
       - id
-      - firstName
-      - lastName
-      - jobTitle
-      - companyName
-      - emailAddress
-      - phone
-      - cellphone
-      - linkedinUrl
-      - domain
+      - name
+      - filters
+      - createdAt
+      - updatedAt
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     LeadSearchPreviewResult:
@@ -4410,133 +4225,88 @@ components:
       - companyHeadline
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    SavedSearchResponse:
+    RevealJobSummary:
       type: object
       required:
-      - success
-      - data
+      - jobId
+      - status
+      - jobType
+      - fields
+      - total
+      - processed
+      - creditsUsed
+      - creditsRefunded
+      - createdAt
       properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/SavedSearchItem'
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-          x-apidog-orders:
-          - requestId
-          x-apidog-ignore-properties: []
+        jobId:
+          type: string
+        status:
+          type: string
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+        jobType:
+          type: string
+          enum:
+          - reveal
+          - enrich
+        fields:
+          type: array
+          items:
+            type: string
+            enum:
+            - email
+            - phone
+        total:
+          type: integer
+          description: Total leads in the job
+        processed:
+          type: integer
+          description: Leads processed
+        creditsUsed:
+          type: number
+          description: Credits consumed
+        creditsRefunded:
+          type: number
+          description: Credits refunded
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
       x-apidog-orders:
-      - success
-      - data
-      - meta
+      - jobId
+      - status
+      - jobType
+      - fields
+      - total
+      - processed
+      - creditsUsed
+      - creditsRefunded
+      - createdAt
+      - completedAt
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    LeadExportJobStatusResponse:
+    SavedSearchCreateRequest:
       type: object
-      description: Export job status response. Single flat object — all fields always present.
       required:
-      - success
-      - data
+      - name
+      - filters
       properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          type: object
-          required:
-          - jobId
-          - name
-          - status
-          - phase
-          - progress
-          - totalRows
-          - processedRows
-          - creditsUsed
-          - creditsRefunded
-          - error
-          - downloadUrl
-          - createdAt
-          - completedAt
-          properties:
-            jobId:
-              type: string
-              description: Export job ID
-              examples:
-              - ej_a1b2c3d4e5f6a7b8
-            name:
-              type: string
-              description: Display name for the export job
-            status:
-              type: string
-              enum:
-              - pending
-              - processing
-              - completed
-              - failed
-              description: Current job status
-            phase:
-              type: string
-              enum:
-              - queued
-              - fetching
-              - enriching
-              - generating
-              - uploading
-              description: Current processing phase
-            progress:
-              type: number
-              description: Progress percentage 0-100
-            totalRows:
-              type: number
-              description: Total rows (actual if available, otherwise estimated)
-            processedRows:
-              type: number
-              description: Rows processed so far
-            creditsUsed:
-              type: number
-              description: Credits consumed
-            creditsRefunded:
-              type: number
-              description: Credits refunded
-            error:
-              type: string
-              description: Error message (null unless failed)
-              nullable: true
-            downloadUrl:
-              type: string
-              description: Pre-signed download URL (only for completed jobs)
-              nullable: true
-            createdAt:
-              type: string
-              format: date-time
-              description: Job creation timestamp (ISO 8601)
-            completedAt:
-              type: string
-              format: date-time
-              description: Job completion timestamp (ISO 8601), null if not yet complete
-              nullable: true
-          x-apidog-orders:
-          - jobId
-          - name
-          - status
-          - phase
-          - progress
-          - totalRows
-          - processedRows
-          - creditsUsed
-          - creditsRefunded
-          - error
-          - downloadUrl
-          - createdAt
-          - completedAt
-          x-apidog-ignore-properties: []
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Search name
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
       x-apidog-orders:
-      - success
-      - data
+      - name
+      - filters
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
     RevealJobPollResponse:
@@ -4661,15 +4431,245 @@ components:
       - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
+    SavedSearchListResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedSearchItem'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadExportRequest:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+        excludeFilters:
+          type: object
+          additionalProperties: false
+          description: Filters to exclude from export. Only personHeadline, companyHeadline, aboutUs, domain, and jobTitle are supported.
+          properties:
+            personHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Person LinkedIn headline to exclude (keyword/contains match)
+            companyHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company headline to exclude (keyword/contains match)
+            aboutUs:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company overview/about us to exclude (keyword/contains match)
+            domain:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 5000
+              description: Company domain to exclude (exact match)
+            jobTitle:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 25
+              description: Job title to exclude (keyword/contains match)
+          x-apidog-orders:
+          - personHeadline
+          - companyHeadline
+          - aboutUs
+          - domain
+          - jobTitle
+          x-apidog-ignore-properties: []
+        name:
+          type: string
+          maxLength: 200
+          description: Display name for the export (shown in export history). Auto-generated if omitted.
+        maxResults:
+          type: integer
+          minimum: 1
+          maximum: 100000
+          default: 1000
+          description: Maximum rows to export
+        includeContactInfo:
+          type: boolean
+          default: false
+          description: 'Shorthand: include both email and phone (costs credits per lead)'
+        includeEmail:
+          type: boolean
+          default: false
+          description: Include email addresses (10 credits per lead)
+        includePhone:
+          type: boolean
+          default: false
+          description: Include phone numbers (525 credits per lead)
+        includeNames:
+          type: boolean
+          default: false
+          description: Include full last names (1 credit per lead)
+        leadIds:
+          type: array
+          items:
+            type: string
+          maxItems: 100000
+          description: Export specific leads by encrypted ID (selected rows mode)
+        page:
+          type: integer
+          minimum: 1
+          description: Export a specific page of results (current page mode)
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Page size when exporting a specific page
+      x-apidog-orders:
+      - filters
+      - excludeFilters
+      - name
+      - maxResults
+      - includeContactInfo
+      - includeEmail
+      - includePhone
+      - includeNames
+      - leadIds
+      - page
+      - pageSize
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    LeadCountRequest_2:
+      type: object
+      required:
+      - filters
+      properties:
+        filters:
+          $ref: '#/components/schemas/LeadFinderSearchFilters'
+        excludeFilters:
+          type: object
+          additionalProperties: false
+          description: Filters to exclude from count. Only personHeadline, companyHeadline, aboutUs, domain, and jobTitle are supported.
+          properties:
+            personHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Person LinkedIn headline to exclude (keyword/contains match)
+            companyHeadline:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company headline to exclude (keyword/contains match)
+            aboutUs:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 10
+              description: Company overview/about us to exclude (keyword/contains match)
+            domain:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 5000
+              description: Company domain to exclude (exact match)
+            jobTitle:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                maxItems: 25
+              description: Job title to exclude (keyword/contains match)
+          x-apidog-orders:
+          - personHeadline
+          - companyHeadline
+          - aboutUs
+          - domain
+          - jobTitle
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - filters
+      - excludeFilters
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    SavedSearchResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/SavedSearchItem'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+          x-apidog-orders:
+          - requestId
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
   responses:
-    RateLimited:
-      description: Rate limit exceeded. Includes a Retry-After header.
+    InsufficientCredits:
+      description: Not enough credits to complete the request.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    InsufficientCredits:
-      description: Not enough credits to complete the request.
+    RateLimited:
+      description: Rate limit exceeded. Includes a Retry-After header.
       content:
         application/json:
           schema:

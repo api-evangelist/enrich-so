@@ -306,136 +306,6 @@ paths:
       x-run-in-apidog: https://app.apidog.com/web/project/1189032/apis/api-27728075-run
 components:
   schemas:
-    StartCountEstimateResponse:
-      type: object
-      required:
-      - success
-      - data
-      properties:
-        success:
-          type: boolean
-          const: true
-        data:
-          $ref: '#/components/schemas/StartCountEstimateData'
-        meta:
-          type: object
-          properties:
-            requestId:
-              type: string
-            creditsUsed:
-              type: number
-              description: Credits consumed (100, or 0 if from cache)
-            creditsRemaining:
-              type: number
-              description: Remaining credit balance
-          x-apidog-orders:
-          - requestId
-          - creditsUsed
-          - creditsRemaining
-          x-apidog-ignore-properties: []
-      x-apidog-orders:
-      - success
-      - data
-      - meta
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    StartCountEstimateData:
-      type: object
-      required:
-      - batchId
-      - status
-      properties:
-        batchId:
-          type: string
-          description: Unique batch ID for this estimation
-        status:
-          type: string
-          enum:
-          - pending
-          - completed
-          description: Job status — pending (queued) or completed (from cache)
-        message:
-          type: string
-          description: Human-readable status message
-        fromCache:
-          type: boolean
-          description: Whether result was served from cache (no credits charged)
-        cachedAt:
-          type: string
-          format: date-time
-          description: When the cached result was originally computed
-        data:
-          $ref: '#/components/schemas/CountEstimateResultData'
-          description: Result data (only present if returned from cache)
-      x-apidog-orders:
-      - batchId
-      - status
-      - message
-      - fromCache
-      - cachedAt
-      - data
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
-    CountEstimateResultData:
-      type: object
-      required:
-      - totalCount
-      properties:
-        totalCount:
-          type: integer
-          description: Total estimated follower count
-        functionBreakdown:
-          type: array
-          items:
-            $ref: '#/components/schemas/FunctionBreakdownItem'
-          description: Breakdown by department/function (if departments filter was applied)
-          nullable: true
-        seniorityBreakdown:
-          type: array
-          items:
-            $ref: '#/components/schemas/SeniorityBreakdownItem'
-          description: Breakdown by seniority level (if levels filter was applied)
-          nullable: true
-        filtersApplied:
-          type: object
-          properties:
-            countries:
-              type: array
-              items:
-                type: string
-            states:
-              type: array
-              items:
-                type: string
-              description: State/province filters applied
-            jobTitles:
-              type: array
-              items:
-                type: string
-            departments:
-              type: array
-              items:
-                type: string
-            levels:
-              type: array
-              items:
-                type: string
-          description: Filters applied to the estimation
-          x-apidog-orders:
-          - countries
-          - states
-          - jobTitles
-          - departments
-          - levels
-          x-apidog-ignore-properties: []
-          nullable: true
-      x-apidog-orders:
-      - totalCount
-      - functionBreakdown
-      - seniorityBreakdown
-      - filtersApplied
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     CountEstimateRequest:
       type: object
       required:
@@ -1622,48 +1492,6 @@ components:
       - levels
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    ErrorEnvelope:
-      type: object
-      description: RFC 9457 Problem Details error response.
-      required:
-      - type
-      - title
-      - status
-      properties:
-        type:
-          type: string
-          format: uri
-          description: URI reference that identifies the problem type.
-          examples:
-          - https://dev.enrich.so/errors/validation-error
-        title:
-          type: string
-          description: Short, human-readable summary of the problem.
-          examples:
-          - Validation Error
-        status:
-          type: integer
-          description: HTTP status code.
-          examples:
-          - 400
-        detail:
-          type: string
-          description: Human-readable explanation specific to this occurrence.
-          examples:
-          - body/email Invalid email
-        instance:
-          type: string
-          description: URI reference that identifies the specific occurrence.
-          examples:
-          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
-      x-apidog-orders:
-      - type
-      - title
-      - status
-      - detail
-      - instance
-      x-apidog-ignore-properties: []
-      x-apidog-folder: ''
     CountEstimateStatusData:
       type: object
       required:
@@ -1712,6 +1540,85 @@ components:
       - data
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
+    ErrorEnvelope:
+      type: object
+      description: RFC 9457 Problem Details error response.
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type.
+          examples:
+          - https://dev.enrich.so/errors/validation-error
+        title:
+          type: string
+          description: Short, human-readable summary of the problem.
+          examples:
+          - Validation Error
+        status:
+          type: integer
+          description: HTTP status code.
+          examples:
+          - 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          examples:
+          - body/email Invalid email
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence.
+          examples:
+          - /requests/3fa85f64-5717-4562-b3fc-2c963f66afa6
+      x-apidog-orders:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    StartCountEstimateData:
+      type: object
+      required:
+      - batchId
+      - status
+      properties:
+        batchId:
+          type: string
+          description: Unique batch ID for this estimation
+        status:
+          type: string
+          enum:
+          - pending
+          - completed
+          description: Job status — pending (queued) or completed (from cache)
+        message:
+          type: string
+          description: Human-readable status message
+        fromCache:
+          type: boolean
+          description: Whether result was served from cache (no credits charged)
+        cachedAt:
+          type: string
+          format: date-time
+          description: When the cached result was originally computed
+        data:
+          $ref: '#/components/schemas/CountEstimateResultData'
+          description: Result data (only present if returned from cache)
+      x-apidog-orders:
+      - batchId
+      - status
+      - message
+      - fromCache
+      - cachedAt
+      - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
     FunctionBreakdownItem:
       type: object
       required:
@@ -1746,7 +1653,67 @@ components:
       - seniorityBreakdown
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
-    CountEstimateStatusResponse:
+    CountEstimateResultData:
+      type: object
+      required:
+      - totalCount
+      properties:
+        totalCount:
+          type: integer
+          description: Total estimated follower count
+        functionBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctionBreakdownItem'
+          description: Breakdown by department/function (if departments filter was applied)
+          nullable: true
+        seniorityBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeniorityBreakdownItem'
+          description: Breakdown by seniority level (if levels filter was applied)
+          nullable: true
+        filtersApplied:
+          type: object
+          properties:
+            countries:
+              type: array
+              items:
+                type: string
+            states:
+              type: array
+              items:
+                type: string
+              description: State/province filters applied
+            jobTitles:
+              type: array
+              items:
+                type: string
+            departments:
+              type: array
+              items:
+                type: string
+            levels:
+              type: array
+              items:
+                type: string
+          description: Filters applied to the estimation
+          x-apidog-orders:
+          - countries
+          - states
+          - jobTitles
+          - departments
+          - levels
+          x-apidog-ignore-properties: []
+          nullable: true
+      x-apidog-orders:
+      - totalCount
+      - functionBreakdown
+      - seniorityBreakdown
+      - filtersApplied
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    StartCountEstimateResponse:
       type: object
       required:
       - success
@@ -1756,21 +1723,21 @@ components:
           type: boolean
           const: true
         data:
-          $ref: '#/components/schemas/CountEstimateStatusData'
+          $ref: '#/components/schemas/StartCountEstimateData'
         meta:
           type: object
           properties:
             requestId:
               type: string
-            creditsRefunded:
+            creditsUsed:
               type: number
-              description: Credits refunded (100, if job failed)
+              description: Credits consumed (100, or 0 if from cache)
             creditsRemaining:
               type: number
               description: Remaining credit balance
           x-apidog-orders:
           - requestId
-          - creditsRefunded
+          - creditsUsed
           - creditsRemaining
           x-apidog-ignore-properties: []
       x-apidog-orders:
@@ -1804,6 +1771,39 @@ components:
       - seniorityId
       - count
       - percentage
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    CountEstimateStatusResponse:
+      type: object
+      required:
+      - success
+      - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/CountEstimateStatusData'
+        meta:
+          type: object
+          properties:
+            requestId:
+              type: string
+            creditsRefunded:
+              type: number
+              description: Credits refunded (100, if job failed)
+            creditsRemaining:
+              type: number
+              description: Remaining credit balance
+          x-apidog-orders:
+          - requestId
+          - creditsRefunded
+          - creditsRemaining
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+      - success
+      - data
+      - meta
       x-apidog-ignore-properties: []
       x-apidog-folder: ''
   securitySchemes:
