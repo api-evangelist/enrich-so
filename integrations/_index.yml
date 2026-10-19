@@ -28,3 +28,64 @@
     builder: unknown (not in the directory record)
   status: not-a-workflow
   arazzo: null
+- slug: enrich-so-go-module-proxy
+  label: Go module proxy
+  partner_name: Go module proxy
+  category: official SDK (Go)
+  type: register
+  channel: package-registry
+  evidence: https://pkg.go.dev/github.com/maximiseai/enrich-go-sdk
+  source: edge
+  relationship: distribution-channel
+  contract_reference:
+    register: Go module proxy (public registry JSON)
+    spec_file: null
+    language: Go
+    packages:
+    - name: github.com/maximiseai/enrich-go-sdk
+      version: v0.2.1
+      released: '2026-03-03'
+      released_field: Time
+      lapsed: false
+      page: https://pkg.go.dev/github.com/maximiseai/enrich-go-sdk
+      repo_leg: github-org:maximiseai
+      publisher_leg: org:maximiseai
+      matched_by: github-org
+    current: true
+    signal_note: 'an official package on the registry: distribution, not an integration; lapsed = no release in
+      24 months'
+    detected_by: sweep-official-sdks.py
+    detected: '2026-10-18'
+  status: not-a-workflow
+  arazzo: null
+- slug: enrich-so-npm-registry
+  label: npm registry
+  partner: npm
+  partner_name: npm registry
+  category: official SDK (JavaScript/TypeScript)
+  type: register
+  channel: package-registry
+  evidence: https://www.npmjs.com/package/@enrich.so/sdk
+  source: edge
+  relationship: distribution-channel
+  contract_reference:
+    register: npm registry (public registry JSON)
+    spec_file: null
+    language: JavaScript/TypeScript
+    packages:
+    - name: '@enrich.so/sdk'
+      version: 1.2.0
+      released: '2026-03-03'
+      released_field: modified
+      lapsed: false
+      page: https://www.npmjs.com/package/@enrich.so/sdk
+      repo_leg: github-org:maximiseai
+      publisher_leg: email:enrich.so
+      matched_by: domain
+    current: true
+    signal_note: 'an official package on the registry: distribution, not an integration; lapsed = no release in
+      24 months'
+    detected_by: sweep-official-sdks.py
+    detected: '2026-10-18'
+  status: not-a-workflow
+  arazzo: null
