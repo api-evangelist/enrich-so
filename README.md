@@ -1,4 +1,4 @@
-# Enrich (enrich-so)
+# Enrich
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -64,178 +64,184 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Enrich (enrich.so) is a person and company data enrichment API for B2B go-to-market, sales, and web intelligence teams. From a single REST interface it resolves a professional profile from an email address (reverse email lookup), finds and verifies professional email addresses, finds mobile and phone numbers, resolves a company and geolocation from an IP address, scrapes LinkedIn company followers, and searches a lead-finder database of people and organizations for contact discovery and lead enrichment.
+Enrich (enrich.so), operated by Enrich Labs, is a person and company data enrichment API for B2B go-to-market, sales, and web intelligence teams. From a single REST interface at https://dev.enrich.so/api/v3 it resolves a professional profile from an email address (reverse email lookup), finds and verifies professional email addresses, finds mobile and phone numbers, resolves a company and geolocation from an IP address, searches a lead-finder database of people and organizations, finds employees at a company, and scrapes LinkedIn company followers. Fifty-one operations across nine products, every one of them metered against a single prepaid credit balance and refunded when a lookup finds nothing. Every bulk product follows one submit/poll/results shape with reserve-and-settle billing, ten typed webhook callbacks, RFC 9457 problem details on every error, and official TypeScript and Go SDKs. Enrich also operates a first-party remote MCP server at mcp.enrich.so with OAuth 2.0 and dynamic client registration.
 
-**Access model:** Commercial, closed-source SaaS — there is no self-hostable component. Access requires an Enrich account and an API key (prefixed `sk_`) created in the dashboard at `https://dash.enrich.so/dashboard/api-keys`, passed via the `x-api-key` header or as an `Authorization: Bearer` token. Every endpoint shares the base URL `https://dev.enrich.so/api/v3` and is metered against a prepaid credit balance; unsuccessful ("not found") lookups are refunded. New accounts receive a one-time grant of free credits.
+**Areas:** Data Enrichment · Contact Discovery · Web Intelligence · B2B Data · Lead Enrichment · Email Finder · Email Verification · Phone Numbers · People Search · IP Intelligence · LinkedIn · Reference Data
 
-**Grounding note:** The single-lookup endpoints below, their HTTP methods, and their credit costs are confirmed from the live Enrich documentation. The batch / progress / results sub-paths are modeled on Enrich's documented submit → poll → results pattern and are flagged as modeled in `openapi/enrich-so-openapi.yml` and `review.yml`; reconcile them against the current docs before code generation.
+## Enrich on APIs.io
 
-**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/enrich-so/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/enrich-so/refs/heads/main/apis.yml)
+Everything profiled for Enrich is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/enrich-so/](https://apis.io/providers/enrich-so/)** — or go straight to one of the APIs or properties below.
 
-## Tags
+### APIs (18)
 
-- Data Enrichment
-- Contact Discovery
-- Web Intelligence
-- B2B Data
-- Lead Enrichment
-- Email Finder
-- Email Verification
-- Phone Numbers
-- LinkedIn
-- Reference Data
+- [Enrich Email Finder API](https://apis.io/apis/enrich-so/enrich-so-email-finder-api/) — Find a professional email from a first name, last name and company domain, single or in batches of up to 500,000 leads.
+- [Enrich Lead Finder API](https://apis.io/apis/enrich-so/enrich-so-lead-finder-api/) — Search, count, reveal, enrich, unlock and export leads across people and organizations, with saved searches and asynchronous reveal and export jobs.
+- [Enrich Phone Finder API](https://apis.io/apis/enrich-so/enrich-so-phone-finder-api/) — Find phone and mobile numbers for a person from an email address or profile URL, single or in bulk.
+- [Enrich Teams API](https://apis.io/apis/enrich-so/enrich-so-teams-api/) — List team members and manage pending team invitations for the organization behind the API key.
+- [Enrich People Search API](https://apis.io/apis/enrich-so/enrich-so-people-search-api/) — Find employees at a company and run cascading ICP (ideal customer profile) people searches.
+- [Enrich Authentication API](https://apis.io/apis/enrich-so/enrich-so-authentication-api/) — The Authentication API from Enrich — 1 operation(s) for authentication.
+- [Enrich Company Followers API](https://apis.io/apis/enrich-so/enrich-so-company-followers-api/) — The Company Followers API from Enrich — 7 operation(s) for company followers.
+- [Enrich Company Followers/Count Estimation API](https://apis.io/apis/enrich-so/enrich-so-company-followers-count-estimation-api/) — The Company Followers/Count Estimation API from Enrich — 2 operation(s) for company followers/count estimation.
+- [Enrich Email Validation API](https://apis.io/apis/enrich-so/enrich-so-email-validation-api/) — The Email Validation API from Enrich — 4 operation(s) for email validation.
+- [Enrich API](https://apis.io/apis/enrich-so/enrich-so-enrich-api/) — The Enrich API from Enrich — 1 operation(s) for enrich.
+- [Enrich IP to Company API](https://apis.io/apis/enrich-so/enrich-so-ip-to-company-api/) — The IP to Company API from Enrich — 4 operation(s) for ip to company.
+- [Enrich Reverse Email Lookup API](https://apis.io/apis/enrich-so/enrich-so-reverse-email-lookup-api/) — The Reverse Email Lookup API from Enrich — 4 operation(s) for reverse email lookup.
+- [Enrich Wallets API](https://apis.io/apis/enrich-so/enrich-so-wallets-api/) — The Wallets API from Enrich — 2 operation(s) for wallets.
+- [Enrich Account API](https://apis.io/apis/enrich-so/enrich-so-account-api/) — Credit balance and transaction history.
+- [Enrich Company Intelligence API](https://apis.io/apis/enrich-so/enrich-so-company-intelligence-api/) — IP-to-company resolution and LinkedIn company-follower scraping.
+- [Enrich Email Verification API](https://apis.io/apis/enrich-so/enrich-so-email-verification-api/) — Validate email addresses for deliverability.
+- [Enrich Person Enrichment API](https://apis.io/apis/enrich-so/enrich-so-person-enrichment-api/) — Reverse email lookup returning a person's professional profile.
+- [Enrich Webhooks API](https://apis.io/apis/enrich-so/enrich-so-webhooks-api/) — The Webhooks API from Enrich — 0 operation(s) for webhooks.
 
-## Timestamps
+### Published properties
 
-- **Created:** 2026-07-11
-- **Modified:** 2026-07-11
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-## APIs
+#### AsyncAPI (1)
 
-### Enrich Person Enrichment API
+Event-driven and webhook contracts.
 
-Reverse email lookup that returns a person's professional profile — name, headline, current company, position history, education, and skills — from just an email address, with a matching batch endpoint for bulk enrichment. Confirmed endpoint `POST /reverse-lookup/lookup` at 10 credits per successful lookup (not charged when no profile is found).
+- [Enrich So Webhooks](https://apis.io/asyncapis/enrich-so/enrich-so-webhooks/)
 
-- **Human URL:** [https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0](https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0)
-- **Base URL:** `https://dev.enrich.so/api/v3`
+#### MCP servers (1)
 
-#### Tags
+Model Context Protocol servers that expose the API to agents.
 
-- Person Enrichment
-- Contact Discovery
-- Reverse Email Lookup
-- LinkedIn
-- Web Intelligence
+- [enrich-so-mcp.yml](https://apis.io/servers/enrich-so/enrich-so-mcp-yml/)
 
-#### Properties
+#### Agentic access (1)
 
-- [Documentation](https://doc.enrich.so/introduction-1951028m0)
-- [API Reference](https://doc.enrich.so/look-up-a-professional-profile-by-email-27483203e0)
-- [OpenAPI](openapi/enrich-so-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/enrich-so.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/enrich-so.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+Which operations an agent can call, which act, and which need a human in the loop.
 
-### Enrich Email Finder API
+- [Enrich So Agentic Access](https://apis.io/agentic-access/enrich-so/enrich-so-agentic-access/)
 
-Finds a person's professional email address from their first name, last name, and company domain, with a batch variant plus progress and results endpoints. Confirmed endpoint `POST /email-finder` at 10 credits per successful find (not charged when `found` is false).
+#### Collections (10)
 
-- **Human URL:** [https://doc.enrich.so/find-a-professional-email-27483195e0](https://doc.enrich.so/find-a-professional-email-27483195e0)
-- **Base URL:** `https://dev.enrich.so/api/v3`
+Postman and Open Collection request collections.
 
-#### Tags
+- [Enrich API](https://apis.io/collections/enrich-so/open-enrich-so/)
+- [Enrich Account API](https://apis.io/collections/enrich-so/open-enrich-so-account-api/)
+- [Enrich Company Intelligence API](https://apis.io/collections/enrich-so/open-enrich-so-company-intelligence-api/)
+- [Enrich Email Finder API](https://apis.io/collections/enrich-so/open-enrich-so-email-finder-api/)
+- [Enrich Email Verification API](https://apis.io/collections/enrich-so/open-enrich-so-email-verification-api/)
+- [Enrich Lead Finder API](https://apis.io/collections/enrich-so/open-enrich-so-lead-finder-api/)
+- [Enrich People Search API](https://apis.io/collections/enrich-so/open-enrich-so-people-search-api/)
+- [Enrich Person Enrichment API](https://apis.io/collections/enrich-so/open-enrich-so-person-enrichment-api/)
+- [Enrich Phone Finder API](https://apis.io/collections/enrich-so/open-enrich-so-phone-finder-api/)
+- [Enrich Teams API](https://apis.io/collections/enrich-so/open-enrich-so-teams-api/)
 
-- Email Finder
-- Contact Discovery
-- B2B Data
+#### Overlays (9)
 
-#### Properties
+OpenAPI overlays, including conversational phrasing for each operation.
 
-- [Documentation](https://doc.enrich.so/introduction-1951028m0)
-- [API Reference](https://doc.enrich.so/find-a-professional-email-27483195e0)
-- [OpenAPI](openapi/enrich-so-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/enrich-so.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/enrich-so.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+- [Enrich So Account Overlay](https://apis.io/overlays/enrich-so/enrich-so-account-overlay/)
+- [Enrich So Company Intelligence Overlay](https://apis.io/overlays/enrich-so/enrich-so-company-intelligence-overlay/)
+- [Enrich So Email Finder Overlay](https://apis.io/overlays/enrich-so/enrich-so-email-finder-overlay/)
+- [Enrich So Email Verification Overlay](https://apis.io/overlays/enrich-so/enrich-so-email-verification-overlay/)
+- [Enrich So Lead Finder Overlay](https://apis.io/overlays/enrich-so/enrich-so-lead-finder-overlay/)
+- [Enrich So People Search Overlay](https://apis.io/overlays/enrich-so/enrich-so-people-search-overlay/)
+- [Enrich So Person Enrichment Overlay](https://apis.io/overlays/enrich-so/enrich-so-person-enrichment-overlay/)
+- [Enrich So Phone Finder Overlay](https://apis.io/overlays/enrich-so/enrich-so-phone-finder-overlay/)
+- [Enrich So Teams Overlay](https://apis.io/overlays/enrich-so/enrich-so-teams-overlay/)
 
-### Enrich Email Verification API
+#### Security (2)
 
-Validates a single email address for deliverability, returning a status of valid, invalid, or risky along with confidence, mail provider, and catch-all domain detection, plus a batch validation flow. Confirmed endpoint `POST /email-validation` at 1 credit per request (not charged when the result is risky).
+Authentication, trust centre, and vulnerability disclosure.
 
-- **Human URL:** [https://doc.enrich.so/validate-a-single-email-27483191e0](https://doc.enrich.so/validate-a-single-email-27483191e0)
-- **Base URL:** `https://dev.enrich.so/api/v3`
+- [Enrich So Authentication](https://apis.io/security/enrich-so/enrich-so-authentication/)
+- [Enrich So Domain Security](https://apis.io/security/enrich-so/enrich-so-domain-security/)
 
-#### Tags
+#### OAuth scopes (1)
 
-- Email Verification
-- Deliverability
-- Data Quality
+The permissions the API asks for.
 
-#### Properties
+- [Enrich So Scopes](https://apis.io/scopes/enrich-so/enrich-so-scopes/)
 
-- [Documentation](https://doc.enrich.so/introduction-1951028m0)
-- [API Reference](https://doc.enrich.so/validate-a-single-email-27483191e0)
-- [OpenAPI](openapi/enrich-so-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/enrich-so.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/enrich-so.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+#### Plans and pricing (1)
 
-### Enrich Phone Finder API
+Published plans, tiers and prices.
 
-Finds phone and mobile numbers associated with a person from their email address or LinkedIn profile URL, with a bulk variant plus progress and results endpoints. Confirmed endpoint `GET /reverse-lookup/phones` at 500 credits per successful lookup (not charged when no numbers are found).
+- [Enrich So Plans Pricing](https://apis.io/plans/enrich-so/enrich-so-plans-pricing/)
 
-- **Human URL:** [https://doc.enrich.so/find-phone-numbers-27483199e0](https://doc.enrich.so/find-phone-numbers-27483199e0)
-- **Base URL:** `https://dev.enrich.so/api/v3`
+#### Rate limits (1)
 
-#### Tags
+Published request limits.
 
-- Phone Numbers
-- Mobile Finder
-- Contact Discovery
+- [Enrich So Rate Limits](https://apis.io/rate-limits/enrich-so/enrich-so-rate-limits/)
 
-#### Properties
+#### FinOps (1)
 
-- [Documentation](https://doc.enrich.so/introduction-1951028m0)
-- [API Reference](https://doc.enrich.so/find-phone-numbers-27483199e0)
-- [OpenAPI](openapi/enrich-so-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/enrich-so.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/enrich-so.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+What the API costs to run, by operation.
 
-### Enrich Company Intelligence API
+- [Enrich So Finops](https://apis.io/finops/enrich-so/enrich-so-finops/)
 
-Company-level web intelligence — resolve a company, organization, and geolocation from an IPv4/IPv6 address (`POST /ip-to-company`, 100 credits, results cached 7 days), scrape LinkedIn company followers asynchronously with filtering by location, title, department, and seniority (`POST /company-follower`), find employees at a company, and suggest company names.
+## Where to find this API
 
-- **Human URL:** [https://doc.enrich.so/resolve-company-from-ip-35511038e0](https://doc.enrich.so/resolve-company-from-ip-35511038e0)
-- **Base URL:** `https://dev.enrich.so/api/v3`
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
-#### Tags
-
-- Company Enrichment
-- Web Intelligence
-- B2B Data
-- IP Intelligence
-- LinkedIn
-
-#### Properties
-
-- [Documentation](https://doc.enrich.so/introduction-1951028m0)
-- [API Reference](https://doc.enrich.so/resolve-company-from-ip-35511038e0)
-- [OpenAPI](openapi/enrich-so-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/enrich-so.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/enrich-so.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Enrich Lead Finder API
-
-Lead-finder search across a database of people and organizations with roughly 135 filter fields (person attributes, firmographics, and technology stack), lead counting and estimation, saved searches, and asynchronous reveal/enrich of contact email and phone. Confirmed endpoints `POST /lead-finder/search` (first 3 pages / 75 results free, then 1 credit per result) and `POST /lead-finder/reveal` (50 credits email, 525 phone, 575 both).
-
-- **Human URL:** [https://doc.enrich.so/search-leads-28165853e0](https://doc.enrich.so/search-leads-28165853e0)
-- **Base URL:** `https://dev.enrich.so/api/v3`
-
-#### Tags
-
-- Lead Enrichment
-- Prospecting
-- Contact Discovery
-- B2B Data
-- ICP
-
-#### Properties
-
-- [Documentation](https://doc.enrich.so/introduction-1951028m0)
-- [API Reference](https://doc.enrich.so/search-leads-28165853e0)
-- [OpenAPI](openapi/enrich-so-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/enrich-so.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/enrich-so.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-## Common Properties
-
-- [Authentication](authentication/enrich-so-authentication.yml)
-- [LinkedIn](https://www.linkedin.com/company/enrich-so)
 - [Website](https://www.enrich.so)
 - [Documentation](https://doc.enrich.so/introduction-1951028m0)
-- [Plans](plans/enrich-so-plans-pricing.yml)
-- [Rate Limits](rate-limits/enrich-so-rate-limits.yml)
-- [Fin Ops](finops/enrich-so-finops.yml)
+- [Getting started](https://doc.enrich.so/quickstart-1951029m0)
+- [API reference](https://doc.enrich.so/api-reference-1951025m0)
+- [Pricing](https://doc.enrich.so/credits-pricing-1951027m0)
+- [Sign up](https://dash.enrich.so)
 - [Blog](https://www.enrich.so/blog)
+- [Terms of service](https://www.enrich.so/terms-of-service)
+- [Privacy policy](https://www.enrich.so/privacy-policy)
+- [GitHub](https://github.com/maximiseai)
+- [Status](https://status.enrich.so)
 
-## Maintainers
+## API Evangelist rating
 
-**FN:** Kin Lane
-**Email:** kin@apievangelist.com
+**Kin Score 62.5** — strong · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 80.0 |
+| Contract quality | 61.9 |
+| Contract governance | 18.2 |
+| Operational transparency | 73.7 |
+| Developer ergonomics | 62.5 |
+| Access clarity | 65.8 |
+
+**Agent readiness 44.6** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | verified |
+| MCP Server | documented (partial credit) |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | verified |
+| OpenAPI Examples | verified |
+| Rate Limit Signal | verified |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | — |
+| Operation Distinctiveness | mostly |
+
+**Regulatory alignment 30.4** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/enrich-so/](https://apis.io/providers/enrich-so/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Enrich: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/enrich-so/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
